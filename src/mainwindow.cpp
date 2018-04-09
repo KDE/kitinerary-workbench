@@ -23,6 +23,7 @@
 #include <KItinerary/ExtractorPostprocessor>
 #include <KItinerary/IataBcbpParser>
 #include <KItinerary/JsonLdDocument>
+#include <KItinerary/StructuredDataExtractor>
 
 #include <KMime/Message>
 
@@ -58,6 +59,12 @@ MainWindow::MainWindow(QWidget* parent)
     m_preprocDoc = editor->createDocument(nullptr);
     auto view = m_preprocDoc->createView(nullptr);
     auto layout = new QHBoxLayout(ui->preprocTab);
+    layout->addWidget(view);
+
+    m_structuredDoc = editor->createDocument(nullptr);
+    m_structuredDoc->setMode(QStringLiteral("JSON"));
+    view = m_structuredDoc->createView(nullptr);
+    layout = new QHBoxLayout(ui->structuredTab);
     layout->addWidget(view);
 
     m_outputDoc = editor->createDocument(nullptr);
@@ -126,8 +133,16 @@ void MainWindow::sourceChanged()
 
     m_outputDoc->setText(QJsonDocument(data).toJson());
 
+    QJsonArray structured;
+    if (ui->typeBox->currentIndex() == 1) {
+        StructuredDataExtractor extractor;
+        extractor.parse(m_sourceDoc->text());
+        structured = extractor.data();
+        m_structuredDoc->setText(QJsonDocument(structured).toJson());
+    }
+
     ExtractorPostprocessor postproc;
     postproc.setContextDate(ui->contextDate->dateTime());
-    postproc.process(JsonLdDocument::fromJson(data));
+    postproc.process(JsonLdDocument::fromJson(structured.isEmpty() ? data : structured));
     m_postprocDoc->setText(QJsonDocument(JsonLdDocument::toJson(postproc.result())).toJson());
 }

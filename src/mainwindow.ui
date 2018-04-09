@@ -85,7 +85,7 @@
           <item row="3" column="0">
            <widget class="QLabel" name="label_3">
             <property name="text">
-             <string>Context date:</string>
+             <string>Conte&amp;xt date:</string>
             </property>
             <property name="buddy">
              <cstring>contextDate</cstring>
@@ -104,11 +104,16 @@
      </widget>
      <widget class="QTabWidget" name="outputTabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
+      <widget class="QWidget" name="structuredTab">
+       <attribute name="title">
+        <string>Structured Extractor</string>
+       </attribute>
+      </widget>
       <widget class="QWidget" name="outputTab">
        <attribute name="title">
-        <string>Extractor Output</string>
+        <string>Unstructured Extractor</string>
        </attribute>
       </widget>
       <widget class="QWidget" name="postprocTab">
