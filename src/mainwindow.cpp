@@ -43,6 +43,7 @@ MainWindow::MainWindow(QWidget* parent)
     ui->contextDate->setDateTime(QDateTime(QDate::currentDate(), QTime()));
     setCentralWidget(ui->mainSplitter);
 
+    connect(ui->typeBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::typeChanged);
     connect(ui->typeBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::sourceChanged);
     connect(ui->senderLine, &QLineEdit::textChanged, this, &MainWindow::sourceChanged);
     connect(ui->contextDate, &QDateTimeEdit::dateTimeChanged, this, &MainWindow::sourceChanged);
@@ -51,11 +52,11 @@ MainWindow::MainWindow(QWidget* parent)
 
     m_sourceDoc = editor->createDocument(nullptr);
     connect(m_sourceDoc, &KTextEditor::Document::textChanged, this, &MainWindow::sourceChanged);
-    auto view = m_sourceDoc->createView(nullptr);
-    ui->sourceTab->layout()->addWidget(view);
+    m_sourceView = m_sourceDoc->createView(nullptr);
+    ui->sourceTab->layout()->addWidget(m_sourceView);
 
     m_preprocDoc = editor->createDocument(nullptr);
-    view = m_preprocDoc->createView(nullptr);
+    auto view = m_preprocDoc->createView(nullptr);
     auto layout = new QHBoxLayout(ui->preprocTab);
     layout->addWidget(view);
 
@@ -74,6 +75,25 @@ MainWindow::MainWindow(QWidget* parent)
 
 MainWindow::~MainWindow() = default;
 
+void MainWindow::typeChanged()
+{
+    switch (ui->typeBox->currentIndex()) {
+        case 0:
+        case 4:
+            m_sourceDoc->setMode(QStringLiteral("Normal"));
+            m_sourceView->show();
+            break;
+        case 1:
+            m_sourceDoc->setMode(QStringLiteral("HTML"));
+            m_sourceView->show();
+            break;
+        case 2:
+        case 3:
+            m_sourceView->hide();
+            break;
+    }
+}
+
 void MainWindow::sourceChanged()
 {
     using namespace KItinerary;
@@ -84,7 +104,10 @@ void MainWindow::sourceChanged()
         data = JsonLdDocument::toJson({bp});
     } else { // TODO pkpass type
         ExtractorPreprocessor preproc;
-        preproc.preprocessHtml(m_sourceDoc->text());
+        if (ui->typeBox->currentIndex() == 0) // plain text
+            preproc.preprocessPlainText(m_sourceDoc->text());
+        else if (ui->typeBox->currentIndex() == 1) // html
+            preproc.preprocessHtml(m_sourceDoc->text());
         m_preprocDoc->setText(preproc.text());
 
         KMime::Message msg;

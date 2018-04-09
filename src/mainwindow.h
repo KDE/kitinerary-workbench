@@ -26,6 +26,7 @@
 
 namespace KTextEditor {
 class Document;
+class View;
 }
 
 namespace Ui
@@ -41,6 +42,7 @@ public:
     ~MainWindow();
 
 private:
+    void typeChanged();
     void sourceChanged();
 
 private:
@@ -50,6 +52,7 @@ private:
     KTextEditor::Document *m_preprocDoc = nullptr;
     KTextEditor::Document *m_outputDoc = nullptr;
     KTextEditor::Document *m_postprocDoc = nullptr;
+    KTextEditor::View *m_sourceView = nullptr;
 
     KItinerary::ExtractorRepository m_repo;
 };
