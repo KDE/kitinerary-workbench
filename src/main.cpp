@@ -17,10 +17,17 @@
 
 #include "mainwindow.h"
 
+#include <KItinerary/Organization>
+#include <KItinerary/Place>
+
 #include <QApplication>
 
 int main(int argc, char **argv)
 {
+    qRegisterMetaType<KItinerary::Airline>();
+    qRegisterMetaType<KItinerary::Airport>();
+    qRegisterMetaType<KItinerary::Organization>();
+
     QApplication app(argc, argv);
 
     MainWindow mainWindow;

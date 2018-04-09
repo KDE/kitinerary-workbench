@@ -21,6 +21,7 @@
 #include <KItinerary/ExtractorEngine>
 #include <KItinerary/ExtractorPreprocessor>
 #include <KItinerary/ExtractorPostprocessor>
+#include <KItinerary/IataBcbpParser>
 #include <KItinerary/JsonLdDocument>
 
 #include <KMime/Message>
@@ -39,7 +40,12 @@ MainWindow::MainWindow(QWidget* parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    ui->contextDate->setDateTime(QDateTime(QDate::currentDate(), QTime()));
     setCentralWidget(ui->mainSplitter);
+
+    connect(ui->typeBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::sourceChanged);
+    connect(ui->senderLine, &QLineEdit::textChanged, this, &MainWindow::sourceChanged);
+    connect(ui->contextDate, &QDateTimeEdit::dateTimeChanged, this, &MainWindow::sourceChanged);
 
     auto editor = KTextEditor::Editor::instance();
 
@@ -70,27 +76,35 @@ MainWindow::~MainWindow() = default;
 
 void MainWindow::sourceChanged()
 {
-    // TODO: select the right source type: plain, pkpass, pdf, html
-    KItinerary::ExtractorPreprocessor preproc;
-    preproc.preprocessHtml(m_sourceDoc->text());
-    m_preprocDoc->setText(preproc.text());
+    using namespace KItinerary;
 
-    KMime::Message msg;
-    msg.from()->fromUnicodeString(ui->senderLine->text(), "utf-8");
-    const auto extractors = m_repo.extractorsForMessage(&msg);
-
-    KItinerary::ExtractorEngine engine;
-    engine.setText(preproc.text());
     QJsonArray data;
-    for (const auto extractor : extractors) {
-        engine.setExtractor(extractor);
-        data = engine.extract();
-        if (!data.isEmpty())
-            break;
+    if (ui->typeBox->currentIndex() == 4) { // IATA BCBP
+        const auto bp = IataBcbpParser::parse(m_sourceDoc->text(), ui->contextDate->date());
+        data = JsonLdDocument::toJson({bp});
+    } else { // TODO pkpass type
+        ExtractorPreprocessor preproc;
+        preproc.preprocessHtml(m_sourceDoc->text());
+        m_preprocDoc->setText(preproc.text());
+
+        KMime::Message msg;
+        msg.from()->fromUnicodeString(ui->senderLine->text(), "utf-8");
+        const auto extractors = m_repo.extractorsForMessage(&msg);
+
+        ExtractorEngine engine;
+        engine.setText(preproc.text());
+        for (const auto extractor : extractors) {
+            engine.setExtractor(extractor);
+            data = engine.extract();
+            if (!data.isEmpty())
+                break;
+        }
     }
+
     m_outputDoc->setText(QJsonDocument(data).toJson());
 
-    KItinerary::ExtractorPostprocessor postproc;
-    postproc.process(KItinerary::JsonLdDocument::fromJson(data));
-    m_postprocDoc->setText(QJsonDocument(KItinerary::JsonLdDocument::toJson(postproc.result())).toJson());
+    ExtractorPostprocessor postproc;
+    postproc.setContextDate(ui->contextDate->dateTime());
+    postproc.process(JsonLdDocument::fromJson(data));
+    m_postprocDoc->setText(QJsonDocument(JsonLdDocument::toJson(postproc.result())).toJson());
 }
