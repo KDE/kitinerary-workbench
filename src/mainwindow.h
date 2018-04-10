@@ -24,6 +24,10 @@
 
 #include <memory>
 
+namespace KPkPass {
+class Pass;
+}
+
 namespace KTextEditor {
 class Document;
 class View;
@@ -53,6 +57,7 @@ private:
 
     void typeChanged();
     void sourceChanged();
+    void urlChanged();
 
 private:
     std::unique_ptr<Ui::MainWindow> ui;
@@ -65,6 +70,9 @@ private:
     KTextEditor::View *m_sourceView = nullptr;
 
     KItinerary::ExtractorRepository m_repo;
+
+    QByteArray m_pdf;
+    std::unique_ptr<KPkPass::Pass> m_pkpass;
 };
 
 #endif // MAINWINDOW_H

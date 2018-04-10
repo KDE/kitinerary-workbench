@@ -25,6 +25,8 @@
 #include <KItinerary/JsonLdDocument>
 #include <KItinerary/StructuredDataExtractor>
 
+#include <KPkPass/Pass>
+
 #include <KMime/Message>
 
 #include <KTextEditor/Document>
@@ -49,6 +51,7 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->typeBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::sourceChanged);
     connect(ui->senderLine, &QLineEdit::textChanged, this, &MainWindow::sourceChanged);
     connect(ui->contextDate, &QDateTimeEdit::dateTimeChanged, this, &MainWindow::sourceChanged);
+    connect(ui->fileRequester, &KUrlRequester::textChanged, this, &MainWindow::urlChanged);
 
     auto editor = KTextEditor::Editor::instance();
 
@@ -87,13 +90,13 @@ MainWindow::~MainWindow() = default;
 
 void MainWindow::typeChanged()
 {
+    ui->inputTabWidget->setTabEnabled(1, false);
     ui->outputTabWidget->setTabEnabled(1, true);
     switch (ui->typeBox->currentIndex()) {
         case PlainText:
         case IataBcbp:
             m_sourceDoc->setMode(QStringLiteral("Normal"));
             m_sourceView->show();
-            ui->inputTabWidget->setTabEnabled(1, false);
             ui->outputTabWidget->setTabEnabled(0, false);
             break;
         case Html:
@@ -103,15 +106,14 @@ void MainWindow::typeChanged()
             ui->outputTabWidget->setTabEnabled(0, true);
             break;
         case Pdf:
+            ui->inputTabWidget->setTabEnabled(1, true);
         case PkPass:
             m_sourceView->hide();
-            ui->inputTabWidget->setTabEnabled(1, false);
             ui->outputTabWidget->setTabEnabled(0, false);
             break;
         case JsonLd:
             m_sourceDoc->setMode(QStringLiteral("JSON"));
             m_sourceView->show();
-            ui->inputTabWidget->setTabEnabled(1, false);
             ui->outputTabWidget->setTabEnabled(0, false);
             ui->outputTabWidget->setTabEnabled(1, false);
             break;
@@ -126,18 +128,31 @@ void MainWindow::sourceChanged()
     if (ui->typeBox->currentIndex() == IataBcbp) {
         const auto bp = IataBcbpParser::parse(m_sourceDoc->text(), ui->contextDate->date());
         data = JsonLdDocument::toJson({bp});
+    } else if (ui->typeBox->currentIndex() == PkPass) {
+        const auto extractors = m_repo.extractorsForPass(m_pkpass.get());
+        ExtractorEngine engine;
+        engine.setSenderDate(ui->contextDate->dateTime());
+        engine.setPass(m_pkpass.get());
+        for (const auto extractor : extractors) {
+            engine.setExtractor(extractor);
+            data = engine.extract();
+            if (!data.isEmpty())
+                break;
+        }
     } else if (ui->typeBox->currentIndex() == JsonLd) {
         const auto doc = QJsonDocument::fromJson(m_sourceDoc->text().toUtf8());
         if (doc.isArray())
             data = doc.array();
         else if (doc.isObject())
             data = {doc.object()};
-    } else { // TODO pkpass type
+    } else {
         ExtractorPreprocessor preproc;
         if (ui->typeBox->currentIndex() == PlainText)
             preproc.preprocessPlainText(m_sourceDoc->text());
         else if (ui->typeBox->currentIndex() == Html)
             preproc.preprocessHtml(m_sourceDoc->text());
+        else if (ui->typeBox->currentIndex() == Pdf)
+            preproc.preprocessPdf(m_pdf);
         m_preprocDoc->setText(preproc.text());
 
         KMime::Message msg;
@@ -145,6 +160,7 @@ void MainWindow::sourceChanged()
         const auto extractors = m_repo.extractorsForMessage(&msg);
 
         ExtractorEngine engine;
+        engine.setSenderDate(ui->contextDate->dateTime());
         engine.setText(preproc.text());
         for (const auto extractor : extractors) {
             engine.setExtractor(extractor);
@@ -168,4 +184,25 @@ void MainWindow::sourceChanged()
     postproc.setContextDate(ui->contextDate->dateTime());
     postproc.process(JsonLdDocument::fromJson(structured.isEmpty() ? data : structured));
     m_postprocDoc->setText(QJsonDocument(JsonLdDocument::toJson(postproc.result())).toJson());
+}
+
+void MainWindow::urlChanged()
+{
+    const auto url = ui->fileRequester->url();
+    if (!url.isValid())
+        return;
+
+    if (url.toString().endsWith(QLatin1String(".pkpass"))) {
+        m_pkpass.reset(KPkPass::Pass::fromFile(url.toLocalFile()));
+        ui->typeBox->setCurrentIndex(PkPass);
+        sourceChanged();
+    } else if (url.toString().endsWith(QLatin1String(".pdf"))) {
+        QFile f(url.toLocalFile());
+        f.open(QFile::ReadOnly);
+        m_pdf = f.readAll();
+        ui->typeBox->setCurrentIndex(Pdf);
+        sourceChanged();
+    } else {
+        m_sourceDoc->openUrl(url);
+    }
 }

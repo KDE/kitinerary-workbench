@@ -17,7 +17,7 @@ set(CMAKE_AUTOUIC ON)
 ecm_setup_version(PROJECT VARIABLE_PREFIX KITINERARY_WORKBENCH VERSION_HEADER kitinerary_workbench_version.h)
 
 find_package(Qt5 REQUIRED COMPONENTS Widgets)
-find_package(KF5 REQUIRED COMPONENTS TextEditor)
+find_package(KF5 REQUIRED COMPONENTS TextEditor KIO)
 find_package(KPimPkPass REQUIRED)
 find_package(KPimItinerary REQUIRED)
 
