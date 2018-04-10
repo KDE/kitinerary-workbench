@@ -35,6 +35,7 @@
 #include <QHBoxLayout>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <QJsonObject>
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
@@ -78,25 +79,41 @@ MainWindow::MainWindow(QWidget* parent)
     view = m_postprocDoc->createView(nullptr);
     layout = new QHBoxLayout(ui->postprocTab);
     layout->addWidget(view);
+
+    typeChanged();
 }
 
 MainWindow::~MainWindow() = default;
 
 void MainWindow::typeChanged()
 {
+    ui->outputTabWidget->setTabEnabled(1, true);
     switch (ui->typeBox->currentIndex()) {
-        case 0:
-        case 4:
+        case PlainText:
+        case IataBcbp:
             m_sourceDoc->setMode(QStringLiteral("Normal"));
             m_sourceView->show();
+            ui->inputTabWidget->setTabEnabled(1, false);
+            ui->outputTabWidget->setTabEnabled(0, false);
             break;
-        case 1:
+        case Html:
             m_sourceDoc->setMode(QStringLiteral("HTML"));
             m_sourceView->show();
+            ui->inputTabWidget->setTabEnabled(1, true);
+            ui->outputTabWidget->setTabEnabled(0, true);
             break;
-        case 2:
-        case 3:
+        case Pdf:
+        case PkPass:
             m_sourceView->hide();
+            ui->inputTabWidget->setTabEnabled(1, false);
+            ui->outputTabWidget->setTabEnabled(0, false);
+            break;
+        case JsonLd:
+            m_sourceDoc->setMode(QStringLiteral("JSON"));
+            m_sourceView->show();
+            ui->inputTabWidget->setTabEnabled(1, false);
+            ui->outputTabWidget->setTabEnabled(0, false);
+            ui->outputTabWidget->setTabEnabled(1, false);
             break;
     }
 }
@@ -106,14 +123,20 @@ void MainWindow::sourceChanged()
     using namespace KItinerary;
 
     QJsonArray data;
-    if (ui->typeBox->currentIndex() == 4) { // IATA BCBP
+    if (ui->typeBox->currentIndex() == IataBcbp) {
         const auto bp = IataBcbpParser::parse(m_sourceDoc->text(), ui->contextDate->date());
         data = JsonLdDocument::toJson({bp});
+    } else if (ui->typeBox->currentIndex() == JsonLd) {
+        const auto doc = QJsonDocument::fromJson(m_sourceDoc->text().toUtf8());
+        if (doc.isArray())
+            data = doc.array();
+        else if (doc.isObject())
+            data = {doc.object()};
     } else { // TODO pkpass type
         ExtractorPreprocessor preproc;
-        if (ui->typeBox->currentIndex() == 0) // plain text
+        if (ui->typeBox->currentIndex() == PlainText)
             preproc.preprocessPlainText(m_sourceDoc->text());
-        else if (ui->typeBox->currentIndex() == 1) // html
+        else if (ui->typeBox->currentIndex() == Html)
             preproc.preprocessHtml(m_sourceDoc->text());
         m_preprocDoc->setText(preproc.text());
 
@@ -134,7 +157,7 @@ void MainWindow::sourceChanged()
     m_outputDoc->setText(QJsonDocument(data).toJson());
 
     QJsonArray structured;
-    if (ui->typeBox->currentIndex() == 1) {
+    if (ui->typeBox->currentIndex() == Html) {
         StructuredDataExtractor extractor;
         extractor.parse(m_sourceDoc->text());
         structured = extractor.data();

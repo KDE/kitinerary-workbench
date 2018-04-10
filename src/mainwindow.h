@@ -42,6 +42,15 @@ public:
     ~MainWindow();
 
 private:
+    enum Type {
+        PlainText,
+        Html,
+        Pdf,
+        PkPass,
+        IataBcbp,
+        JsonLd
+    };
+
     void typeChanged();
     void sourceChanged();
 

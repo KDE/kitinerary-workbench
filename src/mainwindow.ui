@@ -64,6 +64,11 @@
               <string>IATA BCBP</string>
              </property>
             </item>
+            <item>
+             <property name="text">
+              <string>JSON-LD</string>
+             </property>
+            </item>
            </widget>
           </item>
           <item row="2" column="0">
