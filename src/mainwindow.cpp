@@ -38,6 +38,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QSettings>
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
@@ -84,9 +85,20 @@ MainWindow::MainWindow(QWidget* parent)
     layout->addWidget(view);
 
     typeChanged();
+
+    QSettings settings;
+    settings.beginGroup(QLatin1String("MainWindow"));
+    restoreGeometry(settings.value(QLatin1String("Geometry")).toByteArray());
+    restoreState(settings.value(QLatin1String("State")).toByteArray());
 }
 
-MainWindow::~MainWindow() = default;
+MainWindow::~MainWindow()
+{
+    QSettings settings;
+    settings.beginGroup(QLatin1String("MainWindow"));
+    settings.setValue(QLatin1String("Geometry"), saveGeometry());
+    settings.setValue(QLatin1String("State"), saveState());
+}
 
 void MainWindow::typeChanged()
 {

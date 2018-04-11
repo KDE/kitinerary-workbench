@@ -24,6 +24,10 @@
 
 int main(int argc, char **argv)
 {
+    QCoreApplication::setOrganizationDomain(QStringLiteral("kde.org"));
+    QCoreApplication::setOrganizationName(QStringLiteral("KDE"));
+    QCoreApplication::setApplicationName(QStringLiteral("kitinerary-workbench"));
+
     qRegisterMetaType<KItinerary::Airline>();
     qRegisterMetaType<KItinerary::Airport>();
     qRegisterMetaType<KItinerary::Organization>();
