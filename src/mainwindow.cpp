@@ -50,7 +50,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     connect(ui->typeBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::typeChanged);
     connect(ui->typeBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::sourceChanged);
-    connect(ui->senderLine, &QLineEdit::textChanged, this, &MainWindow::sourceChanged);
+    connect(ui->senderBox, &QComboBox::currentTextChanged, this, &MainWindow::sourceChanged);
     connect(ui->contextDate, &QDateTimeEdit::dateTimeChanged, this, &MainWindow::sourceChanged);
     connect(ui->fileRequester, &KUrlRequester::textChanged, this, &MainWindow::urlChanged);
 
@@ -90,11 +90,24 @@ MainWindow::MainWindow(QWidget* parent)
     settings.beginGroup(QLatin1String("MainWindow"));
     restoreGeometry(settings.value(QLatin1String("Geometry")).toByteArray());
     restoreState(settings.value(QLatin1String("State")).toByteArray());
+    settings.endGroup();
+    settings.beginGroup(QLatin1String("SenderHistory"));
+    ui->senderBox->addItems(settings.value(QLatin1String("History")).toStringList());
+    ui->senderBox->setCurrentText(QString());
 }
 
 MainWindow::~MainWindow()
 {
     QSettings settings;
+
+    settings.beginGroup(QLatin1String("SenderHistory"));
+    QStringList history;
+    history.reserve(ui->senderBox->count());
+    for (int i = 0; i < ui->senderBox->count(); ++i)
+        history.push_back(ui->senderBox->itemText(i));
+    settings.setValue(QLatin1String("History"), history);
+    settings.endGroup();
+
     settings.beginGroup(QLatin1String("MainWindow"));
     settings.setValue(QLatin1String("Geometry"), saveGeometry());
     settings.setValue(QLatin1String("State"), saveState());
@@ -119,6 +132,7 @@ void MainWindow::typeChanged()
             break;
         case Pdf:
             ui->inputTabWidget->setTabEnabled(1, true);
+            [[fallthrough]];
         case PkPass:
             m_sourceView->hide();
             ui->outputTabWidget->setTabEnabled(0, false);
@@ -168,7 +182,7 @@ void MainWindow::sourceChanged()
         m_preprocDoc->setText(preproc.text());
 
         KMime::Message msg;
-        msg.from()->fromUnicodeString(ui->senderLine->text(), "utf-8");
+        msg.from()->fromUnicodeString(ui->senderBox->currentText(), "utf-8");
         const auto extractors = m_repo.extractorsForMessage(&msg);
 
         ExtractorEngine engine;
