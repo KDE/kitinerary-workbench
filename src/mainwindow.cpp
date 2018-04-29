@@ -18,6 +18,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <KItinerary/BarcodeDecoder>
 #include <KItinerary/ExtractorEngine>
 #include <KItinerary/ExtractorPreprocessor>
 #include <KItinerary/ExtractorPostprocessor>
@@ -39,6 +40,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QMenu>
 #include <QSettings>
 #include <QStandardItemModel>
 
@@ -71,6 +73,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     m_imageModel->setHorizontalHeaderLabels({tr("Image")});
     ui->imageView->setModel(m_imageModel);
+    connect(ui->imageView, &QWidget::customContextMenuRequested, this, &MainWindow::imageContextMenu);
 
     m_structuredDoc = editor->createDocument(nullptr);
     m_structuredDoc->setMode(QStringLiteral("JSON"));
@@ -253,5 +256,24 @@ void MainWindow::urlChanged()
         sourceChanged();
     } else {
         m_sourceDoc->openUrl(url);
+    }
+}
+
+void MainWindow::imageContextMenu(QPoint pos)
+{
+    const auto idx = ui->imageView->currentIndex();
+    if (!idx.isValid())
+        return;
+
+    QMenu menu;
+    auto aztec = menu.addAction(tr("Decode Aztec"));
+    auto pdf417 = menu.addAction(tr("Decode PDF417"));
+    if (auto action = menu.exec(ui->imageView->viewport()->mapToGlobal(pos))) {
+        QString code;
+        if (action == aztec)
+            code = KItinerary::BarcodeDecoder::decodeAztec(idx.data(Qt::DecorationRole).value<QImage>());
+        else if (action == pdf417)
+            code = KItinerary::BarcodeDecoder::decodePdf417(idx.data(Qt::DecorationRole).value<QImage>());
+        m_sourceDoc->setText(code);
     }
 }

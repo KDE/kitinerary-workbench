@@ -64,6 +64,7 @@ private:
     void typeChanged();
     void sourceChanged();
     void urlChanged();
+    void imageContextMenu(QPoint pos);
 
 private:
     std::unique_ptr<Ui::MainWindow> ui;
