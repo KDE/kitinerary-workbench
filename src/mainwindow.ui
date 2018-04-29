@@ -129,6 +129,20 @@
         <string>Pre-processed</string>
        </attribute>
       </widget>
+      <widget class="QWidget" name="imageTab">
+       <attribute name="title">
+        <string>Images</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QTreeView" name="imageView">
+          <property name="rootIsDecorated">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
      <widget class="QTabWidget" name="outputTabWidget">
       <property name="currentIndex">

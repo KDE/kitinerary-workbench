@@ -23,6 +23,7 @@
 #include <KItinerary/ExtractorPostprocessor>
 #include <KItinerary/IataBcbpParser>
 #include <KItinerary/JsonLdDocument>
+#include <KItinerary/PdfDocument>
 #include <KItinerary/StructuredDataExtractor>
 
 #include <KPkPass/Pass>
@@ -39,10 +40,12 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QSettings>
+#include <QStandardItemModel>
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
+    , m_imageModel(new QStandardItemModel(this))
 {
     ui->setupUi(this);
     ui->contextDate->setDateTime(QDateTime(QDate::currentDate(), QTime()));
@@ -65,6 +68,9 @@ MainWindow::MainWindow(QWidget* parent)
     auto view = m_preprocDoc->createView(nullptr);
     auto layout = new QHBoxLayout(ui->preprocTab);
     layout->addWidget(view);
+
+    m_imageModel->setHorizontalHeaderLabels({tr("Image")});
+    ui->imageView->setModel(m_imageModel);
 
     m_structuredDoc = editor->createDocument(nullptr);
     m_structuredDoc->setMode(QStringLiteral("JSON"));
@@ -116,6 +122,7 @@ MainWindow::~MainWindow()
 void MainWindow::typeChanged()
 {
     ui->inputTabWidget->setTabEnabled(1, false);
+    ui->inputTabWidget->setTabEnabled(2, false);
     ui->outputTabWidget->setTabEnabled(1, true);
     switch (ui->typeBox->currentIndex()) {
         case PlainText:
@@ -132,8 +139,12 @@ void MainWindow::typeChanged()
             break;
         case Pdf:
             ui->inputTabWidget->setTabEnabled(1, true);
-            [[fallthrough]];
+            ui->inputTabWidget->setTabEnabled(2, true);
+            m_sourceView->hide();
+            ui->outputTabWidget->setTabEnabled(0, false);
+            break;
         case PkPass:
+            ui->inputTabWidget->setTabEnabled(1, true);
             m_sourceView->hide();
             ui->outputTabWidget->setTabEnabled(0, false);
             break;
@@ -148,6 +159,7 @@ void MainWindow::typeChanged()
 
 void MainWindow::sourceChanged()
 {
+    m_imageModel->removeRows(0, m_imageModel->rowCount());
     using namespace KItinerary;
 
     QJsonArray data;
@@ -173,21 +185,32 @@ void MainWindow::sourceChanged()
             data = {doc.object()};
     } else {
         ExtractorPreprocessor preproc;
-        if (ui->typeBox->currentIndex() == PlainText)
+        ExtractorEngine engine;
+        engine.setSenderDate(ui->contextDate->dateTime());
+
+        if (ui->typeBox->currentIndex() == PlainText) {
             preproc.preprocessPlainText(m_sourceDoc->text());
-        else if (ui->typeBox->currentIndex() == Html)
+            engine.setText(preproc.text());
+            m_preprocDoc->setText(preproc.text());
+        } else if (ui->typeBox->currentIndex() == Html) {
             preproc.preprocessHtml(m_sourceDoc->text());
-        else if (ui->typeBox->currentIndex() == Pdf)
-            preproc.preprocessPdf(m_pdf);
-        m_preprocDoc->setText(preproc.text());
+            engine.setText(preproc.text());
+            m_preprocDoc->setText(preproc.text());
+        } else if (ui->typeBox->currentIndex() == Pdf && m_pdfDoc) {
+            engine.setPdfDocument(m_pdfDoc.get());
+            m_preprocDoc->setText(m_pdfDoc->text());
+
+            for (int i = 0; i < m_pdfDoc->imageCount(); ++i) {
+                auto item = new QStandardItem;
+                item->setData(m_pdfDoc->image(i), Qt::DecorationRole);
+                m_imageModel->appendRow(item);
+            }
+        }
 
         KMime::Message msg;
         msg.from()->fromUnicodeString(ui->senderBox->currentText(), "utf-8");
         const auto extractors = m_repo.extractorsForMessage(&msg);
 
-        ExtractorEngine engine;
-        engine.setSenderDate(ui->contextDate->dateTime());
-        engine.setText(preproc.text());
         for (const auto extractor : extractors) {
             engine.setExtractor(extractor);
             data = engine.extract();
@@ -225,7 +248,7 @@ void MainWindow::urlChanged()
     } else if (url.toString().endsWith(QLatin1String(".pdf"))) {
         QFile f(url.toLocalFile());
         f.open(QFile::ReadOnly);
-        m_pdf = f.readAll();
+        m_pdfDoc.reset(KItinerary::PdfDocument::fromData(f.readAll()));
         ui->typeBox->setCurrentIndex(Pdf);
         sourceChanged();
     } else {

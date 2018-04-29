@@ -24,6 +24,10 @@
 
 #include <memory>
 
+namespace KItinerary {
+class PdfDocument;
+}
+
 namespace KPkPass {
 class Pass;
 }
@@ -37,6 +41,8 @@ namespace Ui
 {
 class MainWindow;
 }
+
+class QStandardItemModel;
 
 class MainWindow : public QMainWindow
 {
@@ -69,10 +75,12 @@ private:
     KTextEditor::Document *m_postprocDoc = nullptr;
     KTextEditor::View *m_sourceView = nullptr;
 
+    QStandardItemModel *m_imageModel;
+
     KItinerary::ExtractorRepository m_repo;
 
-    QByteArray m_pdf;
     std::unique_ptr<KPkPass::Pass> m_pkpass;
+    std::unique_ptr<KItinerary::PdfDocument> m_pdfDoc;
 };
 
 #endif // MAINWINDOW_H
