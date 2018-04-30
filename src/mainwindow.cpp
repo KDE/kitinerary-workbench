@@ -205,7 +205,7 @@ void MainWindow::sourceChanged()
 
             for (int i = 0; i < m_pdfDoc->imageCount(); ++i) {
                 auto item = new QStandardItem;
-                item->setData(m_pdfDoc->image(i), Qt::DecorationRole);
+                item->setData(m_pdfDoc->image(i).image(), Qt::DecorationRole);
                 m_imageModel->appendRow(item);
             }
         }
