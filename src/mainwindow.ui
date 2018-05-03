@@ -69,6 +69,11 @@
               <string>JSON-LD</string>
              </property>
             </item>
+            <item>
+             <property name="text">
+              <string>UIC 918.3</string>
+             </property>
+            </item>
            </widget>
           </item>
           <item row="2" column="0">
@@ -84,7 +89,7 @@
           <item row="3" column="0">
            <widget class="QLabel" name="label_2">
             <property name="text">
-             <string>Sender:</string>
+             <string>Se&amp;nder:</string>
             </property>
             <property name="buddy">
              <cstring>senderBox</cstring>

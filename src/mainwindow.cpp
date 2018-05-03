@@ -26,6 +26,7 @@
 #include <KItinerary/JsonLdDocument>
 #include <KItinerary/PdfDocument>
 #include <KItinerary/StructuredDataExtractor>
+#include <KItinerary/Uic9183Parser>
 
 #include <KPkPass/Pass>
 
@@ -130,6 +131,7 @@ void MainWindow::typeChanged()
     switch (ui->typeBox->currentIndex()) {
         case PlainText:
         case IataBcbp:
+        case Uic9183:
             m_sourceDoc->setMode(QStringLiteral("Normal"));
             m_sourceView->show();
             ui->outputTabWidget->setTabEnabled(0, false);
@@ -169,6 +171,10 @@ void MainWindow::sourceChanged()
     if (ui->typeBox->currentIndex() == IataBcbp) {
         const auto bp = IataBcbpParser::parse(m_sourceDoc->text(), ui->contextDate->date());
         data = JsonLdDocument::toJson({bp});
+    } else if (ui->typeBox->currentIndex() == Uic9183) {
+        Uic9183Parser p;
+        p.parse(m_sourceDoc->text().toLatin1());
+        data = JsonLdDocument::toJson({QVariant::fromValue(p)});
     } else if (ui->typeBox->currentIndex() == PkPass) {
         const auto extractors = m_repo.extractorsForPass(m_pkpass.get());
         ExtractorEngine engine;
@@ -261,19 +267,31 @@ void MainWindow::urlChanged()
 
 void MainWindow::imageContextMenu(QPoint pos)
 {
+    using namespace KItinerary;
+
     const auto idx = ui->imageView->currentIndex();
     if (!idx.isValid())
         return;
 
     QMenu menu;
-    auto aztec = menu.addAction(tr("Decode Aztec"));
-    auto pdf417 = menu.addAction(tr("Decode PDF417"));
+    const auto aztec = menu.addAction(tr("Decode Aztec"));
+    const auto aztecBinary = menu.addAction(tr("Decode Aztec (Binary)"));
+    const auto pdf417 = menu.addAction(tr("Decode PDF417"));
+    menu.addSeparator();
+    const auto save = menu.addAction(tr("Save..."));
     if (auto action = menu.exec(ui->imageView->viewport()->mapToGlobal(pos))) {
         QString code;
-        if (action == aztec)
-            code = KItinerary::BarcodeDecoder::decodeAztec(idx.data(Qt::DecorationRole).value<QImage>());
-        else if (action == pdf417)
-            code = KItinerary::BarcodeDecoder::decodePdf417(idx.data(Qt::DecorationRole).value<QImage>());
+        if (action == aztec) {
+            code = BarcodeDecoder::decodeAztec(idx.data(Qt::DecorationRole).value<QImage>());
+        } else if (action == aztecBinary) {
+            const auto b = BarcodeDecoder::decodeAztecBinary(idx.data(Qt::DecorationRole).value<QImage>());
+            code = QString::fromLatin1(b.constData(), b.size());
+        } else if (action == pdf417) {
+            code = BarcodeDecoder::decodePdf417(idx.data(Qt::DecorationRole).value<QImage>());
+        } else if (action == save) {
+            const auto fileName = QFileDialog::getSaveFileName(this, tr("Save Image"));
+            idx.data(Qt::DecorationRole).value<QImage>().save(fileName);
+        }
         m_sourceDoc->setText(code);
     }
 }

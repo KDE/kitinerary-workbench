@@ -58,7 +58,8 @@ private:
         Pdf,
         PkPass,
         IataBcbp,
-        JsonLd
+        JsonLd,
+        Uic9183
     };
 
     void typeChanged();
