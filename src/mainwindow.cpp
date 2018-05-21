@@ -44,6 +44,7 @@
 #include <QMenu>
 #include <QSettings>
 #include <QStandardItemModel>
+#include <QToolBar>
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
@@ -104,6 +105,10 @@ MainWindow::MainWindow(QWidget* parent)
     settings.beginGroup(QLatin1String("SenderHistory"));
     ui->senderBox->addItems(settings.value(QLatin1String("History")).toStringList());
     ui->senderBox->setCurrentText(QString());
+
+    auto toolbar = new QToolBar("maintoolbar",this);
+    toolbar->addAction(QIcon::fromTheme("view-refresh"), "Reload", this, &MainWindow::sourceChanged);
+    addToolBar(Qt::TopToolBarArea, toolbar);
 }
 
 MainWindow::~MainWindow()
