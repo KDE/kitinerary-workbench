@@ -282,7 +282,6 @@ void MainWindow::imageContextMenu(QPoint pos)
     const auto aztec = menu.addAction(tr("Decode Aztec"));
     const auto aztecBinary = menu.addAction(tr("Decode Aztec (Binary)"));
     const auto pdf417 = menu.addAction(tr("Decode PDF417"));
-    const auto pdf417r90 = menu.addAction(tr("Decode PDF417 (Rotated CCW 90)"));
     menu.addSeparator();
     const auto save = menu.addAction(tr("Save..."));
     if (auto action = menu.exec(ui->imageView->viewport()->mapToGlobal(pos))) {
@@ -294,10 +293,6 @@ void MainWindow::imageContextMenu(QPoint pos)
             code = QString::fromLatin1(b.constData(), b.size());
         } else if (action == pdf417) {
             code = BarcodeDecoder::decodePdf417(idx.data(Qt::DecorationRole).value<QImage>());
-        } else if (action == pdf417r90) {
-	    QTransform tf;
-	    tf.rotate(-90);
-            code = BarcodeDecoder::decodePdf417(idx.data(Qt::DecorationRole).value<QImage>().transformed(tf));
         } else if (action == save) {
             const auto fileName = QFileDialog::getSaveFileName(this, tr("Save Image"));
             idx.data(Qt::DecorationRole).value<QImage>().save(fileName);
