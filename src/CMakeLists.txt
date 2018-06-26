@@ -10,3 +10,5 @@ target_link_libraries(kitinerary-workbench
     KF5::KIOWidgets
     KF5::TextEditor
 )
+
+install(TARGETS kitinerary-workbench ${INSTALL_TARGETS_DEFAULT_ARGS})
