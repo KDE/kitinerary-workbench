@@ -23,4 +23,19 @@ the right extractor script) and optionally a context date (used to resolve date/
 
 ## Extractor Development
 
-TODO
+For quick iterations during extractor script development, you can use the 'Reload' action to reload
+and re-run the extractor on the already loaded input data. Any changes to the input data will trigger
+this as well, so you can easily test certain variations in the input by editing the input text field.
+For reloading to work, your extractor script must be placed in the file system rather than be compiled
+in (see https://api.kde.org/kdepim/kitinerary/html/classKItinerary_1_1Extractor.html). Note that
+reloading only works for extractor scripts, not for extractor meta data.
+
+For PDF extractors, the input panel provides two additional tabs, one showing the extracted plain text
+and one showing a list of images. For the image list, context menu action provide the ability to perform
+Aztec of PDF417 barcode decoding. If successful the result of that is set as the new input text, and
+selecting 'IATA BCBP' or 'UIC 918.3' as input will show the result of decoding the respective barcode
+message.
+
+The output view does not only show the final result ('Post-processed') but also the output of the
+extractor script directly ('Unstructured Extractor'), before it has been normalized, validated and
+augmented in the post-processing stage (see https://api.kde.org/kdepim/kitinerary/html/classKItinerary_1_1ExtractorPostprocessor.html).
