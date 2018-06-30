@@ -128,6 +128,11 @@ MainWindow::~MainWindow()
     settings.setValue(QLatin1String("State"), saveState());
 }
 
+void MainWindow::openFile(const QString &file)
+{
+    ui->fileRequester->setText(file);
+}
+
 void MainWindow::typeChanged()
 {
     ui->inputTabWidget->setTabEnabled(1, false);

@@ -17,10 +17,8 @@
 
 #include "mainwindow.h"
 
-#include <KItinerary/Organization>
-#include <KItinerary/Place>
-
 #include <QApplication>
+#include <QCommandLineParser>
 
 int main(int argc, char **argv)
 {
@@ -28,14 +26,18 @@ int main(int argc, char **argv)
     QCoreApplication::setOrganizationName(QStringLiteral("KDE"));
     QCoreApplication::setApplicationName(QStringLiteral("kitinerary-workbench"));
 
-    qRegisterMetaType<KItinerary::Airline>();
-    qRegisterMetaType<KItinerary::Airport>();
-    qRegisterMetaType<KItinerary::Organization>();
-
     QApplication app(argc, argv);
+
+    QCommandLineParser parser;
+    parser.addHelpOption();
+    parser.addVersionOption();
+    parser.addPositionalArgument(QStringLiteral("file"), QStringLiteral("Input file to open."));
+    parser.process(app);
 
     MainWindow mainWindow;
     mainWindow.show();
+    if (parser.positionalArguments().size() == 1)
+        mainWindow.openFile(parser.positionalArguments().at(0));
 
     return app.exec();
 }
