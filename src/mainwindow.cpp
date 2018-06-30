@@ -106,9 +106,10 @@ MainWindow::MainWindow(QWidget* parent)
     ui->senderBox->addItems(settings.value(QLatin1String("History")).toStringList());
     ui->senderBox->setCurrentText(QString());
 
-    auto toolbar = new QToolBar("maintoolbar",this);
-    toolbar->addAction(QIcon::fromTheme("view-refresh"), "Reload", this, &MainWindow::sourceChanged);
-    addToolBar(Qt::TopToolBarArea, toolbar);
+    ui->actionReload->setShortcut(QKeySequence::Refresh);
+    ui->actionQuit->setShortcut(QKeySequence::Quit);
+    connect(ui->actionReload, &QAction::triggered, this, &MainWindow::sourceChanged);
+    connect(ui->actionQuit, &QAction::triggered, QCoreApplication::instance(), &QCoreApplication::quit);
 }
 
 MainWindow::~MainWindow()

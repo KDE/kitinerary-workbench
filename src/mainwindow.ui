@@ -1,180 +1,223 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>MainWindow</class>
- <widget class="QWidget" name="MainWindow">
+ <widget class="QMainWindow" name="MainWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>960</width>
-    <height>640</height>
+    <width>981</width>
+    <height>689</height>
    </rect>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <item>
-    <widget class="QSplitter" name="mainSplitter">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <widget class="QTabWidget" name="inputTabWidget">
-      <property name="currentIndex">
-       <number>0</number>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QSplitter" name="mainSplitter">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
       </property>
-      <widget class="QWidget" name="sourceTab">
-       <attribute name="title">
-        <string>Source</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
-        <item>
-         <layout class="QFormLayout" name="formLayout">
-          <item row="0" column="0">
-           <widget class="QLabel" name="label">
-            <property name="text">
-             <string>Source t&amp;ype:</string>
-            </property>
-            <property name="buddy">
-             <cstring>typeBox</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QComboBox" name="typeBox">
-            <item>
+      <widget class="QTabWidget" name="inputTabWidget">
+       <property name="currentIndex">
+        <number>0</number>
+       </property>
+       <widget class="QWidget" name="sourceTab">
+        <attribute name="title">
+         <string>Source</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <layout class="QFormLayout" name="formLayout">
+           <item row="0" column="0">
+            <widget class="QLabel" name="label">
              <property name="text">
-              <string>Plain Text</string>
+              <string>Source t&amp;ype:</string>
              </property>
-            </item>
-            <item>
+             <property name="buddy">
+              <cstring>typeBox</cstring>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QComboBox" name="typeBox">
+             <item>
+              <property name="text">
+               <string>Plain Text</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>HTML</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>PDF</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>PkPass</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>IATA BCBP</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>JSON-LD</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>UIC 918.3</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_4">
              <property name="text">
-              <string>HTML</string>
+              <string>File:</string>
              </property>
-            </item>
-            <item>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="KUrlRequester" name="fileRequester" native="true"/>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="label_2">
              <property name="text">
-              <string>PDF</string>
+              <string>Se&amp;nder:</string>
              </property>
-            </item>
-            <item>
+             <property name="buddy">
+              <cstring>senderBox</cstring>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QComboBox" name="senderBox">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="editable">
+              <bool>true</bool>
+             </property>
+             <property name="insertPolicy">
+              <enum>QComboBox::InsertAlphabetically</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="label_3">
              <property name="text">
-              <string>PkPass</string>
+              <string>Conte&amp;xt date:</string>
              </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>IATA BCBP</string>
+             <property name="buddy">
+              <cstring>contextDate</cstring>
              </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>JSON-LD</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>UIC 918.3</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>File:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="KUrlRequester" name="fileRequester" native="true"/>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_2">
-            <property name="text">
-             <string>Se&amp;nder:</string>
-            </property>
-            <property name="buddy">
-             <cstring>senderBox</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QComboBox" name="senderBox">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="editable">
-             <bool>true</bool>
-            </property>
-            <property name="insertPolicy">
-             <enum>QComboBox::InsertAlphabetically</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="label_3">
-            <property name="text">
-             <string>Conte&amp;xt date:</string>
-            </property>
-            <property name="buddy">
-             <cstring>contextDate</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="1">
-           <widget class="QDateTimeEdit" name="contextDate"/>
-          </item>
-         </layout>
-        </item>
-       </layout>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QDateTimeEdit" name="contextDate"/>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="preprocTab">
+        <attribute name="title">
+         <string>Pre-processed</string>
+        </attribute>
+       </widget>
+       <widget class="QWidget" name="imageTab">
+        <attribute name="title">
+         <string>Images</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+         <item>
+          <widget class="QTreeView" name="imageView">
+           <property name="contextMenuPolicy">
+            <enum>Qt::CustomContextMenu</enum>
+           </property>
+           <property name="rootIsDecorated">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </widget>
-      <widget class="QWidget" name="preprocTab">
-       <attribute name="title">
-        <string>Pre-processed</string>
-       </attribute>
-      </widget>
-      <widget class="QWidget" name="imageTab">
-       <attribute name="title">
-        <string>Images</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_3">
-        <item>
-         <widget class="QTreeView" name="imageView">
-          <property name="contextMenuPolicy">
-           <enum>Qt::CustomContextMenu</enum>
-          </property>
-          <property name="rootIsDecorated">
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
-       </layout>
+      <widget class="QTabWidget" name="outputTabWidget">
+       <property name="currentIndex">
+        <number>2</number>
+       </property>
+       <widget class="QWidget" name="structuredTab">
+        <attribute name="title">
+         <string>Structured Extractor</string>
+        </attribute>
+       </widget>
+       <widget class="QWidget" name="outputTab">
+        <attribute name="title">
+         <string>Unstructured Extractor</string>
+        </attribute>
+       </widget>
+       <widget class="QWidget" name="postprocTab">
+        <attribute name="title">
+         <string>Post-processed</string>
+        </attribute>
+       </widget>
       </widget>
      </widget>
-     <widget class="QTabWidget" name="outputTabWidget">
-      <property name="currentIndex">
-       <number>2</number>
-      </property>
-      <widget class="QWidget" name="structuredTab">
-       <attribute name="title">
-        <string>Structured Extractor</string>
-       </attribute>
-      </widget>
-      <widget class="QWidget" name="outputTab">
-       <attribute name="title">
-        <string>Unstructured Extractor</string>
-       </attribute>
-      </widget>
-      <widget class="QWidget" name="postprocTab">
-       <attribute name="title">
-        <string>Post-processed</string>
-       </attribute>
-      </widget>
-     </widget>
-    </widget>
-   </item>
-  </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>981</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu_File">
+    <property name="title">
+     <string>&amp;File</string>
+    </property>
+    <addaction name="actionReload"/>
+    <addaction name="separator"/>
+    <addaction name="actionQuit"/>
+   </widget>
+   <addaction name="menu_File"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionReload">
+   <property name="icon">
+    <iconset theme="view-refresh">
+     <normaloff>../</normaloff>../</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Re-run Extractor</string>
+   </property>
+  </action>
+  <action name="actionQuit">
+   <property name="icon">
+    <iconset theme="application-exit">
+     <normaloff>../</normaloff>../</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Quit</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
