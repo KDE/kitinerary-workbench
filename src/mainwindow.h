@@ -61,7 +61,8 @@ private:
         PkPass,
         IataBcbp,
         JsonLd,
-        Uic9183
+        Uic9183,
+        Image
     };
 
     void typeChanged();
@@ -85,6 +86,7 @@ private:
 
     std::unique_ptr<KPkPass::Pass> m_pkpass;
     std::unique_ptr<KItinerary::PdfDocument> m_pdfDoc;
+    QImage m_image;
 };
 
 #endif // MAINWINDOW_H

@@ -154,6 +154,7 @@ void MainWindow::typeChanged()
             ui->outputTabWidget->setTabEnabled(0, true);
             break;
         case Pdf:
+        case Image:
             ui->inputTabWidget->setTabEnabled(1, true);
             ui->inputTabWidget->setTabEnabled(2, true);
             m_sourceView->hide();
@@ -203,6 +204,10 @@ void MainWindow::sourceChanged()
             data = doc.array();
         else if (doc.isObject())
             data = {doc.object()};
+    } else if (ui->typeBox->currentIndex() == Image) {
+        auto item = new QStandardItem;
+        item->setData(m_image, Qt::DecorationRole);
+        m_imageModel->appendRow(item);
     } else {
         ExtractorPreprocessor preproc;
         ExtractorEngine engine;
@@ -270,6 +275,9 @@ void MainWindow::urlChanged()
         f.open(QFile::ReadOnly);
         m_pdfDoc.reset(KItinerary::PdfDocument::fromData(f.readAll()));
         ui->typeBox->setCurrentIndex(Pdf);
+        sourceChanged();
+    } else if (url.toString().endsWith(QLatin1String(".png"))) {
+        m_image.load(url.toLocalFile());
         sourceChanged();
     } else {
         m_sourceDoc->openUrl(url);
