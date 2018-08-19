@@ -22,6 +22,7 @@
 #include <KItinerary/ExtractorEngine>
 #include <KItinerary/ExtractorPreprocessor>
 #include <KItinerary/ExtractorPostprocessor>
+#include <KItinerary/HtmlDocument>
 #include <KItinerary/IataBcbpParser>
 #include <KItinerary/JsonLdDocument>
 #include <KItinerary/PdfDocument>
@@ -220,6 +221,8 @@ void MainWindow::sourceChanged()
         } else if (ui->typeBox->currentIndex() == Html) {
             preproc.preprocessHtml(m_sourceDoc->text());
             engine.setText(preproc.text());
+            m_htmlDoc.reset(HtmlDocument::fromData(m_sourceDoc->text().toUtf8()));
+            engine.setHtmlDocument(m_htmlDoc.get());
             m_preprocDoc->setText(preproc.text());
         } else if (ui->typeBox->currentIndex() == Pdf && m_pdfDoc) {
             engine.setPdfDocument(m_pdfDoc.get());
@@ -275,6 +278,12 @@ void MainWindow::urlChanged()
         f.open(QFile::ReadOnly);
         m_pdfDoc.reset(KItinerary::PdfDocument::fromData(f.readAll()));
         ui->typeBox->setCurrentIndex(Pdf);
+        sourceChanged();
+    } else if (url.toString().endsWith(QLatin1String(".html"))) {
+        QFile f(url.toLocalFile());
+        f.open(QFile::ReadOnly);
+        m_htmlDoc.reset(KItinerary::HtmlDocument::fromData(f.readAll()));
+        ui->typeBox->setCurrentIndex(Html);
         sourceChanged();
     } else if (url.toString().endsWith(QLatin1String(".png"))) {
         m_image.load(url.toLocalFile());

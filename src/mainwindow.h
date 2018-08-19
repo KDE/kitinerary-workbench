@@ -25,6 +25,7 @@
 #include <memory>
 
 namespace KItinerary {
+class HtmlDocument;
 class PdfDocument;
 }
 
@@ -85,6 +86,7 @@ private:
     KItinerary::ExtractorRepository m_repo;
 
     std::unique_ptr<KPkPass::Pass> m_pkpass;
+    std::unique_ptr<KItinerary::HtmlDocument> m_htmlDoc;
     std::unique_ptr<KItinerary::PdfDocument> m_pdfDoc;
     QImage m_image;
 };
