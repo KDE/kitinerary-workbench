@@ -43,6 +43,7 @@ namespace Ui
 class MainWindow;
 }
 
+class DOMModel;
 class QStandardItemModel;
 
 class MainWindow : public QMainWindow
@@ -82,6 +83,7 @@ private:
     KTextEditor::View *m_sourceView = nullptr;
 
     QStandardItemModel *m_imageModel;
+    DOMModel*m_domModel;
 
     KItinerary::ExtractorRepository m_repo;
 

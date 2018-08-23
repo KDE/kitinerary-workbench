@@ -17,6 +17,7 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "dommodel.h"
 
 #include <KItinerary/BarcodeDecoder>
 #include <KItinerary/ExtractorEngine>
@@ -51,6 +52,7 @@ MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , m_imageModel(new QStandardItemModel(this))
+    , m_domModel(new DOMModel(this))
 {
     ui->setupUi(this);
     ui->contextDate->setDateTime(QDateTime(QDate::currentDate(), QTime()));
@@ -77,6 +79,9 @@ MainWindow::MainWindow(QWidget* parent)
     m_imageModel->setHorizontalHeaderLabels({tr("Image")});
     ui->imageView->setModel(m_imageModel);
     connect(ui->imageView, &QWidget::customContextMenuRequested, this, &MainWindow::imageContextMenu);
+
+    ui->domView->setModel(m_domModel);
+    ui->domView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
     m_structuredDoc = editor->createDocument(nullptr);
     m_structuredDoc->setMode(QStringLiteral("JSON"));
@@ -139,6 +144,7 @@ void MainWindow::typeChanged()
 {
     ui->inputTabWidget->setTabEnabled(1, false);
     ui->inputTabWidget->setTabEnabled(2, false);
+    ui->inputTabWidget->setTabEnabled(3, false);
     ui->outputTabWidget->setTabEnabled(1, true);
     switch (ui->typeBox->currentIndex()) {
         case PlainText:
@@ -152,6 +158,7 @@ void MainWindow::typeChanged()
             m_sourceDoc->setMode(QStringLiteral("HTML"));
             m_sourceView->show();
             ui->inputTabWidget->setTabEnabled(1, true);
+            ui->inputTabWidget->setTabEnabled(3, true);
             ui->outputTabWidget->setTabEnabled(0, true);
             break;
         case Pdf:
@@ -224,6 +231,8 @@ void MainWindow::sourceChanged()
             m_htmlDoc.reset(HtmlDocument::fromData(m_sourceDoc->text().toUtf8()));
             engine.setHtmlDocument(m_htmlDoc.get());
             m_preprocDoc->setText(preproc.text());
+            m_domModel->setDocument(m_htmlDoc.get());
+            ui->domView->expandAll();
         } else if (ui->typeBox->currentIndex() == Pdf && m_pdfDoc) {
             engine.setPdfDocument(m_pdfDoc.get());
             m_preprocDoc->setText(m_pdfDoc->text());
@@ -284,6 +293,8 @@ void MainWindow::urlChanged()
         f.open(QFile::ReadOnly);
         m_htmlDoc.reset(KItinerary::HtmlDocument::fromData(f.readAll()));
         ui->typeBox->setCurrentIndex(Html);
+        m_domModel->setDocument(m_htmlDoc.get());
+        ui->domView->expandAll();
         sourceChanged();
     } else if (url.toString().endsWith(QLatin1String(".png"))) {
         m_image.load(url.toLocalFile());

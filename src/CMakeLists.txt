@@ -1,6 +1,7 @@
 set(workbench_srcs
     main.cpp
     mainwindow.cpp
+    dommodel.cpp
 )
 
 add_executable(kitinerary-workbench ${workbench_srcs})

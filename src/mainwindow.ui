@@ -160,6 +160,20 @@
          </item>
         </layout>
        </widget>
+       <widget class="QWidget" name="domTab">
+        <attribute name="title">
+         <string>DOM</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_4">
+         <item>
+          <widget class="QTreeView" name="domView">
+           <property name="indentation">
+            <number>8</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </widget>
       <widget class="QTabWidget" name="outputTabWidget">
        <property name="currentIndex">
