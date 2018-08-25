@@ -36,6 +36,9 @@ Aztec of PDF417 barcode decoding. If successful the result of that is set as the
 selecting 'IATA BCBP' or 'UIC 918.3' as input will show the result of decoding the respective barcode
 message.
 
+For HTML extractors, the input panel provides an additional tab, showing the DOM tree of the parsed
+document, and the attributes of an selected element in there.
+
 The output view does not only show the final result ('Post-processed') but also the output of the
 extractor script directly ('Unstructured Extractor'), before it has been normalized, validated and
 augmented in the post-processing stage (see https://api.kde.org/kdepim/kitinerary/html/classKItinerary_1_1ExtractorPostprocessor.html).
