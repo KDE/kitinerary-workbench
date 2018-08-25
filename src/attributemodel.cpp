@@ -38,6 +38,7 @@ void AttributeModel::setElement(KItinerary::HtmlElement elem)
         i1->setText(attr);
         auto i2 = new QStandardItem;
         i2->setText(elem.attribute(attr));
+        i2->setToolTip(elem.attribute(attr));
         appendRow({i1, i2});
     }
 
