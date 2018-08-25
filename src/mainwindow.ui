@@ -166,10 +166,20 @@
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_4">
          <item>
-          <widget class="QTreeView" name="domView">
-           <property name="indentation">
-            <number>8</number>
+          <widget class="QSplitter" name="domSplitter">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
            </property>
+           <widget class="QTreeView" name="domView">
+            <property name="indentation">
+             <number>8</number>
+            </property>
+           </widget>
+           <widget class="QTreeView" name="attributeView">
+            <property name="rootIsDecorated">
+             <bool>false</bool>
+            </property>
+           </widget>
           </widget>
          </item>
         </layout>

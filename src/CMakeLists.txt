@@ -1,6 +1,7 @@
 set(workbench_srcs
     main.cpp
     mainwindow.cpp
+    attributemodel.cpp
     dommodel.cpp
 )
 

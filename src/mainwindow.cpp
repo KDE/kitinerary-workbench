@@ -17,6 +17,7 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "attributemodel.h"
 #include "dommodel.h"
 
 #include <KItinerary/BarcodeDecoder>
@@ -53,6 +54,7 @@ MainWindow::MainWindow(QWidget* parent)
     , ui(new Ui::MainWindow)
     , m_imageModel(new QStandardItemModel(this))
     , m_domModel(new DOMModel(this))
+    , m_attrModel(new AttributeModel(this))
 {
     ui->setupUi(this);
     ui->contextDate->setDateTime(QDateTime(QDate::currentDate(), QTime()));
@@ -82,6 +84,14 @@ MainWindow::MainWindow(QWidget* parent)
 
     ui->domView->setModel(m_domModel);
     ui->domView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->attributeView->setModel(m_attrModel);
+    ui->attributeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    connect(ui->domView->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this](const QItemSelection &selection) {
+        const auto idx = selection.value(0).topLeft();
+        m_attrModel->setElement(idx.data(Qt::UserRole).value<KItinerary::HtmlElement>());
+    });
+    ui->domSplitter->setStretchFactor(0, 5);
+    ui->domSplitter->setStretchFactor(1, 1);
 
     m_structuredDoc = editor->createDocument(nullptr);
     m_structuredDoc->setMode(QStringLiteral("JSON"));

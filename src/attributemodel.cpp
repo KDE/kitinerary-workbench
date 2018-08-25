@@ -15,42 +15,31 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "dommodel.h"
+#include "attributemodel.h"
 
 #include <KItinerary/HtmlDocument>
 
-DOMModel::DOMModel(QObject *parent)
+AttributeModel::AttributeModel(QObject *parent)
     : QStandardItemModel(parent)
 {
 }
 
-DOMModel::~DOMModel() = default;
+AttributeModel::~AttributeModel() = default;
 
-void DOMModel::setDocument(KItinerary::HtmlDocument *doc)
+void AttributeModel::setElement(KItinerary::HtmlElement elem)
 {
     clear();
-    if (!doc)
+    if (elem.isNull()) {
         return;
+    }
 
-    addNode(nullptr, doc->root());
-    setHorizontalHeaderLabels({tr("Element"), tr("Content")});
-}
-
-void DOMModel::addNode(QStandardItem *parent, KItinerary::HtmlElement elem)
-{
-    auto i1 = new QStandardItem;
-    i1->setText(elem.name());
-    i1->setData(QVariant::fromValue(elem), Qt::UserRole);
-    auto i2 = new QStandardItem;
-    i2->setText(elem.content().left(200).replace(QLatin1Char('\n'), QLatin1Char(' ')));
-    i2->setToolTip(elem.content());
-
-    if (parent)
-        parent->appendRow({i1, i2});
-    else
+    for (const auto &attr : elem.attributes()) {
+        auto i1 = new QStandardItem;
+        i1->setText(attr);
+        auto i2 = new QStandardItem;
+        i2->setText(elem.attribute(attr));
         appendRow({i1, i2});
+    }
 
-    for (auto child = elem.firstChild(); !child.isNull(); child = child.nextSibling())
-        addNode(i1, child);
+    setHorizontalHeaderLabels({tr("Attribute"), tr("Value")});
 }
-

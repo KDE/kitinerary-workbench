@@ -43,6 +43,7 @@ namespace Ui
 class MainWindow;
 }
 
+class AttributeModel;
 class DOMModel;
 class QStandardItemModel;
 
@@ -83,7 +84,8 @@ private:
     KTextEditor::View *m_sourceView = nullptr;
 
     QStandardItemModel *m_imageModel;
-    DOMModel*m_domModel;
+    DOMModel *m_domModel;
+    AttributeModel *m_attrModel;
 
     KItinerary::ExtractorRepository m_repo;
 
