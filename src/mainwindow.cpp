@@ -305,6 +305,7 @@ void MainWindow::urlChanged()
         ui->typeBox->setCurrentIndex(Html);
         m_domModel->setDocument(m_htmlDoc.get());
         ui->domView->expandAll();
+        m_sourceDoc->openUrl(url);
         sourceChanged();
     } else if (url.toString().endsWith(QLatin1String(".png"))) {
         m_image.load(url.toLocalFile());
