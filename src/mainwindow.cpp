@@ -231,6 +231,7 @@ void MainWindow::sourceChanged()
         ExtractorEngine engine;
         engine.setSenderDate(ui->contextDate->dateTime());
 
+        m_preprocDoc->setReadWrite(true);
         if (ui->typeBox->currentIndex() == PlainText) {
             preproc.preprocessPlainText(m_sourceDoc->text());
             engine.setText(preproc.text());
@@ -253,6 +254,7 @@ void MainWindow::sourceChanged()
                 m_imageModel->appendRow(item);
             }
         }
+        m_preprocDoc->setReadWrite(false);
 
         KMime::Message msg;
         msg.from()->fromUnicodeString(ui->senderBox->currentText(), "utf-8");
@@ -266,20 +268,27 @@ void MainWindow::sourceChanged()
         }
     }
 
+    m_outputDoc->setReadWrite(true);
     m_outputDoc->setText(QJsonDocument(data).toJson());
+    m_outputDoc->setReadWrite(false);
 
     QJsonArray structured;
     if (ui->typeBox->currentIndex() == Html) {
         StructuredDataExtractor extractor;
         extractor.parse(m_sourceDoc->text());
         structured = extractor.data();
+        m_structuredDoc->setReadWrite(true);
         m_structuredDoc->setText(QJsonDocument(structured).toJson());
+        m_structuredDoc->setReadWrite(false);
     }
 
     ExtractorPostprocessor postproc;
     postproc.setContextDate(ui->contextDate->dateTime());
     postproc.process(JsonLdDocument::fromJson(structured.isEmpty() ? data : structured));
+
+    m_postprocDoc->setReadWrite(true);
     m_postprocDoc->setText(QJsonDocument(JsonLdDocument::toJson(postproc.result())).toJson());
+    m_postprocDoc->setReadWrite(false);
 }
 
 void MainWindow::urlChanged()
