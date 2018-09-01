@@ -187,16 +187,11 @@
       </widget>
       <widget class="QTabWidget" name="outputTabWidget">
        <property name="currentIndex">
-        <number>2</number>
+        <number>1</number>
        </property>
-       <widget class="QWidget" name="structuredTab">
-        <attribute name="title">
-         <string>Structured Extractor</string>
-        </attribute>
-       </widget>
        <widget class="QWidget" name="outputTab">
         <attribute name="title">
-         <string>Unstructured Extractor</string>
+         <string>Extractor</string>
         </attribute>
        </widget>
        <widget class="QWidget" name="postprocTab">

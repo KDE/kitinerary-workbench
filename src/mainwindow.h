@@ -79,7 +79,6 @@ private:
     KTextEditor::Document *m_sourceDoc = nullptr;
     KTextEditor::Document *m_preprocDoc = nullptr;
     KTextEditor::Document *m_outputDoc = nullptr;
-    KTextEditor::Document *m_structuredDoc = nullptr;
     KTextEditor::Document *m_postprocDoc = nullptr;
     KTextEditor::View *m_sourceView = nullptr;
 

@@ -28,7 +28,6 @@
 #include <KItinerary/IataBcbpParser>
 #include <KItinerary/JsonLdDocument>
 #include <KItinerary/PdfDocument>
-#include <KItinerary/StructuredDataExtractor>
 #include <KItinerary/Uic9183Parser>
 
 #include <KPkPass/Pass>
@@ -93,12 +92,6 @@ MainWindow::MainWindow(QWidget* parent)
     ui->domSplitter->setStretchFactor(0, 5);
     ui->domSplitter->setStretchFactor(1, 1);
 
-    m_structuredDoc = editor->createDocument(nullptr);
-    m_structuredDoc->setMode(QStringLiteral("JSON"));
-    view = m_structuredDoc->createView(nullptr);
-    layout = new QHBoxLayout(ui->structuredTab);
-    layout->addWidget(view);
-
     m_outputDoc = editor->createDocument(nullptr);
     m_outputDoc->setMode(QStringLiteral("JSON"));
     view = m_outputDoc->createView(nullptr);
@@ -155,39 +148,33 @@ void MainWindow::typeChanged()
     ui->inputTabWidget->setTabEnabled(1, false);
     ui->inputTabWidget->setTabEnabled(2, false);
     ui->inputTabWidget->setTabEnabled(3, false);
-    ui->outputTabWidget->setTabEnabled(1, true);
+    ui->outputTabWidget->setTabEnabled(0, true);
     switch (ui->typeBox->currentIndex()) {
         case PlainText:
         case IataBcbp:
         case Uic9183:
             m_sourceDoc->setMode(QStringLiteral("Normal"));
             m_sourceView->show();
-            ui->outputTabWidget->setTabEnabled(0, false);
             break;
         case Html:
             m_sourceDoc->setMode(QStringLiteral("HTML"));
             m_sourceView->show();
             ui->inputTabWidget->setTabEnabled(1, true);
             ui->inputTabWidget->setTabEnabled(3, true);
-            ui->outputTabWidget->setTabEnabled(0, true);
             break;
         case Pdf:
         case Image:
             ui->inputTabWidget->setTabEnabled(1, true);
             ui->inputTabWidget->setTabEnabled(2, true);
             m_sourceView->hide();
-            ui->outputTabWidget->setTabEnabled(0, false);
             break;
         case PkPass:
-            ui->inputTabWidget->setTabEnabled(1, true);
             m_sourceView->hide();
-            ui->outputTabWidget->setTabEnabled(0, false);
             break;
         case JsonLd:
             m_sourceDoc->setMode(QStringLiteral("JSON"));
             m_sourceView->show();
             ui->outputTabWidget->setTabEnabled(0, false);
-            ui->outputTabWidget->setTabEnabled(1, false);
             break;
     }
 }
@@ -205,17 +192,13 @@ void MainWindow::sourceChanged()
         Uic9183Parser p;
         p.parse(m_sourceDoc->text().toLatin1());
         data = JsonLdDocument::toJson({QVariant::fromValue(p)});
-    } else if (ui->typeBox->currentIndex() == PkPass) {
-        const auto extractors = m_repo.extractorsForPass(m_pkpass.get());
+    } else if (ui->typeBox->currentIndex() == PkPass && m_pkpass) {
+        auto extractors = m_repo.extractorsForPass(m_pkpass.get());
         ExtractorEngine engine;
         engine.setSenderDate(ui->contextDate->dateTime());
         engine.setPass(m_pkpass.get());
-        for (const auto extractor : extractors) {
-            engine.setExtractor(extractor);
-            data = engine.extract();
-            if (!data.isEmpty())
-                break;
-        }
+        engine.setExtractors(std::move(extractors));
+        data = engine.extract();
     } else if (ui->typeBox->currentIndex() == JsonLd) {
         const auto doc = QJsonDocument::fromJson(m_sourceDoc->text().toUtf8());
         if (doc.isArray())
@@ -258,33 +241,18 @@ void MainWindow::sourceChanged()
 
         KMime::Message msg;
         msg.from()->fromUnicodeString(ui->senderBox->currentText(), "utf-8");
-        const auto extractors = m_repo.extractorsForMessage(&msg);
-
-        for (const auto extractor : extractors) {
-            engine.setExtractor(extractor);
-            data = engine.extract();
-            if (!data.isEmpty())
-                break;
-        }
+        auto extractors = m_repo.extractorsForMessage(&msg);
+        engine.setExtractors(std::move(extractors));
+        data = engine.extract();
     }
 
     m_outputDoc->setReadWrite(true);
     m_outputDoc->setText(QJsonDocument(data).toJson());
     m_outputDoc->setReadWrite(false);
 
-    QJsonArray structured;
-    if (ui->typeBox->currentIndex() == Html) {
-        StructuredDataExtractor extractor;
-        extractor.parse(m_sourceDoc->text());
-        structured = extractor.data();
-        m_structuredDoc->setReadWrite(true);
-        m_structuredDoc->setText(QJsonDocument(structured).toJson());
-        m_structuredDoc->setReadWrite(false);
-    }
-
     ExtractorPostprocessor postproc;
     postproc.setContextDate(ui->contextDate->dateTime());
-    postproc.process(JsonLdDocument::fromJson(structured.isEmpty() ? data : structured));
+    postproc.process(JsonLdDocument::fromJson(data));
 
     m_postprocDoc->setReadWrite(true);
     m_postprocDoc->setText(QJsonDocument(JsonLdDocument::toJson(postproc.result())).toJson());
