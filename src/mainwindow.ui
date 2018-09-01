@@ -140,7 +140,7 @@
        </widget>
        <widget class="QWidget" name="preprocTab">
         <attribute name="title">
-         <string>Pre-processed</string>
+         <string>Text</string>
         </attribute>
        </widget>
        <widget class="QWidget" name="imageTab">

@@ -22,7 +22,6 @@
 
 #include <KItinerary/BarcodeDecoder>
 #include <KItinerary/ExtractorEngine>
-#include <KItinerary/ExtractorPreprocessor>
 #include <KItinerary/ExtractorPostprocessor>
 #include <KItinerary/HtmlDocument>
 #include <KItinerary/IataBcbpParser>
@@ -210,21 +209,20 @@ void MainWindow::sourceChanged()
         item->setData(m_image, Qt::DecorationRole);
         m_imageModel->appendRow(item);
     } else {
-        ExtractorPreprocessor preproc;
         ExtractorEngine engine;
         engine.setSenderDate(ui->contextDate->dateTime());
 
         m_preprocDoc->setReadWrite(true);
         if (ui->typeBox->currentIndex() == PlainText) {
-            preproc.preprocessPlainText(m_sourceDoc->text());
-            engine.setText(preproc.text());
-            m_preprocDoc->setText(preproc.text());
+            engine.setText(m_sourceDoc->text());
+            m_preprocDoc->setText(m_sourceDoc->text());
         } else if (ui->typeBox->currentIndex() == Html) {
-            preproc.preprocessHtml(m_sourceDoc->text());
-            engine.setText(preproc.text());
             m_htmlDoc.reset(HtmlDocument::fromData(m_sourceDoc->text().toUtf8()));
             engine.setHtmlDocument(m_htmlDoc.get());
-            m_preprocDoc->setText(preproc.text());
+            if (m_htmlDoc)
+                m_preprocDoc->setText(m_htmlDoc->root().recursiveContent());
+            else
+                m_preprocDoc->clear();
             m_domModel->setDocument(m_htmlDoc.get());
             ui->domView->expandAll();
         } else if (ui->typeBox->currentIndex() == Pdf && m_pdfDoc) {
