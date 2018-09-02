@@ -45,6 +45,7 @@
 #include <QMenu>
 #include <QSettings>
 #include <QStandardItemModel>
+#include <QTextCodec>
 #include <QToolBar>
 
 MainWindow::MainWindow(QWidget* parent)
@@ -217,7 +218,12 @@ void MainWindow::sourceChanged()
             engine.setText(m_sourceDoc->text());
             m_preprocDoc->setText(m_sourceDoc->text());
         } else if (ui->typeBox->currentIndex() == Html) {
-            m_htmlDoc.reset(HtmlDocument::fromData(m_sourceDoc->text().toUtf8()));
+            auto codec = QTextCodec::codecForName(m_sourceDoc->encoding().toUtf8());
+            if (!codec) {
+                codec = QTextCodec::codecForLocale();
+            }
+
+            m_htmlDoc.reset(HtmlDocument::fromData(codec->fromUnicode(m_sourceDoc->text())));
             engine.setHtmlDocument(m_htmlDoc.get());
             if (m_htmlDoc)
                 m_preprocDoc->setText(m_htmlDoc->root().recursiveContent());
