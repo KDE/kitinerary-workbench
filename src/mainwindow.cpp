@@ -288,7 +288,7 @@ void MainWindow::urlChanged()
         ui->domView->expandAll();
         m_sourceDoc->openUrl(url);
         sourceChanged();
-    } else if (url.toString().endsWith(QLatin1String(".png"))) {
+    } else if (url.toString().endsWith(QLatin1String(".png")) || url.toString().endsWith(QLatin1String(".jpg"))) {
         m_image.load(url.toLocalFile());
         sourceChanged();
     } else {
