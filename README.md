@@ -26,8 +26,10 @@ the right extractor script) and optionally a context date (used to resolve date/
 For quick iterations during extractor script development, you can use the 'Reload' action to reload
 and re-run the extractor on the already loaded input data. Any changes to the input data will trigger
 this as well, so you can easily test certain variations in the input by editing the input text field.
+
 For reloading to work, your extractor script must be placed in the file system rather than be compiled
-in (see https://api.kde.org/kdepim/kitinerary/html/classKItinerary_1_1Extractor.html). Note that
+in. It's therefore convenient to symlink the extractor sources to $XDG_DATA_DIRS/kitinerary/extractors
+(see https://api.kde.org/kdepim/kitinerary/html/classKItinerary_1_1Extractor.html). Note that
 reloading only works for extractor scripts, not for extractor meta data.
 
 For PDF extractors, the input panel provides two additional tabs, one showing the extracted plain text
