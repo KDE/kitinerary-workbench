@@ -86,8 +86,16 @@ MainWindow::MainWindow(QWidget* parent)
     ui->attributeView->setModel(m_attrModel);
     ui->attributeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     connect(ui->domView->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this](const QItemSelection &selection) {
-        const auto idx = selection.value(0).topLeft();
+        auto idx = selection.value(0).topLeft();
         m_attrModel->setElement(idx.data(Qt::UserRole).value<KItinerary::HtmlElement>());
+
+        QString path;
+        idx = idx.sibling(idx.row(), 0);
+        while (idx.isValid()) {
+            path.prepend(QLatin1Char('/') + idx.data(Qt::DisplayRole).toString());
+            idx = idx.parent();
+        }
+        ui->domPath->setText(path);
     });
     ui->domSplitter->setStretchFactor(0, 5);
     ui->domSplitter->setStretchFactor(1, 1);
