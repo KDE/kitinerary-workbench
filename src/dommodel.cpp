@@ -41,6 +41,13 @@ void DOMModel::addNode(QStandardItem *parent, KItinerary::HtmlElement elem)
     auto i1 = new QStandardItem;
     i1->setText(elem.name());
     i1->setData(QVariant::fromValue(elem), Qt::UserRole);
+
+    if (elem.hasAttribute(QLatin1String("itemtype")) || elem.hasAttribute(QLatin1String("itemprop")) || elem.hasAttribute(QLatin1String("itemscope"))) {
+        i1->setIcon(QIcon::fromTheme(QLatin1String("comment-symbolic")));
+    } else if (elem.hasAttribute(QLatin1String("id")) || elem.hasAttribute(QLatin1String("class"))) {
+        i1->setIcon(QIcon::fromTheme(QLatin1String("code-context")));
+    }
+
     auto i2 = new QStandardItem;
     i2->setText(elem.content().left(200).replace(QLatin1Char('\n'), QLatin1Char(' ')));
     i2->setToolTip(elem.content());
