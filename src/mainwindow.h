@@ -20,6 +20,8 @@
 
 #include <KItinerary/ExtractorRepository>
 
+#include <KCalCore/Calendar>
+
 #include <QMainWindow>
 
 #include <memory>
@@ -65,7 +67,8 @@ private:
         IataBcbp,
         JsonLd,
         Uic9183,
-        Image
+        Image,
+        ICal
     };
 
     void typeChanged();
@@ -92,6 +95,7 @@ private:
     std::unique_ptr<KItinerary::HtmlDocument> m_htmlDoc;
     std::unique_ptr<KItinerary::PdfDocument> m_pdfDoc;
     QImage m_image;
+    KCalCore::Calendar::Ptr m_calendar;
 };
 
 #endif // MAINWINDOW_H

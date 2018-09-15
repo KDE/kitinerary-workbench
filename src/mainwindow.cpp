@@ -31,6 +31,9 @@
 
 #include <KPkPass/Pass>
 
+#include <KCalCore/ICalFormat>
+#include <KCalCore/MemoryCalendar>
+
 #include <KMime/Message>
 
 #include <KTextEditor/Document>
@@ -184,6 +187,10 @@ void MainWindow::typeChanged()
             m_sourceView->show();
             ui->outputTabWidget->setTabEnabled(0, false);
             break;
+        case ICal:
+            m_sourceDoc->setMode(QStringLiteral("vCard, vCalendar, iCalendar"));
+            m_sourceView->show();
+            break;
     }
 }
 
@@ -248,6 +255,11 @@ void MainWindow::sourceChanged()
                 item->setData(m_pdfDoc->image(i).image(), Qt::DecorationRole);
                 m_imageModel->appendRow(item);
             }
+        } else if (ui->typeBox->currentIndex() == ICal) {
+            m_calendar.reset(new KCalCore::MemoryCalendar(QTimeZone::systemTimeZone()));
+            KCalCore::ICalFormat format;
+            format.fromString(m_calendar, m_sourceDoc->text());
+            engine.setCalendar(m_calendar);
         }
         m_preprocDoc->setReadWrite(false);
 
@@ -295,10 +307,12 @@ void MainWindow::urlChanged()
         m_domModel->setDocument(m_htmlDoc.get());
         ui->domView->expandAll();
         m_sourceDoc->openUrl(url);
-        sourceChanged();
     } else if (url.toString().endsWith(QLatin1String(".png")) || url.toString().endsWith(QLatin1String(".jpg"))) {
         m_image.load(url.toLocalFile());
         sourceChanged();
+    } else if (url.toString().endsWith(QLatin1String(".ics"))) {
+        ui->typeBox->setCurrentIndex(ICal);
+        m_sourceDoc->openUrl(url);
     } else {
         m_sourceDoc->openUrl(url);
     }
