@@ -258,7 +258,7 @@ void MainWindow::sourceChanged()
                 const auto page = m_pdfDoc->page(i);
                 for (int j = 0; j < page.imageCount(); ++j) {
                     auto imgItem = new QStandardItem;
-                    imgItem->setData(page.image(i).image(), Qt::DecorationRole);
+                    imgItem->setData(page.image(j).image(), Qt::DecorationRole);
                     pageItem->appendRow(imgItem);
                 }
                 m_imageModel->appendRow(pageItem);
