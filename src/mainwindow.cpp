@@ -40,6 +40,8 @@
 #include <KTextEditor/View>
 #include <KTextEditor/Editor>
 
+#include <KLocalizedString>
+
 #include <QDebug>
 #include <QHBoxLayout>
 #include <QJsonArray>
@@ -250,11 +252,18 @@ void MainWindow::sourceChanged()
             engine.setPdfDocument(m_pdfDoc.get());
             m_preprocDoc->setText(m_pdfDoc->text());
 
-            for (int i = 0; i < m_pdfDoc->imageCount(); ++i) {
-                auto item = new QStandardItem;
-                item->setData(m_pdfDoc->image(i).image(), Qt::DecorationRole);
-                m_imageModel->appendRow(item);
+            for (int i = 0; i < m_pdfDoc->pageCount(); ++i) {
+                auto pageItem = new QStandardItem;
+                pageItem->setText(i18n("Page %1", i + 1));
+                const auto page = m_pdfDoc->page(i);
+                for (int j = 0; j < page.imageCount(); ++j) {
+                    auto imgItem = new QStandardItem;
+                    imgItem->setData(page.image(i).image(), Qt::DecorationRole);
+                    pageItem->appendRow(imgItem);
+                }
+                m_imageModel->appendRow(pageItem);
             }
+            ui->imageView->expandAll();
         } else if (ui->typeBox->currentIndex() == ICal) {
             m_calendar.reset(new KCalCore::MemoryCalendar(QTimeZone::systemTimeZone()));
             KCalCore::ICalFormat format;
