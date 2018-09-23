@@ -18,8 +18,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <KItinerary/ExtractorRepository>
-
 #include <KCalCore/Calendar>
 
 #include <QMainWindow>
@@ -88,8 +86,6 @@ private:
     QStandardItemModel *m_imageModel;
     DOMModel *m_domModel;
     AttributeModel *m_attrModel;
-
-    KItinerary::ExtractorRepository m_repo;
 
     std::unique_ptr<KPkPass::Pass> m_pkpass;
     std::unique_ptr<KItinerary::HtmlDocument> m_htmlDoc;

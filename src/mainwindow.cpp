@@ -210,11 +210,9 @@ void MainWindow::sourceChanged()
         p.parse(m_sourceDoc->text().toLatin1());
         data = JsonLdDocument::toJson({QVariant::fromValue(p)});
     } else if (ui->typeBox->currentIndex() == PkPass && m_pkpass) {
-        auto extractors = m_repo.extractorsForPass(m_pkpass.get());
         ExtractorEngine engine;
-        engine.setSenderDate(ui->contextDate->dateTime());
+        engine.setContextDate(ui->contextDate->dateTime());
         engine.setPass(m_pkpass.get());
-        engine.setExtractors(std::move(extractors));
         data = engine.extract();
     } else if (ui->typeBox->currentIndex() == JsonLd) {
         const auto doc = QJsonDocument::fromJson(m_sourceDoc->text().toUtf8());
@@ -228,7 +226,6 @@ void MainWindow::sourceChanged()
         m_imageModel->appendRow(item);
     } else {
         ExtractorEngine engine;
-        engine.setSenderDate(ui->contextDate->dateTime());
 
         m_preprocDoc->setReadWrite(true);
         if (ui->typeBox->currentIndex() == PlainText) {
@@ -274,8 +271,8 @@ void MainWindow::sourceChanged()
 
         KMime::Message msg;
         msg.from()->fromUnicodeString(ui->senderBox->currentText(), "utf-8");
-        auto extractors = m_repo.extractorsForMessage(&msg);
-        engine.setExtractors(std::move(extractors));
+        msg.date()->setDateTime(ui->contextDate->dateTime());
+        engine.setContext(&msg);
         data = engine.extract();
     }
 
