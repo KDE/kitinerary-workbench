@@ -33,6 +33,10 @@ namespace KPkPass {
 class Pass;
 }
 
+namespace KMime {
+class Message;
+}
+
 namespace KTextEditor {
 class Document;
 class View;
@@ -66,7 +70,8 @@ private:
         JsonLd,
         Uic9183,
         Image,
-        ICal
+        ICal,
+        Mime
     };
 
     void typeChanged();
@@ -92,6 +97,7 @@ private:
     std::unique_ptr<KItinerary::PdfDocument> m_pdfDoc;
     QImage m_image;
     KCalCore::Calendar::Ptr m_calendar;
+    std::unique_ptr<KMime::Message> m_mimeMessage;
 };
 
 #endif // MAINWINDOW_H

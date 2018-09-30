@@ -193,6 +193,10 @@ void MainWindow::typeChanged()
             m_sourceDoc->setMode(QStringLiteral("vCard, vCalendar, iCalendar"));
             m_sourceView->show();
             break;
+        case Mime:
+            m_sourceDoc->setMode(QStringLiteral("Email"));
+            m_sourceView->show();
+            break;
     }
 }
 
@@ -266,13 +270,21 @@ void MainWindow::sourceChanged()
             KCalCore::ICalFormat format;
             format.fromString(m_calendar, m_sourceDoc->text());
             engine.setCalendar(m_calendar);
+        } else if (ui->typeBox->currentIndex() == Mime) {
+            m_mimeMessage.reset(new KMime::Message);
+            m_mimeMessage->setContent(m_sourceDoc->text().toUtf8());
+            m_mimeMessage->parse();
+            engine.setContent(m_mimeMessage.get());
         }
         m_preprocDoc->setReadWrite(false);
 
         KMime::Message msg;
-        msg.from()->fromUnicodeString(ui->senderBox->currentText(), "utf-8");
-        msg.date()->setDateTime(ui->contextDate->dateTime());
-        engine.setContext(&msg);
+        if (ui->typeBox->currentIndex() != Mime) {
+            msg.from()->fromUnicodeString(ui->senderBox->currentText(), "utf-8");
+            msg.date()->setDateTime(ui->contextDate->dateTime());
+            engine.setContext(&msg);
+        }
+
         data = engine.extract();
     }
 

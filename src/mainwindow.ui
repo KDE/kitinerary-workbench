@@ -11,7 +11,10 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>KItinerary Workbench</string>
+  </property>
+  <property name="windowIcon">
+   <iconset theme="archive-extract"/>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -86,6 +89,11 @@
              <item>
               <property name="text">
                <string>iCalendar</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>MIME</string>
               </property>
              </item>
             </widget>
