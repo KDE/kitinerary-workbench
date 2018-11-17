@@ -331,6 +331,9 @@ void MainWindow::urlChanged()
     } else if (url.toString().endsWith(QLatin1String(".ics"))) {
         ui->typeBox->setCurrentIndex(ICal);
         m_sourceDoc->openUrl(url);
+    } else if (url.toString().endsWith(QLatin1String(".eml")) || url.toString().endsWith(QLatin1String(".mbox"))) {
+        ui->typeBox->setCurrentIndex(Mime);
+        m_sourceDoc->openUrl(url);
     } else {
         m_sourceDoc->openUrl(url);
     }
