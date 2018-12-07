@@ -211,6 +211,7 @@ void MainWindow::sourceChanged()
         data = JsonLdDocument::toJson({bp});
     } else if (ui->typeBox->currentIndex() == Uic9183) {
         Uic9183Parser p;
+	p.setContextDate(ui->contextDate->dateTime());
         p.parse(m_sourceDoc->text().toLatin1());
         data = JsonLdDocument::toJson({QVariant::fromValue(p)});
     } else if (ui->typeBox->currentIndex() == PkPass && m_pkpass) {
