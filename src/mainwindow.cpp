@@ -21,6 +21,7 @@
 #include "dommodel.h"
 
 #include <KItinerary/BarcodeDecoder>
+#include <KItinerary/CalendarHandler>
 #include <KItinerary/ExtractorEngine>
 #include <KItinerary/ExtractorPostprocessor>
 #include <KItinerary/HtmlDocument>
@@ -31,6 +32,7 @@
 
 #include <KPkPass/Pass>
 
+#include <KCalCore/Event>
 #include <KCalCore/ICalFormat>
 #include <KCalCore/MemoryCalendar>
 
@@ -115,6 +117,12 @@ MainWindow::MainWindow(QWidget* parent)
     m_postprocDoc->setMode(QStringLiteral("JSON"));
     view = m_postprocDoc->createView(nullptr);
     layout = new QHBoxLayout(ui->postprocTab);
+    layout->addWidget(view);
+
+    m_icalDoc = editor->createDocument(nullptr);
+    m_icalDoc->setMode(QStringLiteral("vCard, vCalendar, iCalendar"));
+    view = m_icalDoc->createView(nullptr);
+    layout = new QHBoxLayout(ui->icalTab);
     layout->addWidget(view);
 
     typeChanged();
@@ -300,6 +308,15 @@ void MainWindow::sourceChanged()
     m_postprocDoc->setReadWrite(true);
     m_postprocDoc->setText(QJsonDocument(JsonLdDocument::toJson(postproc.result())).toJson());
     m_postprocDoc->setReadWrite(false);
+
+    KCalCore::Calendar::Ptr cal(new KCalCore::MemoryCalendar(QTimeZone::systemTimeZone()));
+    for (const auto &res : postproc.result()) {
+        KCalCore::Event::Ptr event(new KCalCore::Event);
+        CalendarHandler::fillEvent({res}, event); // TODO this assumes multi-traveller batching to have already happened!
+        cal->addEvent(event);
+    }
+    KCalCore::ICalFormat format;
+    m_icalDoc->setText(format.toString(cal));
 }
 
 void MainWindow::urlChanged()

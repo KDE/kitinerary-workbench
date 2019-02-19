@@ -86,6 +86,7 @@ private:
     KTextEditor::Document *m_preprocDoc = nullptr;
     KTextEditor::Document *m_outputDoc = nullptr;
     KTextEditor::Document *m_postprocDoc = nullptr;
+    KTextEditor::Document *m_icalDoc = nullptr;
     KTextEditor::View *m_sourceView = nullptr;
 
     QStandardItemModel *m_imageModel;

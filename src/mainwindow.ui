@@ -215,6 +215,11 @@
          <string>Post-processed</string>
         </attribute>
        </widget>
+       <widget class="QWidget" name="icalTab">
+        <attribute name="title">
+         <string>iCal</string>
+        </attribute>
+       </widget>
       </widget>
      </widget>
     </item>
