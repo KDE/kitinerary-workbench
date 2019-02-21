@@ -278,6 +278,7 @@ void MainWindow::sourceChanged()
             m_calendar.reset(new KCalCore::MemoryCalendar(QTimeZone::systemTimeZone()));
             KCalCore::ICalFormat format;
             format.fromString(m_calendar, m_sourceDoc->text());
+            m_calendar->setProductId(format.loadedProductId());
             engine.setCalendar(m_calendar);
         } else if (ui->typeBox->currentIndex() == Mime) {
             m_mimeMessage.reset(new KMime::Message);
