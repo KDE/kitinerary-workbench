@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=KItinerary Workbench
+GenericName=KItinerary extractor workbench
+Exec=kitinerary-workbench %f
+Icon=map-globe
+Type=Application
+Comment=Development tool for KItinerary reservation data extractors.
+Terminal=false
+MimeType=application/vnd.apple.pkpass;application/ld+json;application/pdf;text/html;text/plain;message/rfc822;text/calendar;
+Categories=Qt;KDE;
