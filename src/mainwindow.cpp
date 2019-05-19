@@ -367,23 +367,19 @@ void MainWindow::imageContextMenu(QPoint pos)
         return;
 
     QMenu menu;
-    const auto aztec = menu.addAction(tr("Decode Aztec"));
-    const auto aztecBinary = menu.addAction(tr("Decode Aztec (Binary)"));
-    const auto pdf417 = menu.addAction(tr("Decode PDF417"));
-    const auto qrcode = menu.addAction(tr("Decode QRCode"));
+    const auto barcode = menu.addAction(tr("Decode Barcode"));
+    const auto barcodeBinary = menu.addAction(tr("Decode Barcode (Binary)"));
     menu.addSeparator();
     const auto save = menu.addAction(tr("Save..."));
     if (auto action = menu.exec(ui->imageView->viewport()->mapToGlobal(pos))) {
         QString code;
-        if (action == aztec) {
-            code = BarcodeDecoder::decodeAztec(idx.data(Qt::DecorationRole).value<QImage>());
-        } else if (action == aztecBinary) {
-            const auto b = BarcodeDecoder::decodeAztecBinary(idx.data(Qt::DecorationRole).value<QImage>());
+        if (action == barcode) {
+            BarcodeDecoder decoder;
+            code = decoder.decodeString(idx.data(Qt::DecorationRole).value<QImage>());
+        } else if (action == barcodeBinary) {
+            BarcodeDecoder decoder;
+            const auto b = decoder.decodeBinary(idx.data(Qt::DecorationRole).value<QImage>());
             code = QString::fromLatin1(b.constData(), b.size());
-        } else if (action == pdf417) {
-            code = BarcodeDecoder::decodePdf417(idx.data(Qt::DecorationRole).value<QImage>());
-        } else if (action == qrcode) {
-            code = BarcodeDecoder::decodeQRCode(idx.data(Qt::DecorationRole).value<QImage>());
         } else if (action == save) {
             const auto fileName = QFileDialog::getSaveFileName(this, tr("Save Image"));
             idx.data(Qt::DecorationRole).value<QImage>().save(fileName);
