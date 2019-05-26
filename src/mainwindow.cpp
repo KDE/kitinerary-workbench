@@ -221,7 +221,7 @@ void MainWindow::sourceChanged()
         Uic9183Parser p;
 	p.setContextDate(ui->contextDate->dateTime());
         p.parse(m_sourceDoc->text().toLatin1());
-        data = JsonLdDocument::toJson({QVariant::fromValue(p)});
+        data = {JsonLdDocument::toJson(QVariant::fromValue(p))};
     } else if (ui->typeBox->currentIndex() == PkPass && m_pkpass) {
         ExtractorEngine engine;
         engine.setContextDate(ui->contextDate->dateTime());
