@@ -15,3 +15,4 @@ target_link_libraries(kitinerary-workbench
 
 install(TARGETS kitinerary-workbench ${INSTALL_TARGETS_DEFAULT_ARGS})
 install(PROGRAMS org.kde.kitinerary-workbench.desktop DESTINATION ${KDE_INSTALL_APPDIR})
+install(FILES org.kde.kitinerary-workbench.appdata.xml DESTINATION ${KDE_INSTALL_METAINFODIR})
