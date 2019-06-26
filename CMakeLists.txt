@@ -14,6 +14,7 @@ include(KDECMakeSettings)
 
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
+set(CMAKE_CXX_STANDARD 14)
 ecm_setup_version(PROJECT VARIABLE_PREFIX KITINERARY_WORKBENCH VERSION_HEADER kitinerary_workbench_version.h)
 
 find_package(Qt5 REQUIRED COMPONENTS Widgets)

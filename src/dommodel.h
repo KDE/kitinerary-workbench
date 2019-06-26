@@ -20,6 +20,8 @@
 
 #include <QStandardItemModel>
 
+#include <vector>
+
 namespace KItinerary {
 class HtmlDocument;
 class HtmlElement;
@@ -33,10 +35,16 @@ public:
     explicit DOMModel(QObject *parent = nullptr);
     ~DOMModel();
 
+    QVariant data(const QModelIndex &index, int role) const override;
+
     void setDocument(KItinerary::HtmlDocument *doc);
+
+    void setHighlightNodeSet(const QVariantList &nodeSet);
 
 private:
     void addNode(QStandardItem *parent, KItinerary::HtmlElement elem);
+
+    std::vector<KItinerary::HtmlElement> m_highlightNodeSet;
 };
 
 #endif // DOMMODEL_H

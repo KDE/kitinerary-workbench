@@ -19,6 +19,8 @@
 
 #include <KItinerary/HtmlDocument>
 
+#include <KColorScheme>
+
 DOMModel::DOMModel(QObject *parent)
     : QStandardItemModel(parent)
 {
@@ -28,12 +30,32 @@ DOMModel::~DOMModel() = default;
 
 void DOMModel::setDocument(KItinerary::HtmlDocument *doc)
 {
+    m_highlightNodeSet.clear();
     clear();
     if (!doc)
         return;
 
     addNode(nullptr, doc->root());
     setHorizontalHeaderLabels({tr("Element"), tr("Content")});
+}
+
+QVariant DOMModel::data(const QModelIndex &index, int role) const
+{
+    if (role == Qt::BackgroundRole) {
+        const auto elem = index.sibling(index.row(), 0).data(Qt::UserRole).value<KItinerary::HtmlElement>();
+        if (std::find(m_highlightNodeSet.begin(), m_highlightNodeSet.end(), elem) != m_highlightNodeSet.end()) {
+            return KColorScheme(QPalette::Normal).background(KColorScheme::PositiveBackground);
+        }
+    }
+
+    return QStandardItemModel::data(index, role);
+}
+
+void DOMModel::setHighlightNodeSet(const QVariantList &nodeSet)
+{
+    m_highlightNodeSet.clear();
+    m_highlightNodeSet.reserve(nodeSet.size());
+    std::transform(nodeSet.begin(), nodeSet.end(), std::back_inserter(m_highlightNodeSet), [](const QVariant &v) { return v.value<KItinerary::HtmlElement>(); });
 }
 
 void DOMModel::addNode(QStandardItem *parent, KItinerary::HtmlElement elem)
@@ -60,4 +82,3 @@ void DOMModel::addNode(QStandardItem *parent, KItinerary::HtmlElement elem)
     for (auto child = elem.firstChild(); !child.isNull(); child = child.nextSibling())
         addNode(i1, child);
 }
-

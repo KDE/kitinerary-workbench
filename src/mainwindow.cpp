@@ -106,6 +106,17 @@ MainWindow::MainWindow(QWidget* parent)
     });
     ui->domSplitter->setStretchFactor(0, 5);
     ui->domSplitter->setStretchFactor(1, 1);
+    connect(ui->xpathEdit, &QLineEdit::editingFinished, this, [this]() {
+        if (!m_htmlDoc) {
+            return;
+        }
+        const auto res = m_htmlDoc->eval(ui->xpathEdit->text());
+        if (!res.canConvert<QVariantList>()) { // TODO show this properly in the UI somehow
+            qDebug() << "XPath result:" << res;
+        }
+        m_domModel->setHighlightNodeSet(res.value<QVariantList>());
+        ui->domView->viewport()->update(); // dirty, but easier than triggering a proper full model update
+    });
 
     m_outputDoc = editor->createDocument(nullptr);
     m_outputDoc->setMode(QStringLiteral("JSON"));
