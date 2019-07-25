@@ -396,5 +396,11 @@ void MainWindow::imageContextMenu(QPoint pos)
             idx.data(Qt::DecorationRole).value<QImage>().save(fileName);
         }
         m_sourceDoc->setText(code);
+
+        if (IataBcbpParser::maybeIataBcbp(code)) {
+            ui->typeBox->setCurrentIndex(IataBcbp);
+        } else if (Uic9183Parser::maybeUic9183(code.toLatin1())) {
+            ui->typeBox->setCurrentIndex(Uic9183);
+        }
     }
 }
