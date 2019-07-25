@@ -18,6 +18,9 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <KItinerary/Uic9183Parser>
+#include <KItinerary/Uic9183TicketLayout>
+
 #include <KCalCore/Calendar>
 
 #include <QMainWindow>
@@ -49,6 +52,7 @@ class MainWindow;
 
 class AttributeModel;
 class DOMModel;
+class Uic9183TicketLayoutModel;
 class QStandardItemModel;
 
 class MainWindow : public QMainWindow
@@ -92,6 +96,7 @@ private:
     QStandardItemModel *m_imageModel;
     DOMModel *m_domModel;
     AttributeModel *m_attrModel;
+    Uic9183TicketLayoutModel *m_ticketLayoutModel;
 
     std::unique_ptr<KPkPass::Pass> m_pkpass;
     std::unique_ptr<KItinerary::HtmlDocument> m_htmlDoc;
@@ -99,6 +104,9 @@ private:
     QImage m_image;
     KCalCore::Calendar::Ptr m_calendar;
     std::unique_ptr<KMime::Message> m_mimeMessage;
+
+    KItinerary::Uic9183Parser m_ticketParser;
+    KItinerary::Uic9183TicketLayout m_ticketLayout;
 };
 
 #endif // MAINWINDOW_H

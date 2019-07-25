@@ -19,6 +19,7 @@
 #include "ui_mainwindow.h"
 #include "attributemodel.h"
 #include "dommodel.h"
+#include "uic9183ticketlayoutmodel.h"
 
 #include <KItinerary/BarcodeDecoder>
 #include <KItinerary/CalendarHandler>
@@ -28,7 +29,6 @@
 #include <KItinerary/IataBcbpParser>
 #include <KItinerary/JsonLdDocument>
 #include <KItinerary/PdfDocument>
-#include <KItinerary/Uic9183Parser>
 
 #include <KPkPass/Pass>
 
@@ -45,6 +45,7 @@
 #include <KLocalizedString>
 
 #include <QDebug>
+#include <QFontMetrics>
 #include <QHBoxLayout>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -61,6 +62,7 @@ MainWindow::MainWindow(QWidget* parent)
     , m_imageModel(new QStandardItemModel(this))
     , m_domModel(new DOMModel(this))
     , m_attrModel(new AttributeModel(this))
+    , m_ticketLayoutModel(new Uic9183TicketLayoutModel(this))
 {
     ui->setupUi(this);
     ui->contextDate->setDateTime(QDateTime(QDate::currentDate(), QTime()));
@@ -116,6 +118,25 @@ MainWindow::MainWindow(QWidget* parent)
         }
         m_domModel->setHighlightNodeSet(res.value<QVariantList>());
         ui->domView->viewport()->update(); // dirty, but easier than triggering a proper full model update
+    });
+
+    ui->ticketLayoutView->setModel(m_ticketLayoutModel);
+    QFontMetrics fm(font());
+    const auto cellWidth = fm.boundingRect(QStringLiteral("m")).width() + 6;
+    ui->ticketLayoutView->horizontalHeader()->setMinimumSectionSize(cellWidth);
+    ui->ticketLayoutView->horizontalHeader()->setDefaultSectionSize(cellWidth);
+    ui->ticketLayoutView->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+    ui->ticketLayoutView->verticalHeader()->setMinimumSectionSize(fm.height());
+    ui->ticketLayoutView->verticalHeader()->setMinimumSectionSize(fm.height());
+    ui->ticketLayoutView->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+    connect(ui->ticketLayoutView->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this]() {
+        const auto sel = ui->ticketLayoutView->selectionModel()->selection();
+        if (sel.isEmpty()) {
+            ui->ticketLayoutSelection->clear();
+        } else {
+            const auto range = sel.at(0);
+            ui->ticketLayoutSelection->setText(i18n("Row: %1 Column: %2 Width: %3 Height: %4", range.top(), range.left(), range.right() - range.left() + 1, range.bottom() - range.top() + 1));
+        }
     });
 
     m_outputDoc = editor->createDocument(nullptr);
@@ -180,13 +201,18 @@ void MainWindow::typeChanged()
     ui->inputTabWidget->setTabEnabled(1, false);
     ui->inputTabWidget->setTabEnabled(2, false);
     ui->inputTabWidget->setTabEnabled(3, false);
+    ui->inputTabWidget->setTabEnabled(4, false);
     ui->outputTabWidget->setTabEnabled(0, true);
     switch (ui->typeBox->currentIndex()) {
         case PlainText:
         case IataBcbp:
+            m_sourceDoc->setMode(QStringLiteral("Normal"));
+            m_sourceView->show();
+            break;
         case Uic9183:
             m_sourceDoc->setMode(QStringLiteral("Normal"));
             m_sourceView->show();
+            ui->inputTabWidget->setTabEnabled(4, true);
             break;
         case Html:
             m_sourceDoc->setMode(QStringLiteral("HTML"));
@@ -229,10 +255,10 @@ void MainWindow::sourceChanged()
         const auto bp = IataBcbpParser::parse(m_sourceDoc->text(), ui->contextDate->date());
         data = JsonLdDocument::toJson({bp});
     } else if (ui->typeBox->currentIndex() == Uic9183) {
-        Uic9183Parser p;
-	p.setContextDate(ui->contextDate->dateTime());
-        p.parse(m_sourceDoc->text().toLatin1());
-        data = {JsonLdDocument::toJson(QVariant::fromValue(p))};
+        m_ticketParser.setContextDate(ui->contextDate->dateTime());
+        m_ticketParser.parse(m_sourceDoc->text().toLatin1());
+        data = {JsonLdDocument::toJson(QVariant::fromValue(m_ticketParser))};
+        m_ticketLayoutModel->setLayout(m_ticketParser.ticketLayout());
     } else if (ui->typeBox->currentIndex() == PkPass && m_pkpass) {
         ExtractorEngine engine;
         engine.setContextDate(ui->contextDate->dateTime());

@@ -3,6 +3,7 @@ set(workbench_srcs
     mainwindow.cpp
     attributemodel.cpp
     dommodel.cpp
+    uic9183ticketlayoutmodel.cpp
 )
 
 add_executable(kitinerary-workbench ${workbench_srcs})
