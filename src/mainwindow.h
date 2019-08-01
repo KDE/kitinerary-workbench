@@ -21,7 +21,7 @@
 #include <KItinerary/Uic9183Parser>
 #include <KItinerary/Uic9183TicketLayout>
 
-#include <KCalCore/Calendar>
+#include <KCalendarCore/Calendar>
 
 #include <QMainWindow>
 
@@ -102,7 +102,7 @@ private:
     std::unique_ptr<KItinerary::HtmlDocument> m_htmlDoc;
     std::unique_ptr<KItinerary::PdfDocument> m_pdfDoc;
     QImage m_image;
-    KCalCore::Calendar::Ptr m_calendar;
+    KCalendarCore::Calendar::Ptr m_calendar;
     std::unique_ptr<KMime::Message> m_mimeMessage;
 
     KItinerary::Uic9183Parser m_ticketParser;

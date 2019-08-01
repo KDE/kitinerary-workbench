@@ -32,9 +32,9 @@
 
 #include <KPkPass/Pass>
 
-#include <KCalCore/Event>
-#include <KCalCore/ICalFormat>
-#include <KCalCore/MemoryCalendar>
+#include <KCalendarCore/Event>
+#include <KCalendarCore/ICalFormat>
+#include <KCalendarCore/MemoryCalendar>
 
 #include <KMime/Message>
 
@@ -312,8 +312,8 @@ void MainWindow::sourceChanged()
             }
             ui->imageView->expandAll();
         } else if (ui->typeBox->currentIndex() == ICal) {
-            m_calendar.reset(new KCalCore::MemoryCalendar(QTimeZone::systemTimeZone()));
-            KCalCore::ICalFormat format;
+            m_calendar.reset(new KCalendarCore::MemoryCalendar(QTimeZone::systemTimeZone()));
+            KCalendarCore::ICalFormat format;
             format.fromString(m_calendar, m_sourceDoc->text());
             m_calendar->setProductId(format.loadedProductId());
             engine.setCalendar(m_calendar);
@@ -347,13 +347,13 @@ void MainWindow::sourceChanged()
     m_postprocDoc->setText(QJsonDocument(JsonLdDocument::toJson(postproc.result())).toJson());
     m_postprocDoc->setReadWrite(false);
 
-    KCalCore::Calendar::Ptr cal(new KCalCore::MemoryCalendar(QTimeZone::systemTimeZone()));
+    KCalendarCore::Calendar::Ptr cal(new KCalendarCore::MemoryCalendar(QTimeZone::systemTimeZone()));
     for (const auto &res : postproc.result()) {
-        KCalCore::Event::Ptr event(new KCalCore::Event);
+        KCalendarCore::Event::Ptr event(new KCalendarCore::Event);
         CalendarHandler::fillEvent({res}, event); // TODO this assumes multi-traveller batching to have already happened!
         cal->addEvent(event);
     }
-    KCalCore::ICalFormat format;
+    KCalendarCore::ICalFormat format;
     m_icalDoc->setText(format.toString(cal));
 }
 
