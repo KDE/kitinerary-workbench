@@ -29,7 +29,7 @@
        </property>
        <widget class="QWidget" name="sourceTab">
         <attribute name="title">
-         <string>Source</string>
+         <string>Input</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
@@ -206,6 +206,23 @@
              <bool>false</bool>
             </property>
            </widget>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="uic9183BlockTab">
+        <attribute name="title">
+         <string>UIC 918-3 Data</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_6">
+         <item>
+          <widget class="QTreeView" name="uic9183BlockView">
+           <property name="rootIsDecorated">
+            <bool>false</bool>
+           </property>
+           <attribute name="headerStretchLastSection">
+            <bool>false</bool>
+           </attribute>
           </widget>
          </item>
         </layout>

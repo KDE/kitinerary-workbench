@@ -96,6 +96,7 @@ private:
     QStandardItemModel *m_imageModel;
     DOMModel *m_domModel;
     AttributeModel *m_attrModel;
+    QStandardItemModel *m_uic9183BlockModel;
     Uic9183TicketLayoutModel *m_ticketLayoutModel;
 
     std::unique_ptr<KPkPass::Pass> m_pkpass;

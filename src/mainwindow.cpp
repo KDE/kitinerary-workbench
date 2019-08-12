@@ -29,6 +29,7 @@
 #include <KItinerary/IataBcbpParser>
 #include <KItinerary/JsonLdDocument>
 #include <KItinerary/PdfDocument>
+#include <KItinerary/Uic9183Block>
 
 #include <KPkPass/Pass>
 
@@ -62,6 +63,7 @@ MainWindow::MainWindow(QWidget* parent)
     , m_imageModel(new QStandardItemModel(this))
     , m_domModel(new DOMModel(this))
     , m_attrModel(new AttributeModel(this))
+    , m_uic9183BlockModel(new QStandardItemModel(this))
     , m_ticketLayoutModel(new Uic9183TicketLayoutModel(this))
 {
     ui->setupUi(this);
@@ -119,6 +121,10 @@ MainWindow::MainWindow(QWidget* parent)
         m_domModel->setHighlightNodeSet(res.value<QVariantList>());
         ui->domView->viewport()->update(); // dirty, but easier than triggering a proper full model update
     });
+
+    m_uic9183BlockModel->setHorizontalHeaderLabels({tr("Block"), tr("Version"), tr("Content")});
+    ui->uic9183BlockView->setModel(m_uic9183BlockModel);
+    ui->uic9183BlockView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
     ui->ticketLayoutView->setModel(m_ticketLayoutModel);
     QFontMetrics fm(font());
@@ -202,6 +208,7 @@ void MainWindow::typeChanged()
     ui->inputTabWidget->setTabEnabled(2, false);
     ui->inputTabWidget->setTabEnabled(3, false);
     ui->inputTabWidget->setTabEnabled(4, false);
+    ui->inputTabWidget->setTabEnabled(5, false);
     ui->outputTabWidget->setTabEnabled(0, true);
     switch (ui->typeBox->currentIndex()) {
         case PlainText:
@@ -213,6 +220,7 @@ void MainWindow::typeChanged()
             m_sourceDoc->setMode(QStringLiteral("Normal"));
             m_sourceView->show();
             ui->inputTabWidget->setTabEnabled(4, true);
+            ui->inputTabWidget->setTabEnabled(5, true);
             break;
         case Html:
             m_sourceDoc->setMode(QStringLiteral("HTML"));
@@ -248,6 +256,7 @@ void MainWindow::typeChanged()
 void MainWindow::sourceChanged()
 {
     m_imageModel->removeRows(0, m_imageModel->rowCount());
+    m_uic9183BlockModel->removeRows(0, m_uic9183BlockModel->rowCount());
     using namespace KItinerary;
 
     QJsonArray data;
@@ -259,6 +268,16 @@ void MainWindow::sourceChanged()
         m_ticketParser.parse(m_sourceDoc->text().toLatin1());
         data = {JsonLdDocument::toJson(QVariant::fromValue(m_ticketParser))};
         m_ticketLayoutModel->setLayout(m_ticketParser.ticketLayout());
+
+        auto block = m_ticketParser.firstBlock();
+        while (!block.isNull()) {
+            auto nameItem = new QStandardItem(QString::fromUtf8(block.name(), 6));
+            auto versionItem = new QStandardItem(QString::number(block.version()));
+            auto contentItem = new QStandardItem(QString::fromUtf8(block.content(), block.contentSize()));
+            m_uic9183BlockModel->appendRow({nameItem, versionItem, contentItem});
+            block = block.nextBlock();
+        }
+
     } else if (ui->typeBox->currentIndex() == PkPass && m_pkpass) {
         ExtractorEngine engine;
         engine.setContextDate(ui->contextDate->dateTime());
