@@ -45,6 +45,7 @@
 
 #include <KLocalizedString>
 
+#include <QClipboard>
 #include <QDebug>
 #include <QFontMetrics>
 #include <QHBoxLayout>
@@ -52,6 +53,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMenu>
+#include <QMimeData>
 #include <QSettings>
 #include <QStandardItemModel>
 #include <QTextCodec>
@@ -125,6 +127,21 @@ MainWindow::MainWindow(QWidget* parent)
     m_uic9183BlockModel->setHorizontalHeaderLabels({tr("Block"), tr("Version"), tr("Content")});
     ui->uic9183BlockView->setModel(m_uic9183BlockModel);
     ui->uic9183BlockView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    connect(ui->uic9183BlockView, &QTreeView::customContextMenuRequested, this, [this](QPoint pos) {
+        auto idx = ui->uic9183BlockView->currentIndex();
+        if (!idx.isValid())
+            return;
+        idx = idx.sibling(idx.row(), 2);
+
+        QMenu menu;
+        const auto copyContent = menu.addAction(tr("Copy Content"));
+        auto action = menu.exec(ui->uic9183BlockView->viewport()->mapToGlobal(pos));
+        if (action == copyContent) {
+            auto md = new QMimeData;
+            md->setData(QStringLiteral("application/octet-stream"), idx.data(Qt::EditRole).toByteArray());
+            QGuiApplication::clipboard()->setMimeData(md);
+        }
+    });
 
     ui->ticketLayoutView->setModel(m_ticketLayoutModel);
     QFontMetrics fm(font());
@@ -273,7 +290,9 @@ void MainWindow::sourceChanged()
         while (!block.isNull()) {
             auto nameItem = new QStandardItem(QString::fromUtf8(block.name(), 6));
             auto versionItem = new QStandardItem(QString::number(block.version()));
-            auto contentItem = new QStandardItem(QString::fromUtf8(block.content(), block.contentSize()));
+            auto contentItem = new QStandardItem;
+            contentItem->setData(QByteArray(block.content(), block.contentSize()), Qt::EditRole);
+            contentItem->setData(QString::fromUtf8(block.content(), block.contentSize()), Qt::DisplayRole);
             m_uic9183BlockModel->appendRow({nameItem, versionItem, contentItem});
             block = block.nextBlock();
         }

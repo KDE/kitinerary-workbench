@@ -217,6 +217,9 @@
         <layout class="QVBoxLayout" name="verticalLayout_6">
          <item>
           <widget class="QTreeView" name="uic9183BlockView">
+           <property name="contextMenuPolicy">
+            <enum>Qt::CustomContextMenu</enum>
+           </property>
            <property name="rootIsDecorated">
             <bool>false</bool>
            </property>
