@@ -221,11 +221,11 @@ void MainWindow::openFile(const QString &file)
 
 void MainWindow::typeChanged()
 {
-    ui->inputTabWidget->setTabEnabled(1, false);
-    ui->inputTabWidget->setTabEnabled(2, false);
-    ui->inputTabWidget->setTabEnabled(3, false);
-    ui->inputTabWidget->setTabEnabled(4, false);
-    ui->inputTabWidget->setTabEnabled(5, false);
+    ui->inputTabWidget->setTabEnabled(TextTab, false);
+    ui->inputTabWidget->setTabEnabled(ImageTab, false);
+    ui->inputTabWidget->setTabEnabled(DomTab, false);
+    ui->inputTabWidget->setTabEnabled(Uic9183DataTab, false);
+    ui->inputTabWidget->setTabEnabled(Uic9183LayoutTab, false);
     ui->outputTabWidget->setTabEnabled(0, true);
     switch (ui->typeBox->currentIndex()) {
         case PlainText:
@@ -236,19 +236,19 @@ void MainWindow::typeChanged()
         case Uic9183:
             m_sourceDoc->setMode(QStringLiteral("Normal"));
             m_sourceView->show();
-            ui->inputTabWidget->setTabEnabled(4, true);
-            ui->inputTabWidget->setTabEnabled(5, true);
+            ui->inputTabWidget->setTabEnabled(Uic9183DataTab, true);
+            ui->inputTabWidget->setTabEnabled(Uic9183LayoutTab, true);
             break;
         case Html:
             m_sourceDoc->setMode(QStringLiteral("HTML"));
             m_sourceView->show();
-            ui->inputTabWidget->setTabEnabled(1, true);
-            ui->inputTabWidget->setTabEnabled(3, true);
+            ui->inputTabWidget->setTabEnabled(TextTab, true);
+            ui->inputTabWidget->setTabEnabled(DomTab, true);
             break;
         case Pdf:
         case Image:
-            ui->inputTabWidget->setTabEnabled(1, true);
-            ui->inputTabWidget->setTabEnabled(2, true);
+            ui->inputTabWidget->setTabEnabled(TextTab, true);
+            ui->inputTabWidget->setTabEnabled(ImageTab, true);
             m_sourceView->hide();
             break;
         case PkPass:

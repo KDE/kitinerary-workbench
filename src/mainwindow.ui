@@ -25,8 +25,18 @@
       </property>
       <widget class="QTabWidget" name="inputTabWidget">
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
+       <widget class="QWidget" name="extractorTab">
+        <attribute name="title">
+         <string>Extractor</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_7">
+         <item>
+          <widget class="ExtractorEditorWidget" name="extractorWidget" native="true"/>
+         </item>
+        </layout>
+       </widget>
        <widget class="QWidget" name="sourceTab">
         <attribute name="title">
          <string>Input</string>
@@ -320,6 +330,12 @@
    <class>KUrlRequester</class>
    <extends>QWidget</extends>
    <header location="global">KUrlRequester</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ExtractorEditorWidget</class>
+   <extends>QWidget</extends>
+   <header>extractoreditorwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

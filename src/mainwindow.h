@@ -78,6 +78,16 @@ private:
         Mime
     };
 
+    enum Tab {
+        ExtractorEditorTab = 0,
+        InputTab = 1,
+        TextTab = 2,
+        ImageTab = 3,
+        DomTab = 4,
+        Uic9183DataTab = 5,
+        Uic9183LayoutTab = 6
+    };
+
     void typeChanged();
     void sourceChanged();
     void urlChanged();

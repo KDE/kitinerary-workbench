@@ -3,6 +3,7 @@ set(workbench_srcs
     mainwindow.cpp
     attributemodel.cpp
     dommodel.cpp
+    extractoreditorwidget.cpp
     uic9183ticketlayoutmodel.cpp
 )
 
