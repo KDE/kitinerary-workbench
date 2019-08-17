@@ -226,7 +226,7 @@ void MainWindow::typeChanged()
     ui->inputTabWidget->setTabEnabled(DomTab, false);
     ui->inputTabWidget->setTabEnabled(Uic9183DataTab, false);
     ui->inputTabWidget->setTabEnabled(Uic9183LayoutTab, false);
-    ui->outputTabWidget->setTabEnabled(0, true);
+    ui->outputTabWidget->setTabEnabled(ExtractorOutputTab, true);
     switch (ui->typeBox->currentIndex()) {
         case PlainText:
         case IataBcbp:
@@ -257,7 +257,7 @@ void MainWindow::typeChanged()
         case JsonLd:
             m_sourceDoc->setMode(QStringLiteral("JSON"));
             m_sourceView->show();
-            ui->outputTabWidget->setTabEnabled(0, false);
+            ui->outputTabWidget->setTabEnabled(ExtractorOutputTab, false);
             break;
         case ICal:
             m_sourceDoc->setMode(QStringLiteral("vCard, vCalendar, iCalendar"));

@@ -78,7 +78,7 @@ private:
         Mime
     };
 
-    enum Tab {
+    enum InputTab {
         ExtractorEditorTab = 0,
         InputTab = 1,
         TextTab = 2,
@@ -86,6 +86,12 @@ private:
         DomTab = 4,
         Uic9183DataTab = 5,
         Uic9183LayoutTab = 6
+    };
+
+    enum OutputTab {
+        ExtractorOutputTab = 0,
+        PostprocessorTab = 1,
+        ICalTab = 2
     };
 
     void typeChanged();
