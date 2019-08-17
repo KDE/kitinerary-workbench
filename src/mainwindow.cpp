@@ -274,6 +274,7 @@ void MainWindow::sourceChanged()
 {
     m_imageModel->removeRows(0, m_imageModel->rowCount());
     m_uic9183BlockModel->removeRows(0, m_uic9183BlockModel->rowCount());
+    ui->consoleWidget->clear();
     using namespace KItinerary;
 
     QJsonArray data;

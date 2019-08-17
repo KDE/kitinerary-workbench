@@ -91,7 +91,8 @@ private:
     enum OutputTab {
         ExtractorOutputTab = 0,
         PostprocessorTab = 1,
-        ICalTab = 2
+        ICalTab = 2,
+        ConsoleTab = 3
     };
 
     void typeChanged();

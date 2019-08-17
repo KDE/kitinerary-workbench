@@ -14,7 +14,8 @@
    <string>KItinerary Workbench</string>
   </property>
   <property name="windowIcon">
-   <iconset theme="archive-extract"/>
+   <iconset theme="archive-extract">
+    <normaloff>.</normaloff>.</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -281,6 +282,16 @@
          <string>iCal</string>
         </attribute>
        </widget>
+       <widget class="QWidget" name="consoleTab">
+        <attribute name="title">
+         <string>Console</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_8">
+         <item>
+          <widget class="ConsoleOutputWidget" name="consoleWidget" native="true"/>
+         </item>
+        </layout>
+       </widget>
       </widget>
      </widget>
     </item>
@@ -336,6 +347,12 @@
    <class>ExtractorEditorWidget</class>
    <extends>QWidget</extends>
    <header>extractoreditorwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ConsoleOutputWidget</class>
+   <extends>QWidget</extends>
+   <header>consoleoutputwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
