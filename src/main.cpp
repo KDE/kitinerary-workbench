@@ -34,10 +34,10 @@ int main(int argc, char **argv)
     parser.addPositionalArgument(QStringLiteral("file"), QStringLiteral("Input file to open."));
     parser.process(app);
 
-    MainWindow mainWindow;
-    mainWindow.show();
+    auto mainWindow = new MainWindow;
+    mainWindow->show();
     if (parser.positionalArguments().size() == 1)
-        mainWindow.openFile(parser.positionalArguments().at(0));
+        mainWindow->openFile(parser.positionalArguments().at(0));
 
     return app.exec();
 }

@@ -6,6 +6,7 @@ set(workbench_srcs
     dommodel.cpp
     extractoreditorwidget.cpp
     uic9183ticketlayoutmodel.cpp
+    ui.qrc
 )
 
 add_executable(kitinerary-workbench ${workbench_srcs})

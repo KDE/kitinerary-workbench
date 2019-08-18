@@ -23,7 +23,7 @@
 
 #include <KCalendarCore/Calendar>
 
-#include <QMainWindow>
+#include <KXmlGuiWindow>
 
 #include <memory>
 
@@ -55,7 +55,7 @@ class DOMModel;
 class Uic9183TicketLayoutModel;
 class QStandardItemModel;
 
-class MainWindow : public QMainWindow
+class MainWindow : public KXmlGuiWindow
 {
     Q_OBJECT
 public:

@@ -43,7 +43,9 @@
 #include <KTextEditor/View>
 #include <KTextEditor/Editor>
 
+#include <KActionCollection>
 #include <KLocalizedString>
+#include <KStandardAction>
 
 #include <QClipboard>
 #include <QDebug>
@@ -60,7 +62,7 @@
 #include <QToolBar>
 
 MainWindow::MainWindow(QWidget* parent)
-    : QMainWindow(parent)
+    : KXmlGuiWindow(parent)
     , ui(new Ui::MainWindow)
     , m_imageModel(new QStandardItemModel(this))
     , m_domModel(new DOMModel(this))
@@ -191,10 +193,10 @@ MainWindow::MainWindow(QWidget* parent)
     ui->senderBox->addItems(settings.value(QLatin1String("History")).toStringList());
     ui->senderBox->setCurrentText(QString());
 
-    ui->actionReload->setShortcut(QKeySequence::Refresh);
-    ui->actionQuit->setShortcut(QKeySequence::Quit);
-    connect(ui->actionReload, &QAction::triggered, this, &MainWindow::sourceChanged);
-    connect(ui->actionQuit, &QAction::triggered, QCoreApplication::instance(), &QCoreApplication::quit);
+    actionCollection()->addAction(QStringLiteral("view_redisplay"), KStandardAction::redisplay(this, &MainWindow::sourceChanged, this));
+    actionCollection()->addAction(QStringLiteral("file_quit"), KStandardAction::quit(QApplication::instance(), &QApplication::closeAllWindows, this));
+
+    setupGUI(Default, QStringLiteral("ui.rc"));
 }
 
 MainWindow::~MainWindow()
