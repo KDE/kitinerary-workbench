@@ -35,6 +35,8 @@ public:
     explicit ExtractorEditorWidget(QWidget *parent = nullptr);
     ~ExtractorEditorWidget();
 
+    void showExtractor(const QString &extractorId);
+
 private:
     void reloadExtractors();
 

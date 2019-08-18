@@ -303,6 +303,7 @@ void MainWindow::sourceChanged()
         engine.setContextDate(ui->contextDate->dateTime());
         engine.setPass(m_pkpass.get());
         data = engine.extract();
+        ui->extractorWidget->showExtractor(engine.usedCustomExtractor());
     } else if (ui->typeBox->currentIndex() == JsonLd) {
         const auto doc = QJsonDocument::fromJson(m_sourceDoc->text().toUtf8());
         if (doc.isArray())
@@ -372,6 +373,7 @@ void MainWindow::sourceChanged()
         }
 
         data = engine.extract();
+        ui->extractorWidget->showExtractor(engine.usedCustomExtractor());
     }
 
     m_outputDoc->setReadWrite(true);

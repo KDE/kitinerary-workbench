@@ -65,3 +65,11 @@ void ExtractorEditorWidget::reloadExtractors()
         ui->extractorCombobox->addItem(ext.name());
     }
 }
+
+void ExtractorEditorWidget::showExtractor(const QString &extractorId)
+{
+    const auto idx = ui->extractorCombobox->findText(extractorId);
+    if (idx >= 0 && idx != ui->extractorCombobox->currentIndex()) {
+        ui->extractorCombobox->setCurrentIndex(idx);
+    }
+}
