@@ -185,10 +185,6 @@ MainWindow::MainWindow(QWidget* parent)
     typeChanged();
 
     QSettings settings;
-    settings.beginGroup(QLatin1String("MainWindow"));
-    restoreGeometry(settings.value(QLatin1String("Geometry")).toByteArray());
-    restoreState(settings.value(QLatin1String("State")).toByteArray());
-    settings.endGroup();
     settings.beginGroup(QLatin1String("SenderHistory"));
     ui->senderBox->addItems(settings.value(QLatin1String("History")).toStringList());
     ui->senderBox->setCurrentText(QString());
@@ -210,10 +206,6 @@ MainWindow::~MainWindow()
         history.push_back(ui->senderBox->itemText(i));
     settings.setValue(QLatin1String("History"), history);
     settings.endGroup();
-
-    settings.beginGroup(QLatin1String("MainWindow"));
-    settings.setValue(QLatin1String("Geometry"), saveGeometry());
-    settings.setValue(QLatin1String("State"), saveState());
 }
 
 void MainWindow::openFile(const QString &file)
