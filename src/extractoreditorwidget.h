@@ -37,6 +37,9 @@ public:
 
     void showExtractor(const QString &extractorId);
 
+signals:
+    void extractorChanged();
+
 private:
     void reloadExtractors();
 

@@ -53,6 +53,12 @@ ExtractorEditorWidget::ExtractorEditorWidget(QWidget *parent)
     auto view = m_scriptDoc->createView(nullptr);
     ui->topLayout->addWidget(view);
     reloadExtractors();
+
+    connect(m_scriptDoc, &KTextEditor::Document::modifiedChanged, this, [this]() {
+        if (!m_scriptDoc->isModified()) { // approximation for "document has been saved"
+            emit extractorChanged();
+        }
+    });
 }
 
 ExtractorEditorWidget::~ExtractorEditorWidget() = default;

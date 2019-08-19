@@ -79,6 +79,7 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->senderBox, &QComboBox::currentTextChanged, this, &MainWindow::sourceChanged);
     connect(ui->contextDate, &QDateTimeEdit::dateTimeChanged, this, &MainWindow::sourceChanged);
     connect(ui->fileRequester, &KUrlRequester::textChanged, this, &MainWindow::urlChanged);
+    connect(ui->extractorWidget, &ExtractorEditorWidget::extractorChanged, this, &MainWindow::sourceChanged);
 
     auto editor = KTextEditor::Editor::instance();
 
