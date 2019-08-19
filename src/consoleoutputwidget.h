@@ -25,6 +25,7 @@
 namespace Ui {
 class ConsoleOutputWidget;
 }
+class ConsoleOutputModel;
 
 class ConsoleOutputWidget : public QWidget
 {
@@ -35,11 +36,12 @@ public:
 
     void clear();
 
-    void handleMessage(QtMsgType type, const QMessageLogContext &context, const QString &msg);
+signals:
+    void navigateToSource(const QString &file, int line);
 
 private:
     std::unique_ptr<Ui::ConsoleOutputWidget> ui;
-    QtMessageHandler m_prevHandler = nullptr;
+    ConsoleOutputModel *m_model = nullptr;
 };
 
 #endif // CONSOLEOUTPUTWIDGET_H

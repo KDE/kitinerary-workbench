@@ -25,6 +25,7 @@
 #include <KTextEditor/Editor>
 #include <KTextEditor/View>
 
+#include <QDebug>
 #include <QFile>
 
 using namespace KItinerary;
@@ -50,8 +51,8 @@ ExtractorEditorWidget::ExtractorEditorWidget(QWidget *parent)
     auto editor = KTextEditor::Editor::instance();
     m_scriptDoc = editor->createDocument(nullptr);
     m_scriptDoc->setHighlightingMode(QStringLiteral("JavaScript"));
-    auto view = m_scriptDoc->createView(nullptr);
-    ui->topLayout->addWidget(view);
+    m_scriptView = m_scriptDoc->createView(nullptr);
+    ui->topLayout->addWidget(m_scriptView);
     reloadExtractors();
 
     connect(m_scriptDoc, &KTextEditor::Document::modifiedChanged, this, [this]() {
@@ -78,4 +79,13 @@ void ExtractorEditorWidget::showExtractor(const QString &extractorId)
     if (idx >= 0 && idx != ui->extractorCombobox->currentIndex()) {
         ui->extractorCombobox->setCurrentIndex(idx);
     }
+}
+
+void ExtractorEditorWidget::navigateToSource(const QString &fileName, int line)
+{
+    // TODO find the extractor this file belongs to and select it?
+    if (m_scriptDoc->url().toString() != fileName) {
+        m_scriptDoc->openUrl(fileName);
+    }
+    m_scriptView->setCursorPosition(KTextEditor::Cursor(line - 1, 0));
 }

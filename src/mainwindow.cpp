@@ -183,6 +183,11 @@ MainWindow::MainWindow(QWidget* parent)
     layout = new QHBoxLayout(ui->icalTab);
     layout->addWidget(view);
 
+    connect(ui->consoleWidget, &ConsoleOutputWidget::navigateToSource, ui->extractorWidget, &ExtractorEditorWidget::navigateToSource);
+    connect(ui->consoleWidget, &ConsoleOutputWidget::navigateToSource, this, [this]() {
+        ui->inputTabWidget->setCurrentIndex(ExtractorEditorTab);
+    });
+
     typeChanged();
 
     QSettings settings;

@@ -24,6 +24,7 @@
 
 namespace KTextEditor {
 class Document;
+class View;
 }
 
 class Ui_ExtractorEditorWidget;
@@ -36,6 +37,7 @@ public:
     ~ExtractorEditorWidget();
 
     void showExtractor(const QString &extractorId);
+    void navigateToSource(const QString &fileName, int line);
 
 signals:
     void extractorChanged();
@@ -46,6 +48,7 @@ private:
     std::unique_ptr<Ui_ExtractorEditorWidget> ui;
 
     KTextEditor::Document *m_scriptDoc = nullptr;
+    KTextEditor::View *m_scriptView = nullptr;
 };
 
 #endif // EXTRACTOREDITORWIDGET_H
