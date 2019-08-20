@@ -21,6 +21,7 @@
 #include <KLocalizedString>
 
 #include <QAbstractTableModel>
+#include <QDebug>
 #include <QIcon>
 
 #include <cstring>
@@ -152,19 +153,36 @@ void ConsoleOutputModel::clear()
 void ConsoleOutputModel::handleMessage(QtMsgType type, const QMessageLogContext& context, const QString& msg)
 {
     m_prevHandler(type, context, msg);
-    if (std::strcmp(context.category, "js") != 0) { // we only care for the script output
-        return;
+    if (std::strcmp(context.category, "js") == 0) {
+        // script debug output
+        beginInsertRows({}, m_messages.size(), m_messages.size());
+        Message m;
+        m.msg = msg;
+        m.file = QString::fromUtf8(context.file);
+        m.function = QString::fromUtf8(context.function);
+        m.line = context.line;
+        m.type = type;
+        m_messages.push_back(std::move(m));
+        endInsertRows();
+    } else if (std::strcmp(context.category, "org.kde.kitinerary") == 0 && type == QtWarningMsg && msg.startsWith(QLatin1String("JS ERROR"))) {
+        // script engine errors
+        beginInsertRows({}, m_messages.size(), m_messages.size());
+        Message m;
+        const auto idx1 = msg.indexOf(QLatin1String("]:"), 11);
+        if (idx1 > 0) {
+            m.file = msg.mid(11, idx1 - 11);
+        }
+        const auto idx2 = msg.indexOf(QLatin1Char(':'), idx1 + 2);
+        if (idx2 > idx1) {
+            m.line = msg.midRef(idx1 + 2, idx2 - idx1 - 2).toInt();
+            m.msg = msg.mid(idx2 + 1);
+        } else {
+            m.msg = msg;
+        }
+        m.type = QtFatalMsg;
+        m_messages.push_back(std::move(m));
+        endInsertRows();
     }
-
-    beginInsertRows({}, m_messages.size(), m_messages.size());
-    Message m;
-    m.msg = msg;
-    m.file = QString::fromUtf8(context.file);
-    m.function = QString::fromUtf8(context.function);
-    m.line = context.line;
-    m.type = type;
-    m_messages.push_back(std::move(m));
-    endInsertRows();
 }
 
 
