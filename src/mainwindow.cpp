@@ -146,7 +146,16 @@ MainWindow::MainWindow(QWidget* parent)
         }
     });
 
+    ui->uic9183LayoutTemplate->addItem(i18n("<no template>"), -1);
+    const auto layoutTemplates = m_ticketLayoutModel->supportedTemplates();
+    int i = 0;
+    for (const auto &tpl : layoutTemplates) {
+        ui->uic9183LayoutTemplate->addItem(tpl, i++);
+    }
     ui->ticketLayoutView->setModel(m_ticketLayoutModel);
+    connect(ui->uic9183LayoutTemplate, qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {
+        m_ticketLayoutModel->setLayoutTemplate(ui->uic9183LayoutTemplate->currentData().toInt());
+    });
     QFontMetrics fm(font());
     const auto cellWidth = fm.boundingRect(QStringLiteral("m")).width() + 6;
     ui->ticketLayoutView->horizontalHeader()->setMinimumSectionSize(cellWidth);
@@ -286,6 +295,8 @@ void MainWindow::sourceChanged()
         m_ticketParser.parse(m_sourceDoc->text().toLatin1());
         data = {JsonLdDocument::toJson(QVariant::fromValue(m_ticketParser))};
         m_ticketLayoutModel->setLayout(m_ticketParser.ticketLayout());
+        auto idx = ui->uic9183LayoutTemplate->findText(m_ticketParser.ticketLayout().type());
+        ui->uic9183LayoutTemplate->setCurrentIndex(std::max(idx, 0));
 
         auto block = m_ticketParser.firstBlock();
         while (!block.isNull()) {

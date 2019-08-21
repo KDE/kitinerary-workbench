@@ -17,6 +17,8 @@
 
 #include "uic9183ticketlayoutmodel.h"
 
+#include <KColorScheme>
+
 #include <QColor>
 #include <QDebug>
 #include <QSize>
@@ -26,7 +28,10 @@ enum {
     RCT2Height = 18
 };
 
-static const char rct2Layout[] =
+static const struct {
+    const char layout[RCT2Width * RCT2Height + 1];
+} rct2Layouts [] = { {
+// basic RCT2
 "X             XXXX                                 X                   X"
 "X             XXXX                                 X                   X"
 "X   X    X  XXXXXX                                 X                   X"
@@ -44,10 +49,49 @@ static const char rct2Layout[] =
 "X                                                  X                   X"
 "X              X              X                    X                   X"
 "XRRRRRRRRRRRX                 X                    X                   X"
-"X           X                 X     X        X     X                   X"
-;
+"X           X                 X     X        X     X                   X" }, {
 
-static_assert(sizeof(rct2Layout) - 1 == (RCT2Width * RCT2Height), "RCT2 Layout template has wrong size");
+// RCT2 IRT
+"X             XXXX                                 X                   X"
+"X             XXXX                                 X                   X"
+"X   X    X  XXXXXX                                 X                   X"
+"X                                                  X                   X"
+"X     X     X                                      X     X     XXX     X"
+"X     X     X                                      X     X     XXX     X"
+"X     X     X                                      X     X     XXX     X"
+"X     X     X                                      X     X     XXX     X"
+"X     XGGGGGXGGGX        XGGGXXX               XGGGX                   X"
+"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX                   X                   X"
+"X                              X                   X                   X"
+"X                              X                   X                   X"
+"X  X                                X              XXXXXXXXXXXXXXXXXXXXX"
+"X  X                                X    X    X    X                   X"
+"X  X                                X    X    X    X                   X"
+"X              X              X                    X                   X"
+"XRRRRRRRRRRRX                 X                    X                   X"
+"X           X                 X     X        X     X                   X" }, {
+
+// RCT2 RES
+"X             XXXX                                 X                   X"
+"X             XXXX                                 X                   X"
+"X   X    X  XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX                   X"
+"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX                   X"
+"X     X     X                                      X     X     XXX     X"
+"X     X     X                                      X     X     XXX     X"
+"X     X     X                                      X     X     XXX     X"
+"X     X     X                                      X     X     XXX     X"
+"X     XGGGGGXGGGX        XGGGXXX               XGGGX                   X"
+"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX                   X                   X"
+"X                              X                   X                   X"
+"X                              X                   X                   X"
+"X  X                                               XXXXXXXXXXXXXXXXXXXXX"
+"X  X                                               X                   X"
+"X                                                  X                   X"
+"X              X              X                    X                   X"
+"XRRRRRRRRRRRX                 X                    X                   X"
+"X           X                 X     X        X     X                   X"
+
+}};
 
 Uic9183TicketLayoutModel::Uic9183TicketLayoutModel(QObject *parent)
     : QAbstractTableModel(parent)
@@ -60,6 +104,18 @@ void Uic9183TicketLayoutModel::setLayout(const KItinerary::Uic9183TicketLayout &
 {
     beginResetModel();
     m_layout = layout;
+    endResetModel();
+}
+
+QStringList Uic9183TicketLayoutModel::supportedTemplates()
+{
+    return {QStringLiteral("RCT2"), QStringLiteral("RCT2 IRT"), QStringLiteral("RCT2 RES")};
+}
+
+void Uic9183TicketLayoutModel::setLayoutTemplate(int tplIndex)
+{
+    beginResetModel();
+    m_layoutTemplate = tplIndex;
     endResetModel();
 }
 
@@ -93,11 +149,12 @@ QVariant Uic9183TicketLayoutModel::data(const QModelIndex& index, int role) cons
     if (role == Qt::DisplayRole) {
         return m_layout.text(index.row(), index.column(), 1, 1);
     }
-    if (role == Qt::BackgroundRole && m_layout.type() == QLatin1String("RCT2") && index.row() < RCT2Height && index.column() < RCT2Width) {
-        const auto c = rct2Layout[index.row() * RCT2Width + index.column()];
+    if (role == Qt::BackgroundRole && m_layoutTemplate >= 0 && index.row() < RCT2Height && index.column() < RCT2Width) {
+        const auto c = rct2Layouts[m_layoutTemplate].layout[index.row() * RCT2Width + index.column()];
         switch (c) {
             case 'X': return QColor(Qt::gray);
-            case 'R': return QColor(Qt::red);
+            case 'R': return KColorScheme(QPalette::Active).background(KColorScheme::NegativeBackground);
+            case 'G': return KColorScheme(QPalette::Active).background(KColorScheme::PositiveBackground);
         }
     }
 

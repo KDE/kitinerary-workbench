@@ -32,6 +32,9 @@ public:
 
     void setLayout(const KItinerary::Uic9183TicketLayout &layout);
 
+    QStringList supportedTemplates();
+    void setLayoutTemplate(int tplIndex);
+
     int columnCount(const QModelIndex &parent) const override;
     int rowCount(const QModelIndex &parent) const override;
     QVariant data(const QModelIndex &index, int role) const override;
@@ -39,6 +42,7 @@ public:
 
 private:
     KItinerary::Uic9183TicketLayout m_layout;
+    int m_layoutTemplate = -1;
 };
 
 #endif // UIC9183TICKETLAYOUTMODEL_H
