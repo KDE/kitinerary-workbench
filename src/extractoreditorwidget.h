@@ -28,6 +28,7 @@ class View;
 }
 
 class Ui_ExtractorEditorWidget;
+class ExtractorFilterModel;
 
 class ExtractorEditorWidget : public QWidget
 {
@@ -46,6 +47,7 @@ private:
     void reloadExtractors();
 
     std::unique_ptr<Ui_ExtractorEditorWidget> ui;
+    ExtractorFilterModel *m_filterModel = nullptr;
 
     KTextEditor::Document *m_scriptDoc = nullptr;
     KTextEditor::View *m_scriptView = nullptr;
