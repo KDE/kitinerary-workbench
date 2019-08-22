@@ -163,8 +163,13 @@ QVariant Uic9183TicketLayoutModel::data(const QModelIndex& index, int role) cons
 
 QVariant Uic9183TicketLayoutModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if (role == Qt::DisplayRole && orientation == Qt::Horizontal) {
-        return QString::number(section % 10);
+    if (orientation == Qt::Horizontal) {
+        switch (role) {
+            case Qt::DisplayRole:
+                return QString::number(section % 10);
+            case Qt::ToolTipRole:
+                return QString::number(section);
+        }
     }
     if (role == Qt::DisplayRole && orientation == Qt::Vertical) {
         return QString::number(section);
