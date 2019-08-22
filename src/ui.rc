@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE kpartgui SYSTEM "kpartgui.dtd">
 <kpartgui name="kitinerary-workbench" version="1">
+    <MenuBar>
+        <Menu name="extractor" append="before_go">
+            <text>&amp;Extractor</text>
+            <Action name="extractor_run"/>
+            <Separator/>
+            <Action name="extractor_reload_repository"/>
+        </Menu>
+    </MenuBar>
 </kpartgui>

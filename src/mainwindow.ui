@@ -311,6 +311,31 @@
    </property>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionExtractorRun">
+   <property name="icon">
+    <iconset theme="system-run"/>
+   </property>
+   <property name="text">
+    <string>&amp;Run Extractor</string>
+   </property>
+   <property name="toolTip">
+    <string>Re-run extraction on the current input.</string>
+   </property>
+   <property name="shortcut">
+    <string>F8</string>
+   </property>
+  </action>
+  <action name="actionExtractorReloadRepository">
+   <property name="icon">
+    <iconset theme="view-refresh"/>
+   </property>
+   <property name="text">
+    <string>Reload Extractors</string>
+   </property>
+   <property name="toolTip">
+    <string>Reload information about available extractors.</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

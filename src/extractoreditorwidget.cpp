@@ -127,11 +127,6 @@ ExtractorEditorWidget::ExtractorEditorWidget(QWidget *parent)
         m_filterModel->setFilters(extractor.filters());
         m_scriptDoc->openUrl(QUrl::fromLocalFile(extractor.scriptFileName()));
    });
-   connect(ui->reloadButton, &QPushButton::clicked, this, [this]() {
-        ExtractorRepository repo;
-        repo.reload();
-        reloadExtractors();
-   });
 
     auto editor = KTextEditor::Editor::instance();
     m_scriptDoc = editor->createDocument(nullptr);

@@ -39,12 +39,12 @@ public:
 
     void showExtractor(const QString &extractorId);
     void navigateToSource(const QString &fileName, int line);
+    void reloadExtractors();
 
 signals:
     void extractorChanged();
 
 private:
-    void reloadExtractors();
 
     std::unique_ptr<Ui_ExtractorEditorWidget> ui;
     ExtractorFilterModel *m_filterModel = nullptr;

@@ -25,6 +25,7 @@
 #include <KItinerary/CalendarHandler>
 #include <KItinerary/ExtractorEngine>
 #include <KItinerary/ExtractorPostprocessor>
+#include <KItinerary/ExtractorRepository>
 #include <KItinerary/HtmlDocument>
 #include <KItinerary/IataBcbpParser>
 #include <KItinerary/JsonLdDocument>
@@ -204,7 +205,14 @@ MainWindow::MainWindow(QWidget* parent)
     ui->senderBox->addItems(settings.value(QLatin1String("History")).toStringList());
     ui->senderBox->setCurrentText(QString());
 
-    actionCollection()->addAction(QStringLiteral("view_redisplay"), KStandardAction::redisplay(this, &MainWindow::sourceChanged, this));
+    connect(ui->actionExtractorRun, &QAction::triggered, this, &MainWindow::sourceChanged);
+    connect(ui->actionExtractorReloadRepository, &QAction::triggered, this, [this]() {
+        KItinerary::ExtractorRepository repo;
+        repo.reload();
+        ui->extractorWidget->reloadExtractors();
+    });
+    actionCollection()->addAction(QStringLiteral("extractor_run"), ui->actionExtractorRun);
+    actionCollection()->addAction(QStringLiteral("extractor_reload_repository"), ui->actionExtractorReloadRepository);
     actionCollection()->addAction(QStringLiteral("file_quit"), KStandardAction::quit(QApplication::instance(), &QApplication::closeAllWindows, this));
 
     setupGUI(Default, QStringLiteral("ui.rc"));
