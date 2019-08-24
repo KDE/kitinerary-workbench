@@ -47,7 +47,9 @@ public:
 
     int columnCount(const QModelIndex &parent) const override;
     int rowCount(const QModelIndex &parent) const override;
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
     QVariant data(const QModelIndex &index, int role) const override;
+    bool setData(const QModelIndex &index, const QVariant &value, int role) override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
 private:
@@ -80,6 +82,11 @@ int ExtractorFilterModel::rowCount(const QModelIndex &parent) const
     return m_filters.size();
 }
 
+Qt::ItemFlags ExtractorFilterModel::flags(const QModelIndex &index) const
+{
+    return QAbstractTableModel::flags(index) | Qt::ItemIsEditable;
+}
+
 QVariant ExtractorFilterModel::data(const QModelIndex &index, int role) const
 {
     if (role == Qt::DisplayRole) {
@@ -89,8 +96,38 @@ QVariant ExtractorFilterModel::data(const QModelIndex &index, int role) const
             case 1: return filter.fieldName();
             case 2: return filter.pattern();
         }
+    } else if (role == Qt::EditRole) {
+        const auto &filter = m_filters[index.row()];
+        switch (index.column()) {
+            case 0: return filter.type();
+            case 1: return filter.fieldName();
+            case 2: return filter.pattern();
+        }
     }
     return {};
+}
+
+bool ExtractorFilterModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    if (!index.isValid() || role != Qt::EditRole) {
+        return false;
+    }
+
+    auto &filter = m_filters[index.row()];
+    switch (index.column()) {
+        case 0:
+            filter.setType(static_cast<ExtractorInput::Type>(value.toInt()));
+            break;
+        case 1:
+            filter.setFieldName(value.toString());
+            break;
+        case 2:
+            filter.setPattern(value.toString());
+            break;
+    }
+
+    emit dataChanged(index, index);
+    return true;
 }
 
 QVariant ExtractorFilterModel::headerData(int section, Qt::Orientation orientation, int role) const
