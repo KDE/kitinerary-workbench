@@ -31,6 +31,7 @@
 #include <QAbstractTableModel>
 #include <QDebug>
 #include <QFile>
+#include <QFileInfo>
 #include <QMetaEnum>
 #include <QSettings>
 
@@ -171,8 +172,10 @@ ExtractorEditorWidget::ExtractorEditorWidget(QWidget *parent)
         m_filterModel->setFilters(extractor.filters());
         m_scriptDoc->openUrl(QUrl::fromLocalFile(extractor.scriptFileName()));
 
-        m_scriptDoc->setReadWrite(!extractor.scriptFileName().startsWith(QLatin1String("qrc:")));
-        setMetaDataReadOnly(extractor.name().contains(QLatin1Char(':')));
+        QFileInfo scriptFi(extractor.fileName());
+        m_scriptDoc->setReadWrite(scriptFi.isWritable());
+        QFileInfo metaFi(extractor.fileName());
+        setMetaDataReadOnly(!metaFi.isWritable() || extractor.name().contains(QLatin1Char(':')));
     });
 
     auto editor = KTextEditor::Editor::instance();
