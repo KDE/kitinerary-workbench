@@ -32,6 +32,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QMetaEnum>
+#include <QSettings>
 
 using namespace KItinerary;
 
@@ -110,14 +111,20 @@ ExtractorEditorWidget::ExtractorEditorWidget(QWidget *parent)
     , ui(new Ui::ExtractorEditorWidget)
     , m_filterModel(new ExtractorFilterModel(this))
 {
-   ui->setupUi(this);
-   const auto me = ExtractorInput::staticMetaObject.enumerator(0);
-   for (int i = 0; i < me.keyCount(); ++i) {
-       ui->inputType->addItem(QString::fromUtf8(me.key(i)), me.value(i));
-   }
-   ui->filterView->setModel(m_filterModel);
+    ui->setupUi(this);
+    const auto me = ExtractorInput::staticMetaObject.enumerator(0);
+    for (int i = 0; i < me.keyCount(); ++i) {
+        ui->inputType->addItem(QString::fromUtf8(me.key(i)), me.value(i));
+    }
+    ui->filterView->setModel(m_filterModel);
 
-   connect(ui->extractorCombobox, qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {
+    QSettings settings;
+    settings.beginGroup(QLatin1String("Extractor Repository"));
+    ExtractorRepository repo;
+    repo.setAdditionalSearchPaths(settings.value(QLatin1String("SearchPaths"), QStringList()).toStringList());
+    repo.reload();
+
+    connect(ui->extractorCombobox, qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {
         ExtractorRepository repo;
         const auto extId = ui->extractorCombobox->currentText();
         const auto extractor = repo.extractor(extId);
@@ -126,7 +133,7 @@ ExtractorEditorWidget::ExtractorEditorWidget(QWidget *parent)
         ui->inputType->setCurrentIndex(ui->inputType->findData(extractor.type()));
         m_filterModel->setFilters(extractor.filters());
         m_scriptDoc->openUrl(QUrl::fromLocalFile(extractor.scriptFileName()));
-   });
+    });
 
     auto editor = KTextEditor::Editor::instance();
     m_scriptDoc = editor->createDocument(nullptr);

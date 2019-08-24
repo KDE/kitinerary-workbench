@@ -336,6 +336,14 @@
     <string>Reload information about available extractors.</string>
    </property>
   </action>
+  <action name="actionSettingsConfigure">
+   <property name="icon">
+    <iconset theme="settings-configure"/>
+   </property>
+   <property name="text">
+    <string>&amp;Configure KItinerary Workbench...</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

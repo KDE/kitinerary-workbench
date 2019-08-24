@@ -20,6 +20,7 @@
 #include "attributemodel.h"
 #include "dommodel.h"
 #include "uic9183ticketlayoutmodel.h"
+#include "settingsdialog.h"
 
 #include <KItinerary/BarcodeDecoder>
 #include <KItinerary/CalendarHandler>
@@ -211,9 +212,16 @@ MainWindow::MainWindow(QWidget* parent)
         repo.reload();
         ui->extractorWidget->reloadExtractors();
     });
+    connect(ui->actionSettingsConfigure, &QAction::triggered, this, [this]() {
+        SettingsDialog dlg(this);
+        if (dlg.exec() == QDialog::Accepted) {
+            ui->actionExtractorReloadRepository->trigger();
+        }
+    });
     actionCollection()->addAction(QStringLiteral("extractor_run"), ui->actionExtractorRun);
     actionCollection()->addAction(QStringLiteral("extractor_reload_repository"), ui->actionExtractorReloadRepository);
     actionCollection()->addAction(QStringLiteral("file_quit"), KStandardAction::quit(QApplication::instance(), &QApplication::closeAllWindows, this));
+    actionCollection()->addAction(QStringLiteral("options_configure"), ui->actionSettingsConfigure);
 
     setupGUI(Default, QStringLiteral("ui.rc"));
 }

@@ -5,6 +5,7 @@ set(workbench_srcs
     consoleoutputwidget.cpp
     dommodel.cpp
     extractoreditorwidget.cpp
+    settingsdialog.cpp
     uic9183ticketlayoutmodel.cpp
     ui.qrc
 )
