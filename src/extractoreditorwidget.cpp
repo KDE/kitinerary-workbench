@@ -133,6 +133,9 @@ ExtractorEditorWidget::ExtractorEditorWidget(QWidget *parent)
         ui->inputType->setCurrentIndex(ui->inputType->findData(extractor.type()));
         m_filterModel->setFilters(extractor.filters());
         m_scriptDoc->openUrl(QUrl::fromLocalFile(extractor.scriptFileName()));
+
+        m_scriptDoc->setReadWrite(!extractor.scriptFileName().startsWith(QLatin1String("qrc:")));
+        setMetaDataReadOnly(extractor.name().contains(QLatin1Char(':')));
     });
 
     auto editor = KTextEditor::Editor::instance();
@@ -175,6 +178,14 @@ void ExtractorEditorWidget::navigateToSource(const QString &fileName, int line)
         m_scriptDoc->openUrl(fileName);
     }
     m_scriptView->setCursorPosition(KTextEditor::Cursor(line - 1, 0));
+}
+
+void ExtractorEditorWidget::setMetaDataReadOnly(bool readOnly)
+{
+    ui->inputType->setEnabled(!readOnly);
+    ui->scriptEdit->setEnabled(!readOnly);
+    ui->functionEdit->setEnabled(!readOnly);
+    ui->filterView->setEnabled(!readOnly);
 }
 
 #include "extractoreditorwidget.moc"

@@ -45,6 +45,7 @@ signals:
     void extractorChanged();
 
 private:
+    void setMetaDataReadOnly(bool readOnly);
 
     std::unique_ptr<Ui_ExtractorEditorWidget> ui;
     ExtractorFilterModel *m_filterModel = nullptr;
