@@ -222,6 +222,7 @@ MainWindow::MainWindow(QWidget* parent)
     actionCollection()->addAction(QStringLiteral("extractor_reload_repository"), ui->actionExtractorReloadRepository);
     actionCollection()->addAction(QStringLiteral("file_quit"), KStandardAction::quit(QApplication::instance(), &QApplication::closeAllWindows, this));
     actionCollection()->addAction(QStringLiteral("options_configure"), ui->actionSettingsConfigure);
+    ui->extractorWidget->registerActions(actionCollection());
 
     setupGUI(Default, QStringLiteral("ui.rc"));
 }

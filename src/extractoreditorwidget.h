@@ -27,6 +27,8 @@ class Document;
 class View;
 }
 
+class KActionCollection;
+
 class Ui_ExtractorEditorWidget;
 class ExtractorFilterModel;
 
@@ -36,6 +38,7 @@ class ExtractorEditorWidget : public QWidget
 public:
     explicit ExtractorEditorWidget(QWidget *parent = nullptr);
     ~ExtractorEditorWidget();
+    void registerActions(KActionCollection *ac);
 
     void showExtractor(const QString &extractorId);
     void navigateToSource(const QString &fileName, int line);
@@ -46,6 +49,7 @@ signals:
 
 private:
     void setMetaDataReadOnly(bool readOnly);
+    void save();
 
     std::unique_ptr<Ui_ExtractorEditorWidget> ui;
     ExtractorFilterModel *m_filterModel = nullptr;

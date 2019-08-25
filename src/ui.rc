@@ -2,6 +2,10 @@
 <!DOCTYPE kpartgui SYSTEM "kpartgui.dtd">
 <kpartgui name="kitinerary-workbench" version="1">
     <MenuBar>
+        <Menu name="file">
+            <Action name="file_new_extractor" merge="new_merge"/>
+            <Action name="file_save_extractor" merge="save_merge"/>
+        </Menu>
         <Menu name="extractor" append="before_go">
             <text>&amp;Extractor</text>
             <Action name="extractor_run"/>

@@ -26,12 +26,16 @@
 #include <KTextEditor/Editor>
 #include <KTextEditor/View>
 
+#include <KActionCollection>
 #include <KLocalizedString>
 
 #include <QAbstractTableModel>
 #include <QDebug>
 #include <QFile>
 #include <QFileInfo>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QMessageBox>
 #include <QMetaEnum>
 #include <QSettings>
 
@@ -44,6 +48,7 @@ public:
     explicit ExtractorFilterModel(QObject *parent = nullptr);
     ~ExtractorFilterModel() = default;
 
+    const std::vector<ExtractorFilter>& filters() const;
     void setFilters(std::vector<ExtractorFilter> filters);
     void addFilter();
     void removeFilter(int row);
@@ -62,6 +67,11 @@ private:
 ExtractorFilterModel::ExtractorFilterModel(QObject *parent)
     : QAbstractTableModel(parent)
 {
+}
+
+const std::vector<ExtractorFilter>& ExtractorFilterModel::filters() const
+{
+    return m_filters;
 }
 
 void ExtractorFilterModel::setFilters(std::vector<ExtractorFilter> filters)
@@ -223,6 +233,14 @@ ExtractorEditorWidget::ExtractorEditorWidget(QWidget *parent)
 
 ExtractorEditorWidget::~ExtractorEditorWidget() = default;
 
+void ExtractorEditorWidget::registerActions(KActionCollection *ac)
+{
+    connect(ui->actionFileSaveExtractor, &QAction::triggered, this, &ExtractorEditorWidget::save);
+
+    ac->addAction(QStringLiteral("file_new_extractor"), ui->actionFileNewExtractor);
+    ac->addAction(QStringLiteral("file_save_extractor"), ui->actionFileSaveExtractor);
+}
+
 void ExtractorEditorWidget::reloadExtractors()
 {
     ui->extractorCombobox->clear();
@@ -255,6 +273,31 @@ void ExtractorEditorWidget::setMetaDataReadOnly(bool readOnly)
     ui->scriptEdit->setEnabled(!readOnly);
     ui->functionEdit->setEnabled(!readOnly);
     ui->filterView->setEnabled(!readOnly);
+}
+
+void ExtractorEditorWidget::save()
+{
+    ExtractorRepository repo;
+    const auto extId = ui->extractorCombobox->currentText();
+    auto extractor = repo.extractor(extId);
+
+    extractor.setType(static_cast<ExtractorInput::Type>(ui->inputType->currentData().toInt()));
+    extractor.setScriptFileName(ui->scriptEdit->text());
+    extractor.setScriptFunction(ui->functionEdit->text());
+    extractor.setFilters(m_filterModel->filters());
+
+    const auto obj = extractor.toJson();
+
+    QFile f(extractor.fileName());
+    if (!f.open(QFile::WriteOnly)) {
+        QMessageBox::critical(this, i18n("Saving Failed"), i18n("Failed to open file %1 for saving: %2", f.fileName(), f.errorString()));
+        return;
+    }
+    f.write(QJsonDocument(obj).toJson());
+    f.close();
+    m_scriptDoc->save();
+
+    repo.reload();
 }
 
 #include "extractoreditorwidget.moc"

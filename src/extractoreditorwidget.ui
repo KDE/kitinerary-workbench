@@ -133,6 +133,28 @@
     </layout>
    </item>
   </layout>
+  <action name="actionFileNewExtractor">
+   <property name="icon">
+    <iconset theme="document-new"/>
+   </property>
+   <property name="text">
+    <string>&amp;New Extractor...</string>
+   </property>
+   <property name="toolTip">
+    <string>Create a new extractor.</string>
+   </property>
+  </action>
+  <action name="actionFileSaveExtractor">
+   <property name="icon">
+    <iconset theme="document-save"/>
+   </property>
+   <property name="text">
+    <string>&amp;Save Extractor</string>
+   </property>
+   <property name="toolTip">
+    <string>Save changes to the extractor meta data and script.</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
