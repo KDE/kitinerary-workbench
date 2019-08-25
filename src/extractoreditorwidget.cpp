@@ -45,6 +45,8 @@ public:
     ~ExtractorFilterModel() = default;
 
     void setFilters(std::vector<ExtractorFilter> filters);
+    void addFilter();
+    void removeFilter(int row);
 
     int columnCount(const QModelIndex &parent) const override;
     int rowCount(const QModelIndex &parent) const override;
@@ -67,6 +69,24 @@ void ExtractorFilterModel::setFilters(std::vector<ExtractorFilter> filters)
     beginResetModel();
     m_filters = std::move(filters);
     endResetModel();
+}
+
+void ExtractorFilterModel::addFilter()
+{
+    beginInsertRows({}, m_filters.size(), m_filters.size());
+    ExtractorFilter f;
+    f.setType(ExtractorInput::Text);
+    f.setFieldName(i18n("<field>"));
+    f.setPattern(i18n("<pattern>"));
+    m_filters.push_back(f);
+    endInsertRows();
+}
+
+void ExtractorFilterModel::removeFilter(int row)
+{
+    beginRemoveRows({}, row, row);
+    m_filters.erase(m_filters.begin() + row);
+    endRemoveRows();
 }
 
 int ExtractorFilterModel::columnCount(const QModelIndex &parent) const
@@ -189,6 +209,15 @@ ExtractorEditorWidget::ExtractorEditorWidget(QWidget *parent)
         if (!m_scriptDoc->isModified()) { // approximation for "document has been saved"
             emit extractorChanged();
         }
+    });
+
+    connect(ui->addFilterButton, &QToolButton::clicked, m_filterModel, &ExtractorFilterModel::addFilter);
+    connect(ui->removeFilterButton, &QToolButton::clicked, this, [this]() {
+        const auto sel = ui->filterView->selectionModel()->selection();
+        if (sel.isEmpty()) {
+            return;
+        }
+        m_filterModel->removeFilter(sel.first().topLeft().row());
     });
 }
 
