@@ -33,6 +33,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QFileInfo>
+#include <QFileDialog>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMessageBox>
@@ -235,6 +236,7 @@ ExtractorEditorWidget::~ExtractorEditorWidget() = default;
 
 void ExtractorEditorWidget::registerActions(KActionCollection *ac)
 {
+    connect(ui->actionFileNewExtractor, &QAction::triggered, this, &ExtractorEditorWidget::create);
     connect(ui->actionFileSaveExtractor, &QAction::triggered, this, &ExtractorEditorWidget::save);
 
     ac->addAction(QStringLiteral("file_new_extractor"), ui->actionFileNewExtractor);
@@ -298,6 +300,53 @@ void ExtractorEditorWidget::save()
     m_scriptDoc->save();
 
     repo.reload();
+}
+
+void ExtractorEditorWidget::create()
+{
+    ExtractorRepository repo;
+    QString startDir;
+    if (!repo.additionalSearchPaths().empty()) {
+        startDir = repo.additionalSearchPaths().at(0);
+    }
+
+    const auto metaFileName = QFileDialog::getSaveFileName(this, i18n("Create New Extractor"), startDir, QStringLiteral("*.json"));
+    if (metaFileName.isEmpty()) {
+        return;
+    }
+
+    QFileInfo metaFi(metaFileName);
+    const QString scriptFileName = metaFi.path() + QLatin1Char('/') + metaFi.baseName() + QLatin1String(".js");
+    QFile scriptFile(scriptFileName);
+    if (!scriptFile.open(QFile::WriteOnly)) {
+        QMessageBox::critical(this, i18n("Creation Failed"), i18n("Failed to create file %1: %2", scriptFile.fileName(), scriptFile.errorString()));
+        return;
+    }
+    scriptFile.write(
+R"(function main(content) {
+    console.log(content);
+})");
+    scriptFile.close();
+
+    Extractor extractor;
+    extractor.load({}, metaFileName);
+    extractor.setScriptFileName(scriptFileName);
+    ExtractorFilter filter;
+    filter.setType(ExtractorInput::Email);
+    filter.setFieldName(QStringLiteral("From"));
+    filter.setPattern(QStringLiteral("@change-me.com"));
+    extractor.setFilters({filter});
+    QFile metaFile(metaFileName);
+    if (!metaFile.open(QFile::WriteOnly)) {
+        QMessageBox::critical(this, i18n("Creation Failed"), i18n("Failed to create file %1: %2", metaFile.fileName(), metaFile.errorString()));
+        return;
+    }
+    metaFile.write(QJsonDocument(extractor.toJson()).toJson());
+    metaFile.close();
+
+    repo.reload();
+    reloadExtractors();
+    showExtractor(metaFi.baseName());
 }
 
 #include "extractoreditorwidget.moc"

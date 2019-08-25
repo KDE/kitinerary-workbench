@@ -50,6 +50,7 @@ signals:
 private:
     void setMetaDataReadOnly(bool readOnly);
     void save();
+    void create();
 
     std::unique_ptr<Ui_ExtractorEditorWidget> ui;
     ExtractorFilterModel *m_filterModel = nullptr;
