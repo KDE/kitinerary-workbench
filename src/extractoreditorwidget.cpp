@@ -55,7 +55,7 @@ public:
     void removeFilter(int row);
 
     int columnCount(const QModelIndex &parent) const override;
-    int rowCount(const QModelIndex &parent) const override;
+    int rowCount(const QModelIndex &parent = {}) const override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     bool setData(const QModelIndex &index, const QVariant &value, int role) override;
@@ -207,6 +207,7 @@ ExtractorEditorWidget::ExtractorEditorWidget(QWidget *parent)
         m_scriptDoc->setReadWrite(scriptFi.isWritable());
         QFileInfo metaFi(extractor.fileName());
         setMetaDataReadOnly(!metaFi.isWritable() || extractor.name().contains(QLatin1Char(':')));
+        validateInput();
     });
 
     auto editor = KTextEditor::Editor::instance();
@@ -229,7 +230,14 @@ ExtractorEditorWidget::ExtractorEditorWidget(QWidget *parent)
             return;
         }
         m_filterModel->removeFilter(sel.first().topLeft().row());
+        validateInput();
     });
+
+    connect(ui->scriptEdit, &QLineEdit::textChanged, this, &ExtractorEditorWidget::validateInput);
+    connect(ui->functionEdit, &QLineEdit::textChanged, this, &ExtractorEditorWidget::validateInput);
+    connect(m_filterModel, &ExtractorFilterModel::rowsInserted, this, &ExtractorEditorWidget::validateInput);
+    connect(m_filterModel, &ExtractorFilterModel::dataChanged, this, &ExtractorEditorWidget::validateInput);
+    connect(ui->filterView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ExtractorEditorWidget::validateInput);
 }
 
 ExtractorEditorWidget::~ExtractorEditorWidget() = default;
@@ -347,6 +355,13 @@ R"(function main(content) {
     repo.reload();
     reloadExtractors();
     showExtractor(metaFi.baseName());
+}
+
+void ExtractorEditorWidget::validateInput()
+{
+    bool valid = !ui->scriptEdit->text().isEmpty() && !ui->functionEdit->text().isEmpty();
+    ui->actionFileSaveExtractor->setEnabled(valid);
+    ui->removeFilterButton->setEnabled(m_filterModel->rowCount() > 1);
 }
 
 #include "extractoreditorwidget.moc"
