@@ -129,14 +129,14 @@ MainWindow::MainWindow(QWidget* parent)
         ui->domView->viewport()->update(); // dirty, but easier than triggering a proper full model update
     });
 
-    m_uic9183BlockModel->setHorizontalHeaderLabels({tr("Block"), tr("Version"), tr("Content")});
+    m_uic9183BlockModel->setHorizontalHeaderLabels({tr("Block"), tr("Version"), tr("Size"), tr("Content")});
     ui->uic9183BlockView->setModel(m_uic9183BlockModel);
     ui->uic9183BlockView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     connect(ui->uic9183BlockView, &QTreeView::customContextMenuRequested, this, [this](QPoint pos) {
         auto idx = ui->uic9183BlockView->currentIndex();
         if (!idx.isValid())
             return;
-        idx = idx.sibling(idx.row(), 2);
+        idx = idx.sibling(idx.row(), 3);
 
         QMenu menu;
         const auto copyContent = menu.addAction(tr("Copy Content"));
@@ -319,10 +319,11 @@ void MainWindow::sourceChanged()
         while (!block.isNull()) {
             auto nameItem = new QStandardItem(QString::fromUtf8(block.name(), 6));
             auto versionItem = new QStandardItem(QString::number(block.version()));
+            auto sizeItem = new QStandardItem(QString::number(block.contentSize()));
             auto contentItem = new QStandardItem;
             contentItem->setData(QByteArray(block.content(), block.contentSize()), Qt::EditRole);
             contentItem->setData(QString::fromUtf8(block.content(), block.contentSize()), Qt::DisplayRole);
-            m_uic9183BlockModel->appendRow({nameItem, versionItem, contentItem});
+            m_uic9183BlockModel->appendRow({nameItem, versionItem, sizeItem, contentItem});
             block = block.nextBlock();
         }
 
