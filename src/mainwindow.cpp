@@ -143,7 +143,7 @@ MainWindow::MainWindow(QWidget* parent)
         auto action = menu.exec(ui->uic9183BlockView->viewport()->mapToGlobal(pos));
         if (action == copyContent) {
             auto md = new QMimeData;
-            md->setData(QStringLiteral("application/octet-stream"), idx.data(Qt::EditRole).toByteArray());
+            md->setData(QStringLiteral("application/octet-stream"), idx.data(Qt::UserRole).toByteArray());
             QGuiApplication::clipboard()->setMimeData(md);
         }
     });
@@ -321,7 +321,7 @@ void MainWindow::sourceChanged()
             auto versionItem = new QStandardItem(QString::number(block.version()));
             auto sizeItem = new QStandardItem(QString::number(block.contentSize()));
             auto contentItem = new QStandardItem;
-            contentItem->setData(QByteArray(block.content(), block.contentSize()), Qt::EditRole);
+            contentItem->setData(QByteArray(block.content(), block.contentSize()), Qt::UserRole);
             contentItem->setData(QString::fromUtf8(block.content(), block.contentSize()), Qt::DisplayRole);
             m_uic9183BlockModel->appendRow({nameItem, versionItem, sizeItem, contentItem});
             block = block.nextBlock();
