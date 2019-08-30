@@ -19,7 +19,6 @@
 #include "ui_mainwindow.h"
 #include "attributemodel.h"
 #include "dommodel.h"
-#include "uic9183ticketlayoutmodel.h"
 #include "settingsdialog.h"
 
 #include <KItinerary/BarcodeDecoder>
@@ -31,7 +30,6 @@
 #include <KItinerary/IataBcbpParser>
 #include <KItinerary/JsonLdDocument>
 #include <KItinerary/PdfDocument>
-#include <KItinerary/Uic9183Block>
 
 #include <KPkPass/Pass>
 
@@ -69,8 +67,6 @@ MainWindow::MainWindow(QWidget* parent)
     , m_imageModel(new QStandardItemModel(this))
     , m_domModel(new DOMModel(this))
     , m_attrModel(new AttributeModel(this))
-    , m_uic9183BlockModel(new QStandardItemModel(this))
-    , m_ticketLayoutModel(new Uic9183TicketLayoutModel(this))
 {
     ui->setupUi(this);
     ui->contextDate->setDateTime(QDateTime(QDate::currentDate(), QTime()));
@@ -127,53 +123,6 @@ MainWindow::MainWindow(QWidget* parent)
         }
         m_domModel->setHighlightNodeSet(res.value<QVariantList>());
         ui->domView->viewport()->update(); // dirty, but easier than triggering a proper full model update
-    });
-
-    m_uic9183BlockModel->setHorizontalHeaderLabels({tr("Block"), tr("Version"), tr("Size"), tr("Content")});
-    ui->uic9183BlockView->setModel(m_uic9183BlockModel);
-    ui->uic9183BlockView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
-    connect(ui->uic9183BlockView, &QTreeView::customContextMenuRequested, this, [this](QPoint pos) {
-        auto idx = ui->uic9183BlockView->currentIndex();
-        if (!idx.isValid())
-            return;
-        idx = idx.sibling(idx.row(), 3);
-
-        QMenu menu;
-        const auto copyContent = menu.addAction(tr("Copy Content"));
-        auto action = menu.exec(ui->uic9183BlockView->viewport()->mapToGlobal(pos));
-        if (action == copyContent) {
-            auto md = new QMimeData;
-            md->setData(QStringLiteral("application/octet-stream"), idx.data(Qt::UserRole).toByteArray());
-            QGuiApplication::clipboard()->setMimeData(md);
-        }
-    });
-
-    ui->uic9183LayoutTemplate->addItem(i18n("<no template>"), -1);
-    const auto layoutTemplates = m_ticketLayoutModel->supportedTemplates();
-    int i = 0;
-    for (const auto &tpl : layoutTemplates) {
-        ui->uic9183LayoutTemplate->addItem(tpl, i++);
-    }
-    ui->ticketLayoutView->setModel(m_ticketLayoutModel);
-    connect(ui->uic9183LayoutTemplate, qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {
-        m_ticketLayoutModel->setLayoutTemplate(ui->uic9183LayoutTemplate->currentData().toInt());
-    });
-    QFontMetrics fm(font());
-    const auto cellWidth = fm.boundingRect(QStringLiteral("m")).width() + 6;
-    ui->ticketLayoutView->horizontalHeader()->setMinimumSectionSize(cellWidth);
-    ui->ticketLayoutView->horizontalHeader()->setDefaultSectionSize(cellWidth);
-    ui->ticketLayoutView->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-    ui->ticketLayoutView->verticalHeader()->setMinimumSectionSize(fm.height());
-    ui->ticketLayoutView->verticalHeader()->setMinimumSectionSize(fm.height());
-    ui->ticketLayoutView->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-    connect(ui->ticketLayoutView->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this]() {
-        const auto sel = ui->ticketLayoutView->selectionModel()->selection();
-        if (sel.isEmpty()) {
-            ui->ticketLayoutSelection->clear();
-        } else {
-            const auto range = sel.at(0);
-            ui->ticketLayoutSelection->setText(i18n("Row: %1 Column: %2 Width: %3 Height: %4", range.top(), range.left(), range.right() - range.left() + 1, range.bottom() - range.top() + 1));
-        }
     });
 
     m_outputDoc = editor->createDocument(nullptr);
@@ -250,8 +199,7 @@ void MainWindow::typeChanged()
     ui->inputTabWidget->setTabEnabled(TextTab, false);
     ui->inputTabWidget->setTabEnabled(ImageTab, false);
     ui->inputTabWidget->setTabEnabled(DomTab, false);
-    ui->inputTabWidget->setTabEnabled(Uic9183DataTab, false);
-    ui->inputTabWidget->setTabEnabled(Uic9183LayoutTab, false);
+    ui->inputTabWidget->setTabEnabled(Uic9183Tab, false);
     ui->outputTabWidget->setTabEnabled(ExtractorOutputTab, true);
     switch (ui->typeBox->currentIndex()) {
         case PlainText:
@@ -262,8 +210,7 @@ void MainWindow::typeChanged()
         case Uic9183:
             m_sourceDoc->setMode(QStringLiteral("Normal"));
             m_sourceView->show();
-            ui->inputTabWidget->setTabEnabled(Uic9183DataTab, true);
-            ui->inputTabWidget->setTabEnabled(Uic9183LayoutTab, true);
+            ui->inputTabWidget->setTabEnabled(Uic9183Tab, true);
             break;
         case Html:
             m_sourceDoc->setMode(QStringLiteral("HTML"));
@@ -299,7 +246,7 @@ void MainWindow::typeChanged()
 void MainWindow::sourceChanged()
 {
     m_imageModel->removeRows(0, m_imageModel->rowCount());
-    m_uic9183BlockModel->removeRows(0, m_uic9183BlockModel->rowCount());
+    ui->uic9183Widget->clear();
     ui->consoleWidget->clear();
     using namespace KItinerary;
 
@@ -311,22 +258,7 @@ void MainWindow::sourceChanged()
         m_ticketParser.setContextDate(ui->contextDate->dateTime());
         m_ticketParser.parse(m_sourceDoc->text().toLatin1());
         data = {JsonLdDocument::toJson(QVariant::fromValue(m_ticketParser))};
-        m_ticketLayoutModel->setLayout(m_ticketParser.ticketLayout());
-        auto idx = ui->uic9183LayoutTemplate->findText(m_ticketParser.ticketLayout().type());
-        ui->uic9183LayoutTemplate->setCurrentIndex(std::max(idx, 0));
-
-        auto block = m_ticketParser.firstBlock();
-        while (!block.isNull()) {
-            auto nameItem = new QStandardItem(QString::fromUtf8(block.name(), 6));
-            auto versionItem = new QStandardItem(QString::number(block.version()));
-            auto sizeItem = new QStandardItem(QString::number(block.contentSize()));
-            auto contentItem = new QStandardItem;
-            contentItem->setData(QByteArray(block.content(), block.contentSize()), Qt::UserRole);
-            contentItem->setData(QString::fromUtf8(block.content(), block.contentSize()), Qt::DisplayRole);
-            m_uic9183BlockModel->appendRow({nameItem, versionItem, sizeItem, contentItem});
-            block = block.nextBlock();
-        }
-
+        ui->uic9183Widget->setContent(m_ticketParser);
     } else if (ui->typeBox->currentIndex() == PkPass && m_pkpass) {
         ExtractorEngine engine;
         engine.setContextDate(ui->contextDate->dateTime());

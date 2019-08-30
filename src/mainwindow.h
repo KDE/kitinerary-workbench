@@ -19,7 +19,6 @@
 #define MAINWINDOW_H
 
 #include <KItinerary/Uic9183Parser>
-#include <KItinerary/Uic9183TicketLayout>
 
 #include <KCalendarCore/Calendar>
 
@@ -52,7 +51,6 @@ class MainWindow;
 
 class AttributeModel;
 class DOMModel;
-class Uic9183TicketLayoutModel;
 class QStandardItemModel;
 
 class MainWindow : public KXmlGuiWindow
@@ -84,8 +82,7 @@ private:
         TextTab = 2,
         ImageTab = 3,
         DomTab = 4,
-        Uic9183DataTab = 5,
-        Uic9183LayoutTab = 6
+        Uic9183Tab = 5
     };
 
     enum OutputTab {
@@ -113,8 +110,6 @@ private:
     QStandardItemModel *m_imageModel;
     DOMModel *m_domModel;
     AttributeModel *m_attrModel;
-    QStandardItemModel *m_uic9183BlockModel;
-    Uic9183TicketLayoutModel *m_ticketLayoutModel;
 
     std::unique_ptr<KPkPass::Pass> m_pkpass;
     std::unique_ptr<KItinerary::HtmlDocument> m_htmlDoc;
@@ -124,7 +119,6 @@ private:
     std::unique_ptr<KMime::Message> m_mimeMessage;
 
     KItinerary::Uic9183Parser m_ticketParser;
-    KItinerary::Uic9183TicketLayout m_ticketLayout;
 };
 
 #endif // MAINWINDOW_H

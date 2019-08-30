@@ -7,6 +7,7 @@ set(workbench_srcs
     extractoreditorwidget.cpp
     settingsdialog.cpp
     uic9183ticketlayoutmodel.cpp
+    uic9183widget.cpp
     ui.qrc
 )
 
