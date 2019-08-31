@@ -54,7 +54,10 @@ public:
     void addFilter();
     void removeFilter(int row);
 
-    int columnCount(const QModelIndex &parent) const override;
+    bool isReadOnly() const;
+    void setReadOnly(bool ro);
+
+    int columnCount(const QModelIndex &parent = {}) const override;
     int rowCount(const QModelIndex &parent = {}) const override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     QVariant data(const QModelIndex &index, int role) const override;
@@ -63,6 +66,7 @@ public:
 
 private:
     std::vector<ExtractorFilter> m_filters;
+    bool m_readOnly = false;
 };
 
 ExtractorFilterModel::ExtractorFilterModel(QObject *parent)
@@ -100,6 +104,19 @@ void ExtractorFilterModel::removeFilter(int row)
     endRemoveRows();
 }
 
+bool ExtractorFilterModel::isReadOnly() const
+{
+    return m_readOnly;
+}
+
+void ExtractorFilterModel::setReadOnly(bool ro)
+{
+    m_readOnly = ro;
+    if (!m_filters.empty()) {
+        emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
+    }
+}
+
 int ExtractorFilterModel::columnCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
@@ -116,6 +133,9 @@ int ExtractorFilterModel::rowCount(const QModelIndex &parent) const
 
 Qt::ItemFlags ExtractorFilterModel::flags(const QModelIndex &index) const
 {
+    if (m_readOnly) {
+        return QAbstractTableModel::flags(index);
+    }
     return QAbstractTableModel::flags(index) | Qt::ItemIsEditable;
 }
 
@@ -282,7 +302,9 @@ void ExtractorEditorWidget::setMetaDataReadOnly(bool readOnly)
     ui->inputType->setEnabled(!readOnly);
     ui->scriptEdit->setEnabled(!readOnly);
     ui->functionEdit->setEnabled(!readOnly);
-    ui->filterView->setEnabled(!readOnly);
+    m_filterModel->setReadOnly(readOnly);
+    ui->addFilterButton->setEnabled(!readOnly);
+    ui->removeFilterButton->setEnabled(!readOnly);
 }
 
 void ExtractorEditorWidget::save()
@@ -361,7 +383,7 @@ void ExtractorEditorWidget::validateInput()
 {
     bool valid = !ui->scriptEdit->text().isEmpty() && !ui->functionEdit->text().isEmpty();
     ui->actionFileSaveExtractor->setEnabled(valid);
-    ui->removeFilterButton->setEnabled(m_filterModel->rowCount() > 1);
+    ui->removeFilterButton->setEnabled(m_filterModel->rowCount() > 1 && !m_filterModel->isReadOnly());
 }
 
 #include "extractoreditorwidget.moc"
