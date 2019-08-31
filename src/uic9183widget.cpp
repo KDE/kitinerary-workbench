@@ -21,6 +21,7 @@
 
 #include <KItinerary/Uic9183Block>
 #include <KItinerary/Uic9183Parser>
+#include <KItinerary/Vendor0080Block>
 
 #include <KLocalizedString>
 
@@ -30,11 +31,14 @@
 #include <QGuiApplication>
 #include <QStandardItemModel>
 
+using namespace KItinerary;
+
 Uic9183Widget::Uic9183Widget(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::Uic9183Widget)
     , m_uic9183BlockModel(new QStandardItemModel(this))
     , m_ticketLayoutModel(new Uic9183TicketLayoutModel(this))
+    , m_vendor0080BLModel(new QStandardItemModel(this))
 {
     ui->setupUi(this);
     ui->splitter->setStretchFactor(0, 1);
@@ -67,6 +71,8 @@ Uic9183Widget::Uic9183Widget(QWidget *parent)
         const auto blockName = sel.at(0).data(Qt::DisplayRole).toString();
         if (blockName == QLatin1String("U_TLAY")) {
             ui->detailsStack->setCurrentWidget(ui->layoutPage);
+        } else if (blockName == QLatin1String("0080BL")) {
+            ui->detailsStack->setCurrentWidget(ui->vendor0080BLPage);
         } else {
             ui->detailsStack->setCurrentWidget(ui->noDetailsPage);
         }
@@ -99,6 +105,10 @@ Uic9183Widget::Uic9183Widget(QWidget *parent)
             ui->ticketLayoutSelection->setText(i18n("Row: %1 Column: %2 Width: %3 Height: %4", range.top(), range.left(), range.right() - range.left() + 1, range.bottom() - range.top() + 1));
         }
     });
+
+    m_vendor0080BLModel->setHorizontalHeaderLabels({i18n("Name"), i18n("Size"), i18n("Content")});
+    ui->vendor0080BLView->setModel(m_vendor0080BLModel);
+    ui->vendor0080BLView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 }
 
 Uic9183Widget::~Uic9183Widget() = default;
@@ -106,6 +116,7 @@ Uic9183Widget::~Uic9183Widget() = default;
 void Uic9183Widget::clear()
 {
     m_uic9183BlockModel->removeRows(0, m_uic9183BlockModel->rowCount());
+    m_vendor0080BLModel->removeRows(0, m_vendor0080BLModel->rowCount());
 }
 
 void Uic9183Widget::setContent(const KItinerary::Uic9183Parser &p)
@@ -124,5 +135,17 @@ void Uic9183Widget::setContent(const KItinerary::Uic9183Parser &p)
         contentItem->setData(QString::fromUtf8(block.content(), block.contentSize()), Qt::DisplayRole);
         m_uic9183BlockModel->appendRow({nameItem, versionItem, sizeItem, contentItem});
         block = block.nextBlock();
+    }
+
+    const auto vendor0080BL = Vendor0080BLBlock(p.findBlock("0080BL"));
+    if (vendor0080BL.isValid()) {
+        auto sblock = vendor0080BL.firstBlock();
+        while (!sblock.isNull()) {
+            auto nameItem = new QStandardItem(QString::fromUtf8(sblock.id(), 3));
+            auto sizeItem = new QStandardItem(QString::number(sblock.contentSize()));
+            auto contentItem = new QStandardItem(sblock.toString());
+            m_vendor0080BLModel->appendRow({nameItem, sizeItem, contentItem});
+            sblock = sblock.nextBlock();
+        }
     }
 }

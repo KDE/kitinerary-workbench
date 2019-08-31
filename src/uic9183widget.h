@@ -50,6 +50,7 @@ private:
 
     QStandardItemModel *m_uic9183BlockModel;
     Uic9183TicketLayoutModel *m_ticketLayoutModel;
+    QStandardItemModel *m_vendor0080BLModel;
 };
 
 #endif // UIC9183WIDGET_H
