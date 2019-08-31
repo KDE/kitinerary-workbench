@@ -91,7 +91,7 @@ MainWindow::MainWindow(QWidget* parent)
     auto layout = new QHBoxLayout(ui->preprocTab);
     layout->addWidget(view);
 
-    m_imageModel->setHorizontalHeaderLabels({tr("Image")});
+    m_imageModel->setHorizontalHeaderLabels({i18n("Image")});
     ui->imageView->setModel(m_imageModel);
     connect(ui->imageView, &QWidget::customContextMenuRequested, this, &MainWindow::imageContextMenu);
 
@@ -406,10 +406,10 @@ void MainWindow::imageContextMenu(QPoint pos)
         return;
 
     QMenu menu;
-    const auto barcode = menu.addAction(tr("Decode Barcode"));
-    const auto barcodeBinary = menu.addAction(tr("Decode Barcode (Binary)"));
+    const auto barcode = menu.addAction(i18n("Decode Barcode"));
+    const auto barcodeBinary = menu.addAction(i18n("Decode Barcode (Binary)"));
     menu.addSeparator();
-    const auto save = menu.addAction(tr("Save..."));
+    const auto save = menu.addAction(i18n("Save..."));
     if (auto action = menu.exec(ui->imageView->viewport()->mapToGlobal(pos))) {
         QString code;
         if (action == barcode) {
@@ -420,7 +420,7 @@ void MainWindow::imageContextMenu(QPoint pos)
             const auto b = decoder.decodeBinary(idx.data(Qt::DecorationRole).value<QImage>());
             code = QString::fromLatin1(b.constData(), b.size());
         } else if (action == save) {
-            const auto fileName = QFileDialog::getSaveFileName(this, tr("Save Image"));
+            const auto fileName = QFileDialog::getSaveFileName(this, i18n("Save Image"));
             idx.data(Qt::DecorationRole).value<QImage>().save(fileName);
         }
         m_sourceDoc->setText(code);

@@ -20,6 +20,7 @@
 #include <KItinerary/HtmlDocument>
 
 #include <KColorScheme>
+#include <KLocalizedString>
 
 DOMModel::DOMModel(QObject *parent)
     : QStandardItemModel(parent)
@@ -36,7 +37,7 @@ void DOMModel::setDocument(KItinerary::HtmlDocument *doc)
         return;
 
     addNode(nullptr, doc->root());
-    setHorizontalHeaderLabels({tr("Element"), tr("Content")});
+    setHorizontalHeaderLabels({i18n("Element"), i18n("Content")});
 }
 
 QVariant DOMModel::data(const QModelIndex &index, int role) const

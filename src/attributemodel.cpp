@@ -19,6 +19,8 @@
 
 #include <KItinerary/HtmlDocument>
 
+#include <KLocalizedString>
+
 AttributeModel::AttributeModel(QObject *parent)
     : QStandardItemModel(parent)
 {
@@ -42,5 +44,5 @@ void AttributeModel::setElement(KItinerary::HtmlElement elem)
         appendRow({i1, i2});
     }
 
-    setHorizontalHeaderLabels({tr("Attribute"), tr("Value")});
+    setHorizontalHeaderLabels({i18n("Attribute"), i18n("Value")});
 }
