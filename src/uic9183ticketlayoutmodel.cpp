@@ -21,6 +21,7 @@
 
 #include <QColor>
 #include <QDebug>
+#include <QGuiApplication>
 #include <QSize>
 
 enum {
@@ -51,15 +52,35 @@ static const struct {
 "XRRRRRRRRRRRX                 X                    X                   X"
 "X           X                 X     X        X     X                   X" }, {
 
+// RCT2 NRT
+"X             XXXX                                 X                   X"
+"X             XXXX                                 X                   X"
+"X   X    X  XXXXXX                                 X                   X"
+"X                                                  X                   X"
+"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+"XGGGGGXGGGGGXGGGGGGGGGGGGGGGGGGGXXGGGGGGGGGGGGGGGGGXGGGGGXGGGGGXXXGGGGGX"
+"XGGGGGXGGGGGXGGGGGGGGGGGGGGGGGGGXXGGGGGGGGGGGGGGGGGXGGGGGXGGGGGXXXGGGGGX"
+"X                                                                      X"
+"X                                                                      X"
+"X                                                                      X"
+"X                                                                      X"
+"X  X                                               XXXXXXXXXXXXXXXXXXXXX"
+"X  X                                               X                   X"
+"X  X                                               X                   X"
+"X              X              X                    X                   X"
+"XRRRRRRRRRRRX                 X                    X                   X"
+"X           X                 X     X        X     X                   X" }, {
+
 // RCT2 IRT
 "X             XXXX                                 X                   X"
 "X             XXXX                                 X                   X"
 "X   X    X  XXXXXX                                 X                   X"
 "X                                                  X                   X"
-"X     X     X                                      X     X     XXX     X"
-"X     X     X                                      X     X     XXX     X"
-"X     X     X                                      X     X     XXX     X"
-"X     X     X                                      X     X     XXX     X"
+"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+"XGGGGGXGGGGGXGGGGGGGGGGGGGGGGGGGXXGGGGGGGGGGGGGGGGGXGGGGGXGGGGGXXXGGGGGX"
+"XGGGGGXGGGGGXGGGGGGGGGGGGGGGGGGGXXGGGGGGGGGGGGGGGGGXGGGGGXGGGGGXXXGGGGGX"
 "X     XGGGGGXGGGX        XGGGXXX               XGGGX                   X"
 "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX                   X                   X"
 "X                              X                   X                   X"
@@ -76,10 +97,10 @@ static const struct {
 "X             XXXX                                 X                   X"
 "X   X    X  XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX                   X"
 "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX                   X"
-"X     X     X                                      X     X     XXX     X"
-"X     X     X                                      X     X     XXX     X"
-"X     X     X                                      X     X     XXX     X"
-"X     X     X                                      X     X     XXX     X"
+"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+"XGGGGGXGGGGGXGGGGGGGGGGGGGGGGGGGXXGGGGGGGGGGGGGGGGGXGGGGGXGGGGGXXXGGGGGX"
+"XGGGGGXGGGGGXGGGGGGGGGGGGGGGGGGGXXGGGGGGGGGGGGGGGGGXGGGGGXGGGGGXXXGGGGGX"
 "X     XGGGGGXGGGX        XGGGXXX               XGGGX                   X"
 "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX                   X                   X"
 "X                              X                   X                   X"
@@ -109,7 +130,7 @@ void Uic9183TicketLayoutModel::setLayout(const KItinerary::Uic9183TicketLayout &
 
 QStringList Uic9183TicketLayoutModel::supportedTemplates()
 {
-    return {QStringLiteral("RCT2"), QStringLiteral("RCT2 IRT"), QStringLiteral("RCT2 RES")};
+    return {QStringLiteral("RCT2"), QStringLiteral("RCT2 NRT"), QStringLiteral("RCT2 IRT"), QStringLiteral("RCT2 RES")};
 }
 
 void Uic9183TicketLayoutModel::setLayoutTemplate(int tplIndex)
@@ -152,7 +173,7 @@ QVariant Uic9183TicketLayoutModel::data(const QModelIndex& index, int role) cons
     if (role == Qt::BackgroundRole && m_layoutTemplate >= 0 && index.row() < RCT2Height && index.column() < RCT2Width) {
         const auto c = rct2Layouts[m_layoutTemplate].layout[index.row() * RCT2Width + index.column()];
         switch (c) {
-            case 'X': return QColor(Qt::gray);
+            case 'X': return QGuiApplication::palette().color(QPalette::AlternateBase);
             case 'R': return KColorScheme(QPalette::Active).background(KColorScheme::NegativeBackground);
             case 'G': return KColorScheme(QPalette::Active).background(KColorScheme::PositiveBackground);
         }
