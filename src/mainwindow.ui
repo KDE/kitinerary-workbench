@@ -190,7 +190,11 @@
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_4">
          <item>
-          <widget class="QLabel" name="domPath"/>
+          <widget class="QLabel" name="domPath">
+           <property name="textInteractionFlags">
+            <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QLineEdit" name="xpathEdit">
