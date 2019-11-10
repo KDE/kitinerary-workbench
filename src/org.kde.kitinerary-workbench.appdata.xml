@@ -10,7 +10,7 @@
     Interactive development and debugging tool for KItinerary extractors.
     </p>
   </description>
-  <url type="homepage">https://pim.kde.org/</url>
+  <url type="homepage">https://community.kde.org/KDE_PIM/KItinerary</url>
   <url type="bugtracker">https://bugs.kde.org/enter_bug.cgi?format=guided&amp;product=KDE+Itinerary</url>
   <project_group>KDE</project_group>
   <provides>
