@@ -306,7 +306,9 @@ void MainWindow::sourceChanged()
                 const auto page = m_pdfDoc->page(i);
                 for (int j = 0; j < page.imageCount(); ++j) {
                     auto imgItem = new QStandardItem;
-                    imgItem->setData(page.image(j).image(), Qt::DecorationRole);
+                    const auto img = page.image(j);
+                    imgItem->setData(img.image(), Qt::DecorationRole);
+                    imgItem->setToolTip(i18n("Size: %1 x %2\nSource: %3 x %4", img.width(), img.height(), img.sourceWidth(), img.sourceHeight()));
                     pageItem->appendRow(imgItem);
                 }
                 m_imageModel->appendRow(pageItem);
