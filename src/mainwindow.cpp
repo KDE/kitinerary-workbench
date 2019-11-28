@@ -411,7 +411,8 @@ void MainWindow::imageContextMenu(QPoint pos)
     const auto barcode = menu.addAction(i18n("Decode Barcode"));
     const auto barcodeBinary = menu.addAction(i18n("Decode Barcode (Binary)"));
     menu.addSeparator();
-    const auto save = menu.addAction(i18n("Save..."));
+    const auto save = menu.addAction(i18n("Save Image..."));
+    const auto bcSave = menu.addAction(i18n("Save Barcode Content..."));
     if (auto action = menu.exec(ui->imageView->viewport()->mapToGlobal(pos))) {
         QString code;
         if (action == barcode) {
@@ -424,6 +425,18 @@ void MainWindow::imageContextMenu(QPoint pos)
         } else if (action == save) {
             const auto fileName = QFileDialog::getSaveFileName(this, i18n("Save Image"));
             idx.data(Qt::DecorationRole).value<QImage>().save(fileName);
+        } else if (action == bcSave) {
+            const auto fileName = QFileDialog::getSaveFileName(this, i18n("Save Barcode Content"));
+            if (!fileName.isEmpty()) {
+                BarcodeDecoder decoder;
+                const auto b = decoder.decodeBinary(idx.data(Qt::DecorationRole).value<QImage>());
+                QFile f(fileName);
+                if (!f.open(QFile::WriteOnly)) {
+                    qWarning() << "Failed to open file:" << f.errorString() << fileName;
+                } else {
+                    f.write(b);
+                }
+            }
         }
         m_sourceDoc->setText(code);
 
