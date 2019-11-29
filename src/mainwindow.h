@@ -73,7 +73,8 @@ private:
         Uic9183,
         Image,
         ICal,
-        Mime
+        Mime,
+        Vdv
     };
 
     enum InputTab {

@@ -30,6 +30,7 @@
 #include <KItinerary/IataBcbpParser>
 #include <KItinerary/JsonLdDocument>
 #include <KItinerary/PdfDocument>
+#include <KItinerary/VdvTicketParser>
 
 #include <KPkPass/Pass>
 
@@ -259,6 +260,10 @@ void MainWindow::sourceChanged()
         m_ticketParser.parse(m_sourceDoc->text().toLatin1());
         data = {JsonLdDocument::toJson(QVariant::fromValue(m_ticketParser))};
         ui->uic9183Widget->setContent(m_ticketParser);
+    } else if (ui->typeBox->currentIndex() == Vdv) {
+        // TODO
+        VdvTicketParser p;
+        p.parse(m_sourceDoc->text().toLatin1());
     } else if (ui->typeBox->currentIndex() == PkPass && m_pkpass) {
         ExtractorEngine engine;
         engine.setContextDate(ui->contextDate->dateTime());
@@ -444,6 +449,8 @@ void MainWindow::imageContextMenu(QPoint pos)
             ui->typeBox->setCurrentIndex(IataBcbp);
         } else if (Uic9183Parser::maybeUic9183(code.toLatin1())) {
             ui->typeBox->setCurrentIndex(Uic9183);
+        } else if (VdvTicketParser::maybeVdvTicket(code.toLatin1())) {
+            ui->typeBox->setCurrentIndex(Vdv);
         }
     }
 }
