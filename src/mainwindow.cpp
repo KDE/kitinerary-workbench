@@ -261,9 +261,9 @@ void MainWindow::sourceChanged()
         data = {JsonLdDocument::toJson(QVariant::fromValue(m_ticketParser))};
         ui->uic9183Widget->setContent(m_ticketParser);
     } else if (ui->typeBox->currentIndex() == Vdv) {
-        // TODO
         VdvTicketParser p;
         p.parse(m_sourceDoc->text().toLatin1());
+        data = {JsonLdDocument::toJson(QVariant::fromValue(p.ticket()))};
     } else if (ui->typeBox->currentIndex() == PkPass && m_pkpass) {
         ExtractorEngine engine;
         engine.setContextDate(ui->contextDate->dateTime());
