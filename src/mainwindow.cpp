@@ -29,7 +29,9 @@
 #include <KItinerary/HtmlDocument>
 #include <KItinerary/IataBcbpParser>
 #include <KItinerary/JsonLdDocument>
+#include <KItinerary/MergeUtil>
 #include <KItinerary/PdfDocument>
+#include <KItinerary/Reservation>
 #include <KItinerary/VdvTicketParser>
 
 #include <KPkPass/Pass>
@@ -61,6 +63,39 @@
 #include <QStandardItemModel>
 #include <QTextCodec>
 #include <QToolBar>
+
+static QVector<QVector<QVariant>> batchReservations(const QVector<QVariant> &reservations)
+{
+    using namespace KItinerary;
+
+    QVector<QVector<QVariant>> batches;
+    QVector<QVariant> batch;
+
+    for (const auto &res : reservations) {
+        if (batch.isEmpty()) {
+            batch.push_back(res);
+            continue;
+        }
+
+        if (JsonLd::canConvert<Reservation>(res) && JsonLd::canConvert<Reservation>(batch.at(0))) {
+            const auto trip1 = JsonLd::convert<Reservation>(res).reservationFor();
+            const auto trip2 = JsonLd::convert<Reservation>(batch.at(0)).reservationFor();
+            if (KItinerary::MergeUtil::isSame(trip1, trip2)) {
+                batch.push_back(res);
+                continue;
+            }
+        }
+
+        batches.push_back(batch);
+        batch.clear();
+        batch.push_back(res);
+    }
+
+    if (!batch.isEmpty()) {
+        batches.push_back(batch);
+    }
+    return batches;
+}
 
 MainWindow::MainWindow(QWidget* parent)
     : KXmlGuiWindow(parent)
@@ -356,10 +391,11 @@ void MainWindow::sourceChanged()
     m_postprocDoc->setText(QJsonDocument(JsonLdDocument::toJson(postproc.result())).toJson());
     m_postprocDoc->setReadWrite(false);
 
+    const auto batches = batchReservations(postproc.result());
     KCalendarCore::Calendar::Ptr cal(new KCalendarCore::MemoryCalendar(QTimeZone::systemTimeZone()));
-    for (const auto &res : postproc.result()) {
+    for (const auto &batch : batches) {
         KCalendarCore::Event::Ptr event(new KCalendarCore::Event);
-        CalendarHandler::fillEvent({res}, event); // TODO this assumes multi-traveller batching to have already happened!
+        CalendarHandler::fillEvent(batch, event);
         cal->addEvent(event);
     }
     KCalendarCore::ICalFormat format;
