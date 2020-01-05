@@ -54,6 +54,7 @@
 #include <QDebug>
 #include <QFontMetrics>
 #include <QHBoxLayout>
+#include <QImageReader>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -426,8 +427,12 @@ void MainWindow::urlChanged()
         m_domModel->setDocument(m_htmlDoc.get());
         ui->domView->expandAll();
         m_sourceDoc->openUrl(url);
-    } else if (url.toString().endsWith(QLatin1String(".png")) || url.toString().endsWith(QLatin1String(".jpg"))) {
-        m_image.load(url.toLocalFile());
+    } else if (url.toString().endsWith(QLatin1String(".png")) || url.toString().endsWith(QLatin1String(".jpg")) || url.toString().endsWith(QLatin1String(".gif"))) {
+        QImageReader reader(url.toLocalFile());
+        if (!reader.read(&m_image)) {
+            qWarning() << "Failed to open image:" << url.toLocalFile() << reader.errorString();
+        }
+        ui->typeBox->setCurrentIndex(Image);
         sourceChanged();
     } else if (url.toString().endsWith(QLatin1String(".ics"))) {
         ui->typeBox->setCurrentIndex(ICal);
