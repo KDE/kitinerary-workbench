@@ -34,6 +34,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QFileDialog>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMessageBox>
@@ -226,7 +227,7 @@ ExtractorEditorWidget::ExtractorEditorWidget(QWidget *parent)
         QFileInfo scriptFi(extractor.fileName());
         m_scriptDoc->setReadWrite(scriptFi.isWritable());
         QFileInfo metaFi(extractor.fileName());
-        setMetaDataReadOnly(!metaFi.isWritable() || extractor.name().contains(QLatin1Char(':')));
+        setMetaDataReadOnly(!metaFi.isWritable());
         validateInput();
     });
 
@@ -318,14 +319,14 @@ void ExtractorEditorWidget::save()
     extractor.setScriptFunction(ui->functionEdit->text());
     extractor.setFilters(m_filterModel->filters());
 
-    const auto obj = extractor.toJson();
+    const auto val = repo.extractorToJson(extractor);
 
     QFile f(extractor.fileName());
     if (!f.open(QFile::WriteOnly)) {
         QMessageBox::critical(this, i18n("Saving Failed"), i18n("Failed to open file %1 for saving: %2", f.fileName(), f.errorString()));
         return;
     }
-    f.write(QJsonDocument(obj).toJson());
+    f.write((val.isArray() ? QJsonDocument(val.toArray()) : QJsonDocument(val.toObject())).toJson());
     f.close();
     m_scriptDoc->save();
 
@@ -340,7 +341,7 @@ void ExtractorEditorWidget::create()
         startDir = repo.additionalSearchPaths().at(0);
     }
 
-    const auto metaFileName = QFileDialog::getSaveFileName(this, i18n("Create New Extractor"), startDir, QStringLiteral("*.json"));
+    const auto metaFileName = QFileDialog::getSaveFileName(this, i18n("Create New Extractor"), startDir, QStringLiteral("*.json"), nullptr, QFileDialog::DontConfirmOverwrite);
     if (metaFileName.isEmpty()) {
         return;
     }
@@ -348,18 +349,19 @@ void ExtractorEditorWidget::create()
     QFileInfo metaFi(metaFileName);
     const QString scriptFileName = metaFi.path() + QLatin1Char('/') + metaFi.baseName() + QLatin1String(".js");
     QFile scriptFile(scriptFileName);
-    if (!scriptFile.open(QFile::WriteOnly)) {
+    if (!scriptFile.open(QFile::WriteOnly | QFile::Append)) {
         QMessageBox::critical(this, i18n("Creation Failed"), i18n("Failed to create file %1: %2", scriptFile.fileName(), scriptFile.errorString()));
         return;
     }
-    scriptFile.write(
-R"(function main(content) {
+    scriptFile.write(R"(
+function main(content) {
     console.log(content);
-})");
+}
+)");
     scriptFile.close();
 
     Extractor extractor;
-    extractor.load({}, metaFileName);
+    extractor.load({}, metaFileName, std::numeric_limits<int>::max()); // use a certainly unused index, so this doesn't clash with existing ones in a multi-extractor file
     extractor.setScriptFileName(scriptFileName);
     ExtractorFilter filter;
     filter.setType(ExtractorInput::Email);
@@ -371,7 +373,8 @@ R"(function main(content) {
         QMessageBox::critical(this, i18n("Creation Failed"), i18n("Failed to create file %1: %2", metaFile.fileName(), metaFile.errorString()));
         return;
     }
-    metaFile.write(QJsonDocument(extractor.toJson()).toJson());
+    const auto json = repo.extractorToJson(extractor);
+    metaFile.write((json.isArray() ? QJsonDocument(json.toArray()) : QJsonDocument(json.toObject())).toJson());
     metaFile.close();
 
     repo.reload();
