@@ -31,11 +31,20 @@ int main(int argc, char **argv)
     QCommandLineParser parser;
     parser.addHelpOption();
     parser.addVersionOption();
+
+    QCommandLineOption typeOpt({QStringLiteral("t"), QStringLiteral("type")}, QStringLiteral("Type of the input data [PlainText, Html, Pdf, PkPass, IataBcbp, JsonLd, Uic9183, Image, ICal, Mime, Vdv]."), QStringLiteral("type"));
+    parser.addOption(typeOpt);
+
     parser.addPositionalArgument(QStringLiteral("file"), QStringLiteral("Input file to open."));
     parser.process(app);
 
     auto mainWindow = new MainWindow;
     mainWindow->show();
+
+    if (parser.isSet(typeOpt)) {
+        mainWindow->setType(MainWindow::typeFromName(parser.value(typeOpt)));
+    }
+
     if (parser.positionalArguments().size() == 1)
         mainWindow->openFile(parser.positionalArguments().at(0));
 

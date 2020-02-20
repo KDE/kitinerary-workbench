@@ -59,6 +59,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMenu>
+#include <QMetaEnum>
+#include <QMetaObject>
 #include <QMimeData>
 #include <QSettings>
 #include <QStandardItemModel>
@@ -224,6 +226,36 @@ MainWindow::~MainWindow()
         history.push_back(ui->senderBox->itemText(i));
     settings.setValue(QLatin1String("History"), history);
     settings.endGroup();
+}
+
+MainWindow::Type MainWindow::typeFromName(const QString &name)
+{
+    const auto me = QMetaEnum::fromType<Type>();
+    Q_ASSERT(me.isValid());
+
+    bool ok = false;
+    const auto value = me.keyToValue(name.toUtf8().constData(), &ok);
+    if (ok) {
+        return static_cast<Type>(value);
+    }
+
+    for (auto i = 0; i < me.keyCount(); ++i) {
+        if (qstricmp(name.toUtf8().constData(), me.key(i)) == 0) {
+            return static_cast<Type>(me.value(i));
+        }
+    }
+
+    return {};
+}
+
+MainWindow::Type MainWindow::type() const
+{
+    return static_cast<Type>(ui->typeBox->currentIndex());
+}
+
+void MainWindow::setType(MainWindow::Type type)
+{
+    ui->typeBox->setCurrentIndex(static_cast<int>(type));
 }
 
 void MainWindow::openFile(const QString &file)

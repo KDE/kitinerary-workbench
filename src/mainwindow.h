@@ -60,9 +60,6 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    void openFile(const QString &file);
-
-private:
     enum Type {
         PlainText,
         Html,
@@ -76,7 +73,16 @@ private:
         Mime,
         Vdv
     };
+    Q_ENUM(Type)
 
+    static Type typeFromName(const QString &name);
+
+    Type type() const;
+    void setType(Type type);
+
+    void openFile(const QString &file);
+
+private:
     enum InputTab {
         ExtractorEditorTab = 0,
         InputTab = 1,
