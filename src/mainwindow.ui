@@ -212,6 +212,16 @@
           </widget>
          </item>
          <item>
+          <widget class="QLineEdit" name="domSearchLine">
+           <property name="placeholderText">
+            <string>Search...</string>
+           </property>
+           <property name="clearButtonEnabled">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QSplitter" name="domSplitter">
            <property name="orientation">
             <enum>Qt::Vertical</enum>

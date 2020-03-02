@@ -19,6 +19,7 @@
 #define DOMMODEL_H
 
 #include <QStandardItemModel>
+#include <QSortFilterProxyModel>
 
 #include <vector>
 
@@ -45,6 +46,18 @@ private:
     void addNode(QStandardItem *parent, KItinerary::HtmlElement elem);
 
     std::vector<KItinerary::HtmlElement> m_highlightNodeSet;
+};
+
+/** DOM multi-column aware filter model for searching. */
+class DOMFilterModel : public QSortFilterProxyModel
+{
+    Q_OBJECT
+public:
+    explicit DOMFilterModel(QObject *parent = nullptr);
+    ~DOMFilterModel();
+
+protected:
+    bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const override;
 };
 
 #endif // DOMMODEL_H

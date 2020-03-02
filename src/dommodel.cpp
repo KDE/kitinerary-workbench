@@ -83,3 +83,22 @@ void DOMModel::addNode(QStandardItem *parent, KItinerary::HtmlElement elem)
     for (auto child = elem.firstChild(); !child.isNull(); child = child.nextSibling())
         addNode(i1, child);
 }
+
+DOMFilterModel::DOMFilterModel(QObject *parent)
+    : QSortFilterProxyModel(parent)
+{
+}
+
+DOMFilterModel::~DOMFilterModel() = default;
+
+bool DOMFilterModel::filterAcceptsRow(int source_row, const QModelIndex& source_parent) const
+{
+    for (int i = 0; i < sourceModel()->columnCount(source_parent); ++i) {
+        const auto str = sourceModel()->data(sourceModel()->index(source_row, i, source_parent), Qt::DisplayRole).toString();
+        if (filterRegExp().indexIn(str) >= 0) {
+            return true;
+        }
+    }
+
+    return false;
+}

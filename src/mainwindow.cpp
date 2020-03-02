@@ -134,8 +134,16 @@ MainWindow::MainWindow(QWidget* parent)
     ui->imageView->setModel(m_imageModel);
     connect(ui->imageView, &QWidget::customContextMenuRequested, this, &MainWindow::imageContextMenu);
 
-    ui->domView->setModel(m_domModel);
+    auto domFilterModel = new DOMFilterModel(this);
+    domFilterModel->setRecursiveFilteringEnabled(true);
+    domFilterModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    domFilterModel->setSourceModel(m_domModel);
+    connect(domFilterModel, &QSortFilterProxyModel::layoutChanged, ui->domView, &QTreeView::expandAll);
+    connect(domFilterModel, &QSortFilterProxyModel::rowsRemoved, ui->domView, &QTreeView::expandAll);
+    connect(domFilterModel, &QSortFilterProxyModel::rowsInserted, ui->domView, &QTreeView::expandAll);
+    ui->domView->setModel(domFilterModel);
     ui->domView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    connect(ui->domSearchLine, &QLineEdit::textChanged, domFilterModel, &QSortFilterProxyModel::setFilterFixedString);
     ui->attributeView->setModel(m_attrModel);
     ui->attributeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     connect(ui->domView->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this](const QItemSelection &selection) {
