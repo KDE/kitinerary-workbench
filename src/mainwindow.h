@@ -95,8 +95,9 @@ private:
     enum OutputTab {
         ExtractorOutputTab = 0,
         PostprocessorTab = 1,
-        ICalTab = 2,
-        ConsoleTab = 3
+        ValidatedTab = 2,
+        ICalTab = 3,
+        ConsoleTab = 4
     };
 
     void typeChanged();
@@ -111,6 +112,7 @@ private:
     KTextEditor::Document *m_preprocDoc = nullptr;
     KTextEditor::Document *m_outputDoc = nullptr;
     KTextEditor::Document *m_postprocDoc = nullptr;
+    KTextEditor::Document *m_validatedDoc = nullptr;
     KTextEditor::Document *m_icalDoc = nullptr;
     KTextEditor::View *m_sourceView = nullptr;
 

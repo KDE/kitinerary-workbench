@@ -26,6 +26,7 @@
 #include <KItinerary/ExtractorEngine>
 #include <KItinerary/ExtractorPostprocessor>
 #include <KItinerary/ExtractorRepository>
+#include <KItinerary/ExtractorValidator>
 #include <KItinerary/HtmlDocument>
 #include <KItinerary/IataBcbpParser>
 #include <KItinerary/JsonLdDocument>
@@ -182,6 +183,12 @@ MainWindow::MainWindow(QWidget* parent)
     m_postprocDoc->setMode(QStringLiteral("JSON"));
     view = m_postprocDoc->createView(nullptr);
     layout = new QHBoxLayout(ui->postprocTab);
+    layout->addWidget(view);
+
+    m_validatedDoc = editor->createDocument(nullptr);
+    m_validatedDoc->setMode(QStringLiteral("JSON"));
+    view = m_validatedDoc->createView(nullptr);
+    layout = new QHBoxLayout(ui->validatedTab);
     layout->addWidget(view);
 
     m_icalDoc = editor->createDocument(nullptr);
@@ -426,11 +433,21 @@ void MainWindow::sourceChanged()
 
     ExtractorPostprocessor postproc;
     postproc.setContextDate(ui->contextDate->dateTime());
+    postproc.setValidationEnabled(false);
     postproc.process(JsonLdDocument::fromJson(data));
+    auto result = postproc.result();
 
     m_postprocDoc->setReadWrite(true);
-    m_postprocDoc->setText(QJsonDocument(JsonLdDocument::toJson(postproc.result())).toJson());
+    m_postprocDoc->setText(QJsonDocument(JsonLdDocument::toJson(result)).toJson());
     m_postprocDoc->setReadWrite(false);
+
+    ExtractorValidator validator;
+    result.erase(std::remove_if(result.begin(), result.end(), [&validator](const auto &elem) {
+        return !validator.isValidElement(elem);
+    }), result.end());
+    m_validatedDoc->setReadWrite(true);
+    m_validatedDoc->setText(QJsonDocument(JsonLdDocument::toJson(result)).toJson());
+    m_validatedDoc->setReadWrite(false);
 
     const auto batches = batchReservations(postproc.result());
     KCalendarCore::Calendar::Ptr cal(new KCalendarCore::MemoryCalendar(QTimeZone::systemTimeZone()));

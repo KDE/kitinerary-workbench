@@ -253,7 +253,7 @@
       </widget>
       <widget class="QTabWidget" name="outputTabWidget">
        <property name="currentIndex">
-        <number>1</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="outputTab">
         <attribute name="title">
@@ -263,6 +263,11 @@
        <widget class="QWidget" name="postprocTab">
         <attribute name="title">
          <string>Post-processed</string>
+        </attribute>
+       </widget>
+       <widget class="QWidget" name="validatedTab">
+        <attribute name="title">
+         <string>Validated</string>
         </attribute>
        </widget>
        <widget class="QWidget" name="icalTab">
