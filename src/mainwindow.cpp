@@ -188,8 +188,8 @@ MainWindow::MainWindow(QWidget* parent)
     m_validatedDoc = editor->createDocument(nullptr);
     m_validatedDoc->setMode(QStringLiteral("JSON"));
     view = m_validatedDoc->createView(nullptr);
-    layout = new QHBoxLayout(ui->validatedTab);
-    layout->addWidget(view);
+    ui->validatedTab->layout()->addWidget(view);
+    connect(ui->acceptCompleteOnly, &QCheckBox::toggled, this, &MainWindow::sourceChanged);
 
     m_icalDoc = editor->createDocument(nullptr);
     m_icalDoc->setMode(QStringLiteral("vCard, vCalendar, iCalendar"));
@@ -442,6 +442,7 @@ void MainWindow::sourceChanged()
     m_postprocDoc->setReadWrite(false);
 
     ExtractorValidator validator;
+    validator.setAcceptOnlyCompleteElements(ui->acceptCompleteOnly->isChecked());
     result.erase(std::remove_if(result.begin(), result.end(), [&validator](const auto &elem) {
         return !validator.isValidElement(elem);
     }), result.end());

@@ -269,6 +269,18 @@
         <attribute name="title">
          <string>Validated</string>
         </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_5">
+         <item>
+          <widget class="QCheckBox" name="acceptCompleteOnly">
+           <property name="text">
+            <string>Accept only complete elements</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
        <widget class="QWidget" name="icalTab">
         <attribute name="title">
