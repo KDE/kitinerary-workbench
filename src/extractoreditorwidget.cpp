@@ -7,9 +7,9 @@
 #include "extractoreditorwidget.h"
 #include "ui_extractoreditorwidget.h"
 
-#include <KItinerary/Extractor>
 #include <KItinerary/ExtractorFilter>
 #include <KItinerary/ExtractorRepository>
+#include <KItinerary/ScriptExtractor>
 
 #include <KTextEditor/Document>
 #include <KTextEditor/Editor>
@@ -80,7 +80,7 @@ void ExtractorFilterModel::addFilter()
 {
     beginInsertRows({}, m_filters.size(), m_filters.size());
     ExtractorFilter f;
-    f.setType(ExtractorInput::Text);
+    f.setMimeType(QStringLiteral("text/plain"));
     f.setFieldName(i18n("<field>"));
     f.setPattern(i18n("<pattern>"));
     m_filters.push_back(f);
@@ -110,7 +110,7 @@ void ExtractorFilterModel::setReadOnly(bool ro)
 int ExtractorFilterModel::columnCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
-    return 3;
+    return 4;
 }
 
 int ExtractorFilterModel::rowCount(const QModelIndex &parent) const
@@ -134,16 +134,18 @@ QVariant ExtractorFilterModel::data(const QModelIndex &index, int role) const
     if (role == Qt::DisplayRole) {
         const auto &filter = m_filters[index.row()];
         switch (index.column()) {
-            case 0: return ExtractorInput::typeToString(filter.type());
-            case 1: return filter.fieldName();
-            case 2: return filter.pattern();
+            case 0: return filter.mimeType();
+            case 1: return QString::fromUtf8(QMetaEnum::fromType<ExtractorFilter::Scope>().valueToKey(filter.scope()));
+            case 2: return filter.fieldName();
+            case 3: return filter.pattern();
         }
     } else if (role == Qt::EditRole) {
         const auto &filter = m_filters[index.row()];
         switch (index.column()) {
-            case 0: return filter.type();
-            case 1: return filter.fieldName();
-            case 2: return filter.pattern();
+            case 0: return filter.mimeType();
+            case 1: return filter.scope();
+            case 2: return filter.fieldName();
+            case 3: return filter.pattern();
         }
     }
     return {};
@@ -158,12 +160,15 @@ bool ExtractorFilterModel::setData(const QModelIndex &index, const QVariant &val
     auto &filter = m_filters[index.row()];
     switch (index.column()) {
         case 0:
-            filter.setType(static_cast<ExtractorInput::Type>(value.toInt()));
+            filter.setMimeType(value.toString());
             break;
         case 1:
-            filter.setFieldName(value.toString());
+            filter.setScope(static_cast<ExtractorFilter::Scope>(value.toInt()));
             break;
         case 2:
+            filter.setFieldName(value.toString());
+            break;
+        case 3:
             filter.setPattern(value.toString());
             break;
     }
@@ -177,8 +182,9 @@ QVariant ExtractorFilterModel::headerData(int section, Qt::Orientation orientati
     if (role == Qt::DisplayRole && orientation == Qt::Horizontal) {
         switch (section) {
             case 0: return i18n("Type");
-            case 1: return i18n("Value");
-            case 2: return i18n("Pattern");
+            case 1: return i18n("Scope");
+            case 2: return i18n("Value");
+            case 3: return i18n("Pattern");
         }
     }
     return QAbstractTableModel::headerData(section, orientation, role);
@@ -191,10 +197,19 @@ ExtractorEditorWidget::ExtractorEditorWidget(QWidget *parent)
     , m_filterModel(new ExtractorFilterModel(this))
 {
     ui->setupUi(this);
-    const auto me = ExtractorInput::staticMetaObject.enumerator(0);
-    for (int i = 0; i < me.keyCount(); ++i) {
-        ui->inputType->addItem(QString::fromUtf8(me.key(i)), me.value(i));
-    }
+    ui->inputType->addItems({
+        QStringLiteral("application/ld+json"),
+        QStringLiteral("application/octet-stream"),
+        QStringLiteral("application/pdf"),
+        QStringLiteral("application/vnd.apple.pkpass"),
+        QStringLiteral("internal/event"),
+        QStringLiteral("internal/uic9183"),
+        QStringLiteral("internal/vdv"),
+        QStringLiteral("message/rfc822"),
+        QStringLiteral("text/calendar"),
+        QStringLiteral("text/html"),
+        QStringLiteral("text/plain")
+    });
     ui->filterView->setModel(m_filterModel);
 
     QSettings settings;
@@ -206,16 +221,17 @@ ExtractorEditorWidget::ExtractorEditorWidget(QWidget *parent)
     connect(ui->extractorCombobox, qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {
         ExtractorRepository repo;
         const auto extId = ui->extractorCombobox->currentText();
-        const auto extractor = repo.extractor(extId);
-        ui->scriptEdit->setText(extractor.scriptFileName());
-        ui->functionEdit->setText(extractor.scriptFunction());
-        ui->inputType->setCurrentIndex(ui->inputType->findData(extractor.type()));
-        m_filterModel->setFilters(extractor.filters());
-        m_scriptDoc->openUrl(QUrl::fromLocalFile(extractor.scriptFileName()));
+        const auto extractor = dynamic_cast<const ScriptExtractor*>(repo.extractorByName(extId));
+        Q_ASSERT(extractor);
+        ui->scriptEdit->setText(extractor->scriptFileName());
+        ui->functionEdit->setText(extractor->scriptFunction());
+        ui->inputType->setCurrentIndex(ui->inputType->findText(extractor->mimeType()));
+        m_filterModel->setFilters(extractor->filters());
+        m_scriptDoc->openUrl(QUrl::fromLocalFile(extractor->scriptFileName()));
 
-        QFileInfo scriptFi(extractor.fileName());
+        QFileInfo scriptFi(extractor->fileName());
         m_scriptDoc->setReadWrite(scriptFi.isWritable());
-        QFileInfo metaFi(extractor.fileName());
+        QFileInfo metaFi(extractor->fileName());
         setMetaDataReadOnly(!metaFi.isWritable());
         validateInput();
     });
@@ -265,8 +281,10 @@ void ExtractorEditorWidget::reloadExtractors()
 {
     ui->extractorCombobox->clear();
     ExtractorRepository repo;
-    for (const auto &ext : repo.allExtractors()) {
-        ui->extractorCombobox->addItem(ext.name());
+    for (const auto &ext : repo.extractors()) {
+        if (dynamic_cast<ScriptExtractor*>(ext.get())) {
+            ui->extractorCombobox->addItem(ext->name());
+        }
     }
 }
 
@@ -301,16 +319,17 @@ void ExtractorEditorWidget::save()
 {
     ExtractorRepository repo;
     const auto extId = ui->extractorCombobox->currentText();
-    auto extractor = repo.extractor(extId);
+    auto extractor = const_cast<ScriptExtractor*>(dynamic_cast<const ScriptExtractor*>(repo.extractorByName(extId)));
+    Q_ASSERT(extractor);
 
-    extractor.setType(static_cast<ExtractorInput::Type>(ui->inputType->currentData().toInt()));
-    extractor.setScriptFileName(ui->scriptEdit->text());
-    extractor.setScriptFunction(ui->functionEdit->text());
-    extractor.setFilters(m_filterModel->filters());
+    extractor->setMimeType(ui->inputType->currentText());
+    extractor->setScriptFileName(ui->scriptEdit->text());
+    extractor->setScriptFunction(ui->functionEdit->text());
+    extractor->setFilters(m_filterModel->filters());
 
     const auto val = repo.extractorToJson(extractor);
 
-    QFile f(extractor.fileName());
+    QFile f(extractor->fileName());
     if (!f.open(QFile::WriteOnly)) {
         QMessageBox::critical(this, i18n("Saving Failed"), i18n("Failed to open file %1 for saving: %2", f.fileName(), f.errorString()));
         return;
@@ -349,11 +368,12 @@ function main(content) {
 )");
     scriptFile.close();
 
-    Extractor extractor;
+    ScriptExtractor extractor;
     extractor.load({}, metaFileName, std::numeric_limits<int>::max()); // use a certainly unused index, so this doesn't clash with existing ones in a multi-extractor file
     extractor.setScriptFileName(scriptFileName);
+    extractor.setMimeType(QStringLiteral("text/plain"));
     ExtractorFilter filter;
-    filter.setType(ExtractorInput::Email);
+    filter.setMimeType(QStringLiteral("message/rfc822"));
     filter.setFieldName(QStringLiteral("From"));
     filter.setPattern(QStringLiteral("@change-me.com"));
     extractor.setFilters({filter});
@@ -362,7 +382,7 @@ function main(content) {
         QMessageBox::critical(this, i18n("Creation Failed"), i18n("Failed to create file %1: %2", metaFile.fileName(), metaFile.errorString()));
         return;
     }
-    const auto json = repo.extractorToJson(extractor);
+    const auto json = repo.extractorToJson(&extractor);
     metaFile.write((json.isArray() ? QJsonDocument(json.toArray()) : QJsonDocument(json.toObject())).toJson());
     metaFile.close();
 

@@ -20,7 +20,7 @@ ecm_setup_version(PROJECT VARIABLE_PREFIX KITINERARY_WORKBENCH VERSION_HEADER ki
 find_package(Qt5 REQUIRED COMPONENTS Widgets)
 find_package(KF5 REQUIRED COMPONENTS TextEditor KIO)
 find_package(KPimPkPass REQUIRED)
-find_package(KPimItinerary 5.14.41 REQUIRED)
+find_package(KPimItinerary 5.17.41 REQUIRED)
 
 add_subdirectory(src)
 
