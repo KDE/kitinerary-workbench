@@ -1,4 +1,8 @@
 <!DOCTYPE RCC>
+<!--
+    SPDX-License-Identifier: CC0-1.0
+    SPDX-FileCopyrightText: none
+-->
 <RCC version="1.0">
     <qresource prefix="/kxmlgui5/kitinerary-workbench">
         <file>ui.rc</file>

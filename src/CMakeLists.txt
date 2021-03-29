@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2018-2021 Volker Krause <vkrause@kde.org>
+# SPDX-License-Identifier: BSD-3-Clause
+
 set(workbench_srcs
     main.cpp
     mainwindow.cpp
