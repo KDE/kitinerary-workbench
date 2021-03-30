@@ -6,6 +6,7 @@ set(workbench_srcs
     mainwindow.cpp
     attributemodel.cpp
     consoleoutputwidget.cpp
+    documentmodel.cpp
     dommodel.cpp
     extractoreditorwidget.cpp
     settingsdialog.cpp

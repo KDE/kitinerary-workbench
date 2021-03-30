@@ -7,6 +7,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "attributemodel.h"
+#include "documentmodel.h"
 #include "dommodel.h"
 #include "settingsdialog.h"
 
@@ -93,6 +94,7 @@ static QVector<QVector<QVariant>> batchReservations(const QVector<QVariant> &res
 MainWindow::MainWindow(QWidget* parent)
     : KXmlGuiWindow(parent)
     , ui(new Ui::MainWindow)
+    , m_extractorDocModel(new DocumentModel(this))
     , m_imageModel(new QStandardItemModel(this))
     , m_domModel(new DOMModel(this))
     , m_attrModel(new AttributeModel(this))
@@ -119,6 +121,9 @@ MainWindow::MainWindow(QWidget* parent)
     auto view = m_preprocDoc->createView(nullptr);
     auto layout = new QHBoxLayout(ui->preprocTab);
     layout->addWidget(view);
+
+    ui->documentTreeView->setModel(m_extractorDocModel);
+    ui->documentTreeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
     m_imageModel->setHorizontalHeaderLabels({i18n("Image")});
     ui->imageView->setModel(m_imageModel);

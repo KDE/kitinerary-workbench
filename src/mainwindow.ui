@@ -167,6 +167,16 @@
          </item>
         </layout>
        </widget>
+       <widget class="QWidget" name="documentTab">
+        <attribute name="title">
+         <string>Document</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_6">
+         <item>
+          <widget class="QTreeView" name="documentTreeView"/>
+         </item>
+        </layout>
+       </widget>
        <widget class="QWidget" name="preprocTab">
         <attribute name="title">
          <string>Text</string>

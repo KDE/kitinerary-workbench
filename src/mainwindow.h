@@ -39,6 +39,7 @@ class MainWindow;
 }
 
 class AttributeModel;
+class DocumentModel;
 class DOMModel;
 class QStandardItemModel;
 
@@ -75,10 +76,11 @@ private:
     enum InputTab {
         ExtractorEditorTab = 0,
         InputTab = 1,
-        TextTab = 2,
-        ImageTab = 3,
-        DomTab = 4,
-        Uic9183Tab = 5
+        DocumentTab = 2,
+        TextTab = 3,
+        ImageTab = 4,
+        DomTab = 5,
+        Uic9183Tab = 6
     };
 
     enum OutputTab {
@@ -105,6 +107,7 @@ private:
     KTextEditor::Document *m_icalDoc = nullptr;
     KTextEditor::View *m_sourceView = nullptr;
 
+    DocumentModel *m_extractorDocModel;
     QStandardItemModel *m_imageModel;
     DOMModel *m_domModel;
     AttributeModel *m_attrModel;
