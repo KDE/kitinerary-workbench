@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+    SPDX-FileCopyrightText: 2019 Volker Krause <vkrause@kde.org>
+    SPDX-License-Identifier: LGPL-2.0-or-later
+-->
 <ui version="4.0">
  <class>ConsoleOutputWidget</class>
  <widget class="QWidget" name="ConsoleOutputWidget">
