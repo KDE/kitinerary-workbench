@@ -13,7 +13,7 @@
 
 #include <KItinerary/BarcodeDecoder>
 #include <KItinerary/CalendarHandler>
-#include <KItinerary/ExtractorEngine>
+#include <KItinerary/ExtractorDocumentNode>
 #include <KItinerary/ExtractorPostprocessor>
 #include <KItinerary/ExtractorRepository>
 #include <KItinerary/ExtractorValidator>
@@ -323,6 +323,7 @@ void MainWindow::typeChanged()
 
 void MainWindow::sourceChanged()
 {
+    m_engine.clear();
     m_imageModel->removeRows(0, m_imageModel->rowCount());
     ui->uic9183Widget->clear();
     ui->consoleWidget->clear();
@@ -342,11 +343,10 @@ void MainWindow::sourceChanged()
         p.parse(m_sourceDoc->text().toLatin1());
         data = {JsonLdDocument::toJson(QVariant::fromValue(p.ticket()))};
     } else if (ui->typeBox->currentIndex() == PkPass && m_pkpass) {
-        ExtractorEngine engine;
-        engine.setContextDate(ui->contextDate->dateTime());
-        engine.setPass(m_pkpass.get());
-        data = engine.extract();
-        ui->extractorWidget->showExtractor(engine.usedCustomExtractor());
+        m_engine.setContextDate(ui->contextDate->dateTime());
+        m_engine.setPass(m_pkpass.get());
+        data = m_engine.extract();
+        ui->extractorWidget->showExtractor(m_engine.usedCustomExtractor());
     } else if (ui->typeBox->currentIndex() == JsonLd) {
         const auto doc = QJsonDocument::fromJson(m_sourceDoc->text().toUtf8());
         if (doc.isArray())
@@ -358,11 +358,9 @@ void MainWindow::sourceChanged()
         item->setData(m_image, Qt::DecorationRole);
         m_imageModel->appendRow(item);
     } else {
-        ExtractorEngine engine;
-
         m_preprocDoc->setReadWrite(true);
         if (ui->typeBox->currentIndex() == PlainText) {
-            engine.setText(m_sourceDoc->text());
+            m_engine.setText(m_sourceDoc->text());
             m_preprocDoc->setText(m_sourceDoc->text());
         } else if (ui->typeBox->currentIndex() == Html) {
             auto codec = QTextCodec::codecForName(m_sourceDoc->encoding().toUtf8());
@@ -371,7 +369,7 @@ void MainWindow::sourceChanged()
             }
 
             m_htmlDoc.reset(HtmlDocument::fromData(codec->fromUnicode(m_sourceDoc->text())));
-            engine.setHtmlDocument(m_htmlDoc.get());
+            m_engine.setHtmlDocument(m_htmlDoc.get());
             if (m_htmlDoc)
                 m_preprocDoc->setText(m_htmlDoc->root().recursiveContent());
             else
@@ -379,7 +377,7 @@ void MainWindow::sourceChanged()
             m_domModel->setDocument(m_htmlDoc.get());
             ui->domView->expandAll();
         } else if (ui->typeBox->currentIndex() == Pdf && m_pdfDoc) {
-            engine.setPdfDocument(m_pdfDoc.get());
+            m_engine.setPdfDocument(m_pdfDoc.get());
             m_preprocDoc->setText(m_pdfDoc->text());
 
             for (int i = 0; i < m_pdfDoc->pageCount(); ++i) {
@@ -401,12 +399,12 @@ void MainWindow::sourceChanged()
             KCalendarCore::ICalFormat format;
             format.fromString(m_calendar, m_sourceDoc->text());
             m_calendar->setProductId(format.loadedProductId());
-            engine.setCalendar(m_calendar);
+            m_engine.setCalendar(m_calendar);
         } else if (ui->typeBox->currentIndex() == Mime) {
             m_mimeMessage.reset(new KMime::Message);
             m_mimeMessage->setContent(m_sourceDoc->text().toUtf8());
             m_mimeMessage->parse();
-            engine.setContent(m_mimeMessage.get());
+            m_engine.setContent(m_mimeMessage.get());
         }
         m_preprocDoc->setReadWrite(false);
 
@@ -414,12 +412,15 @@ void MainWindow::sourceChanged()
         if (ui->typeBox->currentIndex() != Mime) {
             msg.from()->fromUnicodeString(ui->senderBox->currentText(), "utf-8");
             msg.date()->setDateTime(ui->contextDate->dateTime());
-            engine.setContext(&msg);
+            m_engine.setContext(&msg);
         }
 
-        data = engine.extract();
-        ui->extractorWidget->showExtractor(engine.usedCustomExtractor());
+        data = m_engine.extract();
+        ui->extractorWidget->showExtractor(m_engine.usedCustomExtractor());
     }
+
+    m_extractorDocModel->setRootNode(m_engine.rootDocumentNode());
+    ui->documentTreeView->expandAll();
 
     m_outputDoc->setReadWrite(true);
     m_outputDoc->setText(QJsonDocument(data).toJson());

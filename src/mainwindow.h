@@ -7,6 +7,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <KItinerary/ExtractorEngine>
 #include <KItinerary/Uic9183Parser>
 
 #include <KCalendarCore/Calendar>
@@ -112,6 +113,7 @@ private:
     DOMModel *m_domModel;
     AttributeModel *m_attrModel;
 
+    KItinerary::ExtractorEngine m_engine;
     std::unique_ptr<KPkPass::Pass> m_pkpass;
     std::unique_ptr<KItinerary::HtmlDocument> m_htmlDoc;
     std::unique_ptr<KItinerary::PdfDocument> m_pdfDoc;
