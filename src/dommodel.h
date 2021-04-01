@@ -27,6 +27,7 @@ public:
 
     QVariant data(const QModelIndex &index, int role) const override;
 
+    KItinerary::HtmlDocument *document() const;
     void setDocument(KItinerary::HtmlDocument *doc);
 
     void setHighlightNodeSet(const QVariantList &nodeSet);
@@ -34,6 +35,7 @@ public:
 private:
     void addNode(QStandardItem *parent, KItinerary::HtmlElement elem);
 
+    KItinerary::HtmlDocument *m_document = nullptr;
     std::vector<KItinerary::HtmlElement> m_highlightNodeSet;
 };
 

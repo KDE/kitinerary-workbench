@@ -22,11 +22,17 @@ void DOMModel::setDocument(KItinerary::HtmlDocument *doc)
 {
     m_highlightNodeSet.clear();
     clear();
+    m_document = doc;
     if (!doc)
         return;
 
     addNode(nullptr, doc->root());
     setHorizontalHeaderLabels({i18n("Element"), i18n("Content")});
+}
+
+KItinerary::HtmlDocument * DOMModel::document() const
+{
+    return m_document;
 }
 
 QVariant DOMModel::data(const QModelIndex &index, int role) const

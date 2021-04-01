@@ -156,10 +156,10 @@ MainWindow::MainWindow(QWidget* parent)
     ui->domSplitter->setStretchFactor(0, 5);
     ui->domSplitter->setStretchFactor(1, 1);
     connect(ui->xpathEdit, &QLineEdit::editingFinished, this, [this]() {
-        if (!m_htmlDoc) {
+        if (!m_domModel->document()) {
             return;
         }
-        const auto res = m_htmlDoc->eval(ui->xpathEdit->text());
+        const auto res = m_domModel->document()->eval(ui->xpathEdit->text());
         if (!res.canConvert<QVariantList>()) { // TODO show this properly in the UI somehow
             qDebug() << "XPath result:" << res;
         }
