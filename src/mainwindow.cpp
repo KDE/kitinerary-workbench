@@ -35,6 +35,8 @@
 #include <KTextEditor/View>
 #include <KTextEditor/Editor>
 
+#include <KIO/StoredTransferJob>
+
 #include <KActionCollection>
 #include <KLocalizedString>
 #include <KStandardAction>
@@ -338,23 +340,26 @@ void MainWindow::urlChanged()
         return;
     }
 
-    if (url.isLocalFile()) {
-        QFile f(url.toLocalFile());
-        f.open(QFile::ReadOnly);
-        m_data = f.readAll();
-
+    auto job = KIO::storedGet(url);
+    connect(job, &KJob::finished, this, [this, job, url]() {
+        if (job->error() != KJob::NoError) {
+            qWarning() << job->errorString();
+            return;
+        }
+        m_data = job->data();
         const auto isText = std::none_of(m_data.begin(), m_data.end(), [](char c) { return std::iscntrl(c) && !std::isspace(c); });
         if (isText) {
-            m_sourceDoc->openUrl(url);
+            if (url.scheme() == QLatin1String("https") || url.scheme() == QLatin1String("http")) {
+                m_sourceDoc->setText(QString::fromUtf8(m_data));
+            } else {
+                m_sourceDoc->openUrl(url);
+            }
             m_sourceView->show();
         } else {
             m_sourceView->hide();
             sourceChanged();
         }
-    } else { // remote content: in theory we'd need to check for binary data there as well...
-        m_sourceDoc->openUrl(url);
-        m_sourceView->show();
-    }
+    });
 }
 
 void MainWindow::imageContextMenu(QPoint pos)
