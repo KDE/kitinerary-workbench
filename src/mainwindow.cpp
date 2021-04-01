@@ -507,20 +507,22 @@ void MainWindow::imageContextMenu(QPoint pos)
         return;
 
     QMenu menu;
-    const auto barcode = menu.addAction(i18n("Decode Barcode"));
-    const auto barcodeBinary = menu.addAction(i18n("Decode Barcode (Binary)"));
+    const auto barcode = menu.addAction(i18n("Decode && Copy Barcode"));
+    const auto barcodeBinary = menu.addAction(i18n("Decode && Copy Barcode (Binary)"));
     menu.addSeparator();
     const auto save = menu.addAction(i18n("Save Image..."));
     const auto bcSave = menu.addAction(i18n("Save Barcode Content..."));
     if (auto action = menu.exec(ui->imageView->viewport()->mapToGlobal(pos))) {
-        QString code;
         if (action == barcode) {
             BarcodeDecoder decoder;
-            code = decoder.decodeString(idx.data(Qt::DecorationRole).value<QImage>());
+            const auto code = decoder.decodeString(idx.data(Qt::DecorationRole).value<QImage>());
+            QGuiApplication::clipboard()->setText(code);
         } else if (action == barcodeBinary) {
             BarcodeDecoder decoder;
             const auto b = decoder.decodeBinary(idx.data(Qt::DecorationRole).value<QImage>());
-            code = QString::fromLatin1(b.constData(), b.size());
+            auto md = new QMimeData;
+            md->setData(QStringLiteral("application/octet-stream"), b);
+            QGuiApplication::clipboard()->setMimeData(md);
         } else if (action == save) {
             const auto fileName = QFileDialog::getSaveFileName(this, i18n("Save Image"));
             idx.data(Qt::DecorationRole).value<QImage>().save(fileName);
@@ -536,15 +538,6 @@ void MainWindow::imageContextMenu(QPoint pos)
                     f.write(b);
                 }
             }
-        }
-        m_sourceDoc->setText(code);
-
-        if (IataBcbpParser::maybeIataBcbp(code)) {
-            ui->typeBox->setCurrentIndex(IataBcbp);
-        } else if (Uic9183Parser::maybeUic9183(code.toLatin1())) {
-            ui->typeBox->setCurrentIndex(Uic9183);
-        } else if (VdvTicketParser::maybeVdvTicket(code.toLatin1())) {
-            ui->typeBox->setCurrentIndex(Vdv);
         }
     }
 }
