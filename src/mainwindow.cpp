@@ -17,12 +17,11 @@
 #include <KItinerary/ExtractorRepository>
 #include <KItinerary/ExtractorValidator>
 #include <KItinerary/HtmlDocument>
-#include <KItinerary/IataBcbpParser>
 #include <KItinerary/JsonLdDocument>
 #include <KItinerary/MergeUtil>
 #include <KItinerary/PdfDocument>
 #include <KItinerary/Reservation>
-#include <KItinerary/VdvTicketParser>
+#include <KItinerary/Uic9183Parser>
 
 #include <KPkPass/Pass>
 
@@ -44,7 +43,7 @@
 #include <QDebug>
 #include <QFontMetrics>
 #include <QHBoxLayout>
-#include <QImageReader>
+#include <QImage>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -56,6 +55,8 @@
 #include <QStandardItemModel>
 #include <QTextCodec>
 #include <QToolBar>
+
+#include <cctype>
 
 Q_DECLARE_METATYPE(KItinerary::Internal::OwnedPtr<KItinerary::HtmlDocument>)
 Q_DECLARE_METATYPE(KItinerary::Internal::OwnedPtr<KItinerary::PdfDocument>)
@@ -105,8 +106,6 @@ MainWindow::MainWindow(QWidget* parent)
     ui->contextDate->setDateTime(QDateTime(QDate::currentDate(), QTime()));
     setCentralWidget(ui->mainSplitter);
 
-    connect(ui->typeBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::typeChanged);
-    connect(ui->typeBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::sourceChanged);
     connect(ui->senderBox, &QComboBox::currentTextChanged, this, &MainWindow::sourceChanged);
     connect(ui->contextDate, &QDateTimeEdit::dateTimeChanged, this, &MainWindow::sourceChanged);
     connect(ui->fileRequester, &KUrlRequester::textChanged, this, &MainWindow::urlChanged);
@@ -126,6 +125,11 @@ MainWindow::MainWindow(QWidget* parent)
 
     ui->documentTreeView->setModel(m_extractorDocModel);
     ui->documentTreeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    connect(ui->documentTreeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this](const QItemSelection &selection) {
+        auto idx = selection.at(0).topLeft();
+        idx = idx.sibling(idx.row(), 0);
+        setCurrentDocumentNode(idx.data(Qt::UserRole).value<KItinerary::ExtractorDocumentNode>());
+    });
 
     m_imageModel->setHorizontalHeaderLabels({i18n("Image")});
     ui->imageView->setModel(m_imageModel);
@@ -198,7 +202,7 @@ MainWindow::MainWindow(QWidget* parent)
         ui->inputTabWidget->setCurrentIndex(ExtractorEditorTab);
     });
 
-    typeChanged();
+    setCurrentDocumentNode({});
 
     QSettings settings;
     settings.beginGroup(QLatin1String("SenderHistory"));
@@ -259,68 +263,9 @@ MainWindow::Type MainWindow::typeFromName(const QString &name)
     return {};
 }
 
-MainWindow::Type MainWindow::type() const
-{
-    return static_cast<Type>(ui->typeBox->currentIndex());
-}
-
-void MainWindow::setType(MainWindow::Type type)
-{
-    ui->typeBox->setCurrentIndex(static_cast<int>(type));
-}
-
 void MainWindow::openFile(const QString &file)
 {
     ui->fileRequester->setText(file);
-}
-
-void MainWindow::typeChanged()
-{
-    ui->inputTabWidget->setTabEnabled(TextTab, false);
-    ui->inputTabWidget->setTabEnabled(ImageTab, false);
-    ui->inputTabWidget->setTabEnabled(DomTab, false);
-    ui->inputTabWidget->setTabEnabled(Uic9183Tab, false);
-    ui->outputTabWidget->setTabEnabled(ExtractorOutputTab, true);
-    switch (ui->typeBox->currentIndex()) {
-        case PlainText:
-        case IataBcbp:
-            m_sourceDoc->setMode(QStringLiteral("Normal"));
-            m_sourceView->show();
-            break;
-        case Uic9183:
-            m_sourceDoc->setMode(QStringLiteral("Normal"));
-            m_sourceView->show();
-            ui->inputTabWidget->setTabEnabled(Uic9183Tab, true);
-            break;
-        case Html:
-            m_sourceDoc->setMode(QStringLiteral("HTML"));
-            m_sourceView->show();
-            ui->inputTabWidget->setTabEnabled(TextTab, true);
-            ui->inputTabWidget->setTabEnabled(DomTab, true);
-            break;
-        case Pdf:
-        case Image:
-            ui->inputTabWidget->setTabEnabled(TextTab, true);
-            ui->inputTabWidget->setTabEnabled(ImageTab, true);
-            m_sourceView->hide();
-            break;
-        case PkPass:
-            m_sourceView->hide();
-            break;
-        case JsonLd:
-            m_sourceDoc->setMode(QStringLiteral("JSON"));
-            m_sourceView->show();
-            ui->outputTabWidget->setTabEnabled(ExtractorOutputTab, false);
-            break;
-        case ICal:
-            m_sourceDoc->setMode(QStringLiteral("vCard, vCalendar, iCalendar"));
-            m_sourceView->show();
-            break;
-        case Mime:
-            m_sourceDoc->setMode(QStringLiteral("Email"));
-            m_sourceView->show();
-            break;
-    }
 }
 
 void MainWindow::sourceChanged()
@@ -331,98 +276,26 @@ void MainWindow::sourceChanged()
     ui->consoleWidget->clear();
     using namespace KItinerary;
 
-    QJsonArray data;
-    if (ui->typeBox->currentIndex() == IataBcbp) {
-        const auto bp = IataBcbpParser::parse(m_sourceDoc->text(), ui->contextDate->date());
-        data = JsonLdDocument::toJson({bp});
-    } else if (ui->typeBox->currentIndex() == Uic9183) {
-        m_ticketParser.setContextDate(ui->contextDate->dateTime());
-        m_ticketParser.parse(m_sourceDoc->text().toLatin1());
-        data = {JsonLdDocument::toJson(QVariant::fromValue(m_ticketParser))};
-        ui->uic9183Widget->setContent(m_ticketParser);
-    } else if (ui->typeBox->currentIndex() == Vdv) {
-        VdvTicketParser p;
-        p.parse(m_sourceDoc->text().toLatin1());
-        data = {JsonLdDocument::toJson(QVariant::fromValue(p.ticket()))};
-    } else if (ui->typeBox->currentIndex() == PkPass && m_pkpass) {
-        m_engine.setContextDate(ui->contextDate->dateTime());
-        m_engine.setPass(m_pkpass.get());
-        data = m_engine.extract();
-        ui->extractorWidget->showExtractor(m_engine.usedCustomExtractor());
-    } else if (ui->typeBox->currentIndex() == JsonLd) {
-        const auto doc = QJsonDocument::fromJson(m_sourceDoc->text().toUtf8());
-        if (doc.isArray())
-            data = doc.array();
-        else if (doc.isObject())
-            data = {doc.object()};
-    } else if (ui->typeBox->currentIndex() == Image) {
-        auto item = new QStandardItem;
-        item->setData(m_image, Qt::DecorationRole);
-        m_imageModel->appendRow(item);
-    } else {
-        m_preprocDoc->setReadWrite(true);
-        if (ui->typeBox->currentIndex() == PlainText) {
-            m_engine.setText(m_sourceDoc->text());
-            m_preprocDoc->setText(m_sourceDoc->text());
-        } else if (ui->typeBox->currentIndex() == Html) {
-            auto codec = QTextCodec::codecForName(m_sourceDoc->encoding().toUtf8());
-            if (!codec) {
-                codec = QTextCodec::codecForLocale();
-            }
-
-            m_htmlDoc.reset(HtmlDocument::fromData(codec->fromUnicode(m_sourceDoc->text())));
-            m_engine.setHtmlDocument(m_htmlDoc.get());
-            if (m_htmlDoc)
-                m_preprocDoc->setText(m_htmlDoc->root().recursiveContent());
-            else
-                m_preprocDoc->clear();
-            m_domModel->setDocument(m_htmlDoc.get());
-            ui->domView->expandAll();
-        } else if (ui->typeBox->currentIndex() == Pdf && m_pdfDoc) {
-            m_engine.setPdfDocument(m_pdfDoc.get());
-            m_preprocDoc->setText(m_pdfDoc->text());
-
-            for (int i = 0; i < m_pdfDoc->pageCount(); ++i) {
-                auto pageItem = new QStandardItem;
-                pageItem->setText(i18n("Page %1", i + 1));
-                const auto page = m_pdfDoc->page(i);
-                for (int j = 0; j < page.imageCount(); ++j) {
-                    auto imgItem = new QStandardItem;
-                    const auto img = page.image(j);
-                    imgItem->setData(img.image(), Qt::DecorationRole);
-                    imgItem->setToolTip(i18n("Size: %1 x %2\nSource: %3 x %4", img.width(), img.height(), img.sourceWidth(), img.sourceHeight()));
-                    pageItem->appendRow(imgItem);
-                }
-                m_imageModel->appendRow(pageItem);
-            }
-            ui->imageView->expandAll();
-        } else if (ui->typeBox->currentIndex() == ICal) {
-            m_calendar.reset(new KCalendarCore::MemoryCalendar(QTimeZone::systemTimeZone()));
-            KCalendarCore::ICalFormat format;
-            format.fromString(m_calendar, m_sourceDoc->text());
-            m_calendar->setProductId(format.loadedProductId());
-            m_engine.setCalendar(m_calendar);
-        } else if (ui->typeBox->currentIndex() == Mime) {
-            m_mimeMessage.reset(new KMime::Message);
-            m_mimeMessage->setContent(m_sourceDoc->text().toUtf8());
-            m_mimeMessage->parse();
-            m_engine.setContent(m_mimeMessage.get());
+    if (m_sourceView->isVisible()) {
+        auto codec = QTextCodec::codecForName(m_sourceDoc->encoding().toUtf8());
+        if (!codec) {
+            codec = QTextCodec::codecForLocale();
         }
-        m_preprocDoc->setReadWrite(false);
-
-        KMime::Message msg;
-        if (ui->typeBox->currentIndex() != Mime) {
-            msg.from()->fromUnicodeString(ui->senderBox->currentText(), "utf-8");
-            msg.date()->setDateTime(ui->contextDate->dateTime());
-            m_engine.setContext(&msg);
-        }
-
-        data = m_engine.extract();
-        ui->extractorWidget->showExtractor(m_engine.usedCustomExtractor());
+        m_data = codec->fromUnicode(m_sourceDoc->text());
     }
+
+    KMime::Message contextMsg; // TODO lifetime!
+    contextMsg.from()->fromUnicodeString(ui->senderBox->currentText(), "utf-8");
+    contextMsg.date()->setDateTime(ui->contextDate->dateTime());
+    m_engine.setContext(QVariant::fromValue<KMime::Content*>(&contextMsg), u"message/rfc822");
+
+    m_engine.setData(m_data, ui->fileRequester->url().toString());
+    const auto data = m_engine.extract();
+    ui->extractorWidget->showExtractor(m_engine.usedCustomExtractor());
 
     m_extractorDocModel->setRootNode(m_engine.rootDocumentNode());
     ui->documentTreeView->expandAll();
+    setCurrentDocumentNode(m_engine.rootDocumentNode());
 
     m_outputDoc->setReadWrite(true);
     m_outputDoc->setText(QJsonDocument(data).toJson());
@@ -461,42 +334,26 @@ void MainWindow::sourceChanged()
 void MainWindow::urlChanged()
 {
     const auto url = ui->fileRequester->url();
-    if (!url.isValid())
+    if (!url.isValid()) {
         return;
+    }
 
-    if (url.toString().endsWith(QLatin1String(".pkpass"))) {
-        m_pkpass.reset(KPkPass::Pass::fromFile(url.toLocalFile()));
-        ui->typeBox->setCurrentIndex(PkPass);
-        sourceChanged();
-    } else if (url.toString().endsWith(QLatin1String(".pdf"))) {
+    if (url.isLocalFile()) {
         QFile f(url.toLocalFile());
         f.open(QFile::ReadOnly);
-        m_pdfDoc.reset(KItinerary::PdfDocument::fromData(f.readAll()));
-        ui->typeBox->setCurrentIndex(Pdf);
-        sourceChanged();
-    } else if (url.toString().endsWith(QLatin1String(".html"))) {
-        QFile f(url.toLocalFile());
-        f.open(QFile::ReadOnly);
-        m_htmlDoc.reset(KItinerary::HtmlDocument::fromData(f.readAll()));
-        ui->typeBox->setCurrentIndex(Html);
-        m_domModel->setDocument(m_htmlDoc.get());
-        ui->domView->expandAll();
-        m_sourceDoc->openUrl(url);
-    } else if (url.toString().endsWith(QLatin1String(".png")) || url.toString().endsWith(QLatin1String(".jpg")) || url.toString().endsWith(QLatin1String(".gif"))) {
-        QImageReader reader(url.toLocalFile());
-        if (!reader.read(&m_image)) {
-            qWarning() << "Failed to open image:" << url.toLocalFile() << reader.errorString();
+        m_data = f.readAll();
+
+        const auto isText = std::none_of(m_data.begin(), m_data.end(), [](char c) { return std::iscntrl(c) && !std::isspace(c); });
+        if (isText) {
+            m_sourceDoc->openUrl(url);
+            m_sourceView->show();
+        } else {
+            m_sourceView->hide();
+            sourceChanged();
         }
-        ui->typeBox->setCurrentIndex(Image);
-        sourceChanged();
-    } else if (url.toString().endsWith(QLatin1String(".ics"))) {
-        ui->typeBox->setCurrentIndex(ICal);
+    } else { // remote content: in theory we'd need to check for binary data there as well...
         m_sourceDoc->openUrl(url);
-    } else if (url.toString().endsWith(QLatin1String(".eml")) || url.toString().endsWith(QLatin1String(".mbox"))) {
-        ui->typeBox->setCurrentIndex(Mime);
-        m_sourceDoc->openUrl(url);
-    } else {
-        m_sourceDoc->openUrl(url);
+        m_sourceView->show();
     }
 }
 

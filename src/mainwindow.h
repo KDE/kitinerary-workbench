@@ -9,22 +9,10 @@
 
 #include <KItinerary/ExtractorDocumentNode>
 #include <KItinerary/ExtractorEngine>
-#include <KItinerary/Uic9183Parser>
-
-#include <KCalendarCore/Calendar>
 
 #include <KXmlGuiWindow>
 
 #include <memory>
-
-namespace KItinerary {
-class HtmlDocument;
-class PdfDocument;
-}
-
-namespace KPkPass {
-class Pass;
-}
 
 namespace KMime {
 class Message;
@@ -116,14 +104,7 @@ private:
     AttributeModel *m_attrModel;
 
     KItinerary::ExtractorEngine m_engine;
-    std::unique_ptr<KPkPass::Pass> m_pkpass;
-    std::unique_ptr<KItinerary::HtmlDocument> m_htmlDoc;
-    std::unique_ptr<KItinerary::PdfDocument> m_pdfDoc;
-    QImage m_image;
-    KCalendarCore::Calendar::Ptr m_calendar;
-    std::unique_ptr<KMime::Message> m_mimeMessage;
-
-    KItinerary::Uic9183Parser m_ticketParser;
+    QByteArray m_data;
     KItinerary::ExtractorDocumentNode m_currentNode;
 };
 
