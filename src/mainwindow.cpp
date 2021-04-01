@@ -286,10 +286,10 @@ void MainWindow::sourceChanged()
         m_data = codec->fromUnicode(m_sourceDoc->text());
     }
 
-    KMime::Message contextMsg; // TODO lifetime!
-    contextMsg.from()->fromUnicodeString(ui->senderBox->currentText(), "utf-8");
-    contextMsg.date()->setDateTime(ui->contextDate->dateTime());
-    m_engine.setContext(QVariant::fromValue<KMime::Content*>(&contextMsg), u"message/rfc822");
+    m_contextMsg = std::make_unique<KMime::Message>();
+    m_contextMsg->from()->fromUnicodeString(ui->senderBox->currentText(), "utf-8");
+    m_contextMsg->date()->setDateTime(ui->contextDate->dateTime());
+    m_engine.setContext(QVariant::fromValue<KMime::Content*>(m_contextMsg.get()), u"message/rfc822");
 
     m_engine.setData(m_data, ui->fileRequester->url().toString());
     const auto data = m_engine.extract();

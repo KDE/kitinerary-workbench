@@ -105,6 +105,7 @@ private:
 
     KItinerary::ExtractorEngine m_engine;
     QByteArray m_data;
+    std::unique_ptr<KMime::Message> m_contextMsg;
     KItinerary::ExtractorDocumentNode m_currentNode;
 };
 
