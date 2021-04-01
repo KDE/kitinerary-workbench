@@ -177,7 +177,11 @@
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_6">
          <item>
-          <widget class="QTreeView" name="documentTreeView"/>
+          <widget class="QTreeView" name="documentTreeView">
+           <property name="contextMenuPolicy">
+            <enum>Qt::CustomContextMenu</enum>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>

@@ -13,7 +13,6 @@
 
 #include <KItinerary/BarcodeDecoder>
 #include <KItinerary/CalendarHandler>
-#include <KItinerary/ExtractorDocumentNode>
 #include <KItinerary/ExtractorPostprocessor>
 #include <KItinerary/ExtractorRepository>
 #include <KItinerary/ExtractorValidator>
@@ -57,6 +56,9 @@
 #include <QStandardItemModel>
 #include <QTextCodec>
 #include <QToolBar>
+
+Q_DECLARE_METATYPE(KItinerary::Internal::OwnedPtr<KItinerary::HtmlDocument>)
+Q_DECLARE_METATYPE(KItinerary::Internal::OwnedPtr<KItinerary::PdfDocument>)
 
 static QVector<QVector<QVariant>> batchReservations(const QVector<QVariant> &reservations)
 {
@@ -539,5 +541,65 @@ void MainWindow::imageContextMenu(QPoint pos)
                 }
             }
         }
+    }
+}
+
+void MainWindow::setCurrentDocumentNode(const KItinerary::ExtractorDocumentNode &node)
+{
+    ui->inputTabWidget->setTabEnabled(TextTab, false);
+    ui->inputTabWidget->setTabEnabled(ImageTab, false);
+    ui->inputTabWidget->setTabEnabled(DomTab, false);
+    ui->inputTabWidget->setTabEnabled(Uic9183Tab, false);
+
+    m_imageModel->removeRows(0, m_imageModel->rowCount());
+    m_domModel->setDocument(nullptr);
+
+    using namespace KItinerary;
+    m_currentNode = node;
+
+    if (node.mimeType() == QLatin1String("application/pdf")) {
+        const auto pdf = node.content<PdfDocument*>();
+        m_preprocDoc->setText(pdf->text());
+
+        for (int i = 0; i < pdf->pageCount(); ++i) {
+            auto pageItem = new QStandardItem;
+            pageItem->setText(i18n("Page %1", i + 1));
+            const auto page = pdf->page(i);
+            for (int j = 0; j < page.imageCount(); ++j) {
+                auto imgItem = new QStandardItem;
+                const auto img = page.image(j);
+                imgItem->setData(img.image(), Qt::DecorationRole);
+                imgItem->setToolTip(i18n("Size: %1 x %2\nSource: %3 x %4", img.width(), img.height(), img.sourceWidth(), img.sourceHeight()));
+                pageItem->appendRow(imgItem);
+            }
+            m_imageModel->appendRow(pageItem);
+        }
+        ui->imageView->expandAll();
+
+        ui->inputTabWidget->setTabEnabled(TextTab, true);
+        ui->inputTabWidget->setTabEnabled(ImageTab, true);
+    }
+    else if (node.mimeType() == QLatin1String("internal/qimage")) {
+        auto item = new QStandardItem;
+        item->setData(node.content<QImage>(), Qt::DecorationRole);
+        m_imageModel->appendRow(item);
+        ui->inputTabWidget->setTabEnabled(ImageTab, true);
+    }
+    else if (node.mimeType() == QLatin1String("internal/uic9183")) {
+        const auto uic9183 = node.content<Uic9183Parser>();
+        ui->uic9183Widget->setContent(uic9183);
+        ui->inputTabWidget->setTabEnabled(Uic9183Tab, true);
+    }
+    else if (node.mimeType() == QLatin1String("text/html")) {
+        const auto html = node.content<HtmlDocument*>();
+        m_domModel->setDocument(html);
+        m_preprocDoc->setText(html->root().recursiveContent());
+        ui->domView->expandAll();
+        ui->inputTabWidget->setTabEnabled(TextTab, true);
+        ui->inputTabWidget->setTabEnabled(DomTab, true);
+    }
+    else if (node.mimeType() == QLatin1String("text/plain")) {
+        m_preprocDoc->setText(node.content().value<QString>());
+        ui->inputTabWidget->setTabEnabled(TextTab, true);
     }
 }

@@ -7,6 +7,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <KItinerary/ExtractorDocumentNode>
 #include <KItinerary/ExtractorEngine>
 #include <KItinerary/Uic9183Parser>
 
@@ -96,6 +97,7 @@ private:
     void sourceChanged();
     void urlChanged();
     void imageContextMenu(QPoint pos);
+    void setCurrentDocumentNode(const KItinerary::ExtractorDocumentNode &node);
 
 private:
     std::unique_ptr<Ui::MainWindow> ui;
@@ -122,6 +124,7 @@ private:
     std::unique_ptr<KMime::Message> m_mimeMessage;
 
     KItinerary::Uic9183Parser m_ticketParser;
+    KItinerary::ExtractorDocumentNode m_currentNode;
 };
 
 #endif // MAINWINDOW_H
