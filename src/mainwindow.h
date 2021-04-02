@@ -40,26 +40,6 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    enum Type {
-        PlainText,
-        Html,
-        Pdf,
-        PkPass,
-        IataBcbp,
-        JsonLd,
-        Uic9183,
-        Image,
-        ICal,
-        Mime,
-        Vdv
-    };
-    Q_ENUM(Type)
-
-    static Type typeFromName(const QString &name);
-
-    Type type() const;
-    void setType(Type type);
-
     void openFile(const QString &file);
 
 private:

@@ -245,26 +245,6 @@ MainWindow::~MainWindow()
     settings.endGroup();
 }
 
-MainWindow::Type MainWindow::typeFromName(const QString &name)
-{
-    const auto me = QMetaEnum::fromType<Type>();
-    Q_ASSERT(me.isValid());
-
-    bool ok = false;
-    const auto value = me.keyToValue(name.toUtf8().constData(), &ok);
-    if (ok) {
-        return static_cast<Type>(value);
-    }
-
-    for (auto i = 0; i < me.keyCount(); ++i) {
-        if (qstricmp(name.toUtf8().constData(), me.key(i)) == 0) {
-            return static_cast<Type>(me.value(i));
-        }
-    }
-
-    return {};
-}
-
 void MainWindow::openFile(const QString &file)
 {
     ui->fileRequester->setText(file);
