@@ -444,4 +444,8 @@ void MainWindow::setCurrentDocumentNode(const KItinerary::ExtractorDocumentNode 
         m_preprocDoc->setText(node.content().value<QString>());
         ui->inputTabWidget->setTabEnabled(TextTab, true);
     }
+    else if (node.mimeType() == QLatin1String("application/ld+json")) {
+        m_preprocDoc->setText(QJsonDocument(node.content().value<QJsonArray>()).toJson());
+        ui->inputTabWidget->setTabEnabled(TextTab, true);
+    }
 }
