@@ -222,7 +222,9 @@ ExtractorEditorWidget::ExtractorEditorWidget(QWidget *parent)
         ExtractorRepository repo;
         const auto extId = ui->extractorCombobox->currentText();
         const auto extractor = dynamic_cast<const ScriptExtractor*>(repo.extractorByName(extId));
-        Q_ASSERT(extractor);
+        if (!extractor) {
+            return;
+        }
         ui->scriptEdit->setText(extractor->scriptFileName());
         ui->functionEdit->setText(extractor->scriptFunction());
         ui->inputType->setCurrentIndex(ui->inputType->findText(extractor->mimeType()));
