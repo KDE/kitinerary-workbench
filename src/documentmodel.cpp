@@ -32,6 +32,7 @@ void DocumentModel::addNode(const ExtractorDocumentNode& node, QStandardItem *pa
     auto i1 = new QStandardItem;
     i1->setText(node.mimeType());
     i1->setData(QVariant::fromValue(node), Qt::UserRole);
+    i1->setFlags(i1->flags() & ~Qt::ItemIsEditable);
     if (!node.location().isNull()) {
         i1->setToolTip(i18n("Location: %1", node.location().toString()));
     }
@@ -44,6 +45,7 @@ void DocumentModel::addNode(const ExtractorDocumentNode& node, QStandardItem *pa
 
     auto i2 = new QStandardItem;
     i2->setText(node.contextDateTime().toString(Qt::ISODate));
+    i2->setFlags(i1->flags() & ~Qt::ItemIsEditable);
 
     if (parent)
         parent->appendRow({i1, i2});
