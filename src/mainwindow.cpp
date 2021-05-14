@@ -359,11 +359,11 @@ void MainWindow::imageContextMenu(QPoint pos)
     if (auto action = menu.exec(ui->imageView->viewport()->mapToGlobal(pos))) {
         if (action == barcode) {
             BarcodeDecoder decoder;
-            const auto code = decoder.decodeString(idx.data(Qt::DecorationRole).value<QImage>());
+            const auto code = decoder.decodeString(idx.data(Qt::DecorationRole).value<QImage>(), BarcodeDecoder::Any | BarcodeDecoder::IgnoreAspectRatio);
             QGuiApplication::clipboard()->setText(code);
         } else if (action == barcodeBinary) {
             BarcodeDecoder decoder;
-            const auto b = decoder.decodeBinary(idx.data(Qt::DecorationRole).value<QImage>());
+            const auto b = decoder.decodeBinary(idx.data(Qt::DecorationRole).value<QImage>(), BarcodeDecoder::Any | BarcodeDecoder::IgnoreAspectRatio);
             auto md = new QMimeData;
             md->setData(QStringLiteral("application/octet-stream"), b);
             QGuiApplication::clipboard()->setMimeData(md);
