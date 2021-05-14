@@ -351,7 +351,7 @@ void ExtractorEditorWidget::create()
         startDir = repo.additionalSearchPaths().at(0);
     }
 
-    const auto metaFileName = QFileDialog::getSaveFileName(this, i18n("Create New Extractor"), startDir, QStringLiteral("*.json"), nullptr, QFileDialog::DontConfirmOverwrite);
+    const auto metaFileName = QFileDialog::getSaveFileName(this, i18n("Create New Extractor"), startDir, i18n("JSON (*.json)"), nullptr, QFileDialog::DontConfirmOverwrite);
     if (metaFileName.isEmpty()) {
         return;
     }
