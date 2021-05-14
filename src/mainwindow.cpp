@@ -302,7 +302,7 @@ void MainWindow::sourceChanged()
     m_validatedDoc->setText(QJsonDocument(JsonLdDocument::toJson(result)).toJson());
     m_validatedDoc->setReadWrite(false);
 
-    const auto batches = batchReservations(postproc.result());
+    const auto batches = batchReservations(result);
     KCalendarCore::Calendar::Ptr cal(new KCalendarCore::MemoryCalendar(QTimeZone::systemTimeZone()));
     for (const auto &batch : batches) {
         KCalendarCore::Event::Ptr event(new KCalendarCore::Event);
