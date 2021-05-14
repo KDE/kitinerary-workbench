@@ -401,6 +401,9 @@ void MainWindow::setCurrentDocumentNode(const KItinerary::ExtractorDocumentNode 
 
     if (node.mimeType() == QLatin1String("application/pdf")) {
         const auto pdf = node.content<PdfDocument*>();
+        if (!pdf) {
+            return;
+        }
         m_preprocDoc->setText(pdf->text());
 
         for (int i = 0; i < pdf->pageCount(); ++i) {
