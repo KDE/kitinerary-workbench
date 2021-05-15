@@ -301,6 +301,17 @@
     <string>&amp;Configure KItinerary Workbench...</string>
    </property>
   </action>
+  <action name="actionInputFromClipboard">
+   <property name="icon">
+    <iconset theme="edit-paste"/>
+   </property>
+   <property name="text">
+    <string>Load From &amp;Clipboard</string>
+   </property>
+   <property name="toolTip">
+    <string>Load content from clipboard.</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

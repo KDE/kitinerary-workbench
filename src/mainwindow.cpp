@@ -217,6 +217,7 @@ MainWindow::MainWindow(QWidget* parent)
         repo.reload();
         ui->extractorWidget->reloadExtractors();
     });
+    connect(ui->actionInputFromClipboard, &QAction::triggered, this, &MainWindow::loadFromClipboard);
     connect(ui->actionSettingsConfigure, &QAction::triggered, this, [this]() {
         SettingsDialog dlg(this);
         if (dlg.exec() == QDialog::Accepted) {
@@ -225,6 +226,7 @@ MainWindow::MainWindow(QWidget* parent)
     });
     actionCollection()->addAction(QStringLiteral("extractor_run"), ui->actionExtractorRun);
     actionCollection()->addAction(QStringLiteral("extractor_reload_repository"), ui->actionExtractorReloadRepository);
+    actionCollection()->addAction(QStringLiteral("input_from_clipboard"), ui->actionInputFromClipboard);
     actionCollection()->addAction(QStringLiteral("file_quit"), KStandardAction::quit(QApplication::instance(), &QApplication::closeAllWindows, this));
     actionCollection()->addAction(QStringLiteral("options_configure"), ui->actionSettingsConfigure);
     ui->extractorWidget->registerActions(actionCollection());
@@ -340,6 +342,21 @@ void MainWindow::urlChanged()
             sourceChanged();
         }
     });
+}
+
+void MainWindow::loadFromClipboard()
+{
+    ui->fileRequester->clear();
+
+    const auto md = QGuiApplication::clipboard()->mimeData();
+    if (md->hasText()) {
+        m_sourceDoc->setText(md->text());
+        m_sourceView->show();
+    } else if (md->hasFormat(QLatin1String("application/octet-stream"))) {
+        m_data = md->data(QLatin1String("application/octet-stream"));
+        m_sourceView->hide();
+    }
+    sourceChanged();
 }
 
 void MainWindow::imageContextMenu(QPoint pos)

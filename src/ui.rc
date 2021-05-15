@@ -16,5 +16,9 @@
             <Separator/>
             <Action name="extractor_reload_repository"/>
         </Menu>
+        <Menu name="input">
+            <text>&amp;Input</text>
+            <Action name="input_from_clipboard"/>
+        </Menu>
     </MenuBar>
 </kpartgui>

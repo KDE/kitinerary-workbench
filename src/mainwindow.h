@@ -64,6 +64,7 @@ private:
     void typeChanged();
     void sourceChanged();
     void urlChanged();
+    void loadFromClipboard();
     void imageContextMenu(QPoint pos);
     void setCurrentDocumentNode(const KItinerary::ExtractorDocumentNode &node);
 
