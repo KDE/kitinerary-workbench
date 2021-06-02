@@ -312,6 +312,17 @@
     <string>Load content from clipboard.</string>
    </property>
   </action>
+  <action name="actionInputClear">
+   <property name="icon">
+    <iconset theme="edit-clear"/>
+   </property>
+   <property name="text">
+    <string>&amp;Clear Input</string>
+   </property>
+   <property name="toolTip">
+    <string>Resets the current input data.</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

@@ -19,6 +19,7 @@
         <Menu name="input">
             <text>&amp;Input</text>
             <Action name="input_from_clipboard"/>
+            <Action name="input_clear"/>
         </Menu>
     </MenuBar>
 </kpartgui>

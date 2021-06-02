@@ -218,6 +218,12 @@ MainWindow::MainWindow(QWidget* parent)
         ui->extractorWidget->reloadExtractors();
     });
     connect(ui->actionInputFromClipboard, &QAction::triggered, this, &MainWindow::loadFromClipboard);
+    connect(ui->actionInputClear, &QAction::triggered, this, [this]() {
+        ui->fileRequester->clear();
+        m_sourceDoc->clear();
+        m_sourceView->show();
+        sourceChanged();
+    });
     connect(ui->actionSettingsConfigure, &QAction::triggered, this, [this]() {
         SettingsDialog dlg(this);
         if (dlg.exec() == QDialog::Accepted) {
@@ -227,6 +233,7 @@ MainWindow::MainWindow(QWidget* parent)
     actionCollection()->addAction(QStringLiteral("extractor_run"), ui->actionExtractorRun);
     actionCollection()->addAction(QStringLiteral("extractor_reload_repository"), ui->actionExtractorReloadRepository);
     actionCollection()->addAction(QStringLiteral("input_from_clipboard"), ui->actionInputFromClipboard);
+    actionCollection()->addAction(QStringLiteral("input_clear"), ui->actionInputClear);
     actionCollection()->addAction(QStringLiteral("file_quit"), KStandardAction::quit(QApplication::instance(), &QApplication::closeAllWindows, this));
     actionCollection()->addAction(QStringLiteral("options_configure"), ui->actionSettingsConfigure);
     ui->extractorWidget->registerActions(actionCollection());
