@@ -10,6 +10,7 @@
 #include "documentmodel.h"
 #include "dommodel.h"
 #include "settingsdialog.h"
+#include "standarditemmodelhelper.h"
 
 #include <KItinerary/BarcodeDecoder>
 #include <KItinerary/CalendarHandler>
@@ -17,6 +18,7 @@
 #include <KItinerary/ExtractorRepository>
 #include <KItinerary/ExtractorValidator>
 #include <KItinerary/HtmlDocument>
+#include <KItinerary/IataBcbp>
 #include <KItinerary/JsonLdDocument>
 #include <KItinerary/MergeUtil>
 #include <KItinerary/PdfDocument>
@@ -103,6 +105,7 @@ MainWindow::MainWindow(QWidget* parent)
     , m_imageModel(new QStandardItemModel(this))
     , m_domModel(new DOMModel(this))
     , m_attrModel(new AttributeModel(this))
+    , m_iataBcbpModel(new QStandardItemModel(this))
 {
     ui->setupUi(this);
     ui->contextDate->setDateTime(QDateTime(QDate::currentDate(), QTime()));
@@ -174,6 +177,10 @@ MainWindow::MainWindow(QWidget* parent)
         m_domModel->setHighlightNodeSet(res.value<QVariantList>());
         ui->domView->viewport()->update(); // dirty, but easier than triggering a proper full model update
     });
+
+    m_iataBcbpModel->setHorizontalHeaderLabels({i18n("Field"), i18n("Value")});
+    ui->iataBcbpView->setModel(m_iataBcbpModel);
+    ui->iataBcbpView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
     m_outputDoc = editor->createDocument(nullptr);
     m_outputDoc->setMode(QStringLiteral("JSON"));
@@ -262,7 +269,7 @@ void MainWindow::openFile(const QString &file)
 void MainWindow::sourceChanged()
 {
     m_engine.clear();
-    m_imageModel->removeRows(0, m_imageModel->rowCount());
+    StandardItemModelHelper::clearContent(m_imageModel);
     ui->uic9183Widget->clear();
     ui->consoleWidget->clear();
     using namespace KItinerary;
@@ -416,8 +423,9 @@ void MainWindow::setCurrentDocumentNode(const KItinerary::ExtractorDocumentNode 
     ui->inputTabWidget->setTabEnabled(ImageTab, false);
     ui->inputTabWidget->setTabEnabled(DomTab, false);
     ui->inputTabWidget->setTabEnabled(Uic9183Tab, false);
+    ui->inputTabWidget->setTabEnabled(IataBcbpTab, false);
 
-    m_imageModel->removeRows(0, m_imageModel->rowCount());
+    StandardItemModelHelper::clearContent(m_imageModel);
     m_domModel->setDocument(nullptr);
 
     using namespace KItinerary;
@@ -474,5 +482,36 @@ void MainWindow::setCurrentDocumentNode(const KItinerary::ExtractorDocumentNode 
     else if (node.mimeType() == QLatin1String("application/ld+json")) {
         m_preprocDoc->setText(QJsonDocument(node.content().value<QJsonArray>()).toJson());
         ui->inputTabWidget->setTabEnabled(TextTab, true);
+    }
+    else if (node.mimeType() == QLatin1String("internal/iata-bcbp")) {
+        const auto bcbp = node.content<IataBcbp>();
+        m_preprocDoc->setText(bcbp.rawData());
+        ui->inputTabWidget->setTabEnabled(TextTab, true);
+
+        StandardItemModelHelper::clearContent(m_iataBcbpModel);
+        const auto ums = bcbp.uniqueMandatorySection();
+        StandardItemModelHelper::fillFromGadget(ums, m_iataBcbpModel->invisibleRootItem());
+        const auto ucs = bcbp.uniqueConditionalSection();
+        StandardItemModelHelper::fillFromGadget(ucs, m_iataBcbpModel->invisibleRootItem());
+        const auto issueDate = ucs.dateOfIssue(node.contextDateTime().date());
+        StandardItemModelHelper::addEntry(i18n("Date of issue"), issueDate.toString(Qt::ISODate), m_iataBcbpModel->invisibleRootItem());
+        for (auto i = 0; i < ums.numberOfLegs(); ++i) {
+            auto legItem = StandardItemModelHelper::addEntry(i18n("Leg %1", i + 1), {}, m_iataBcbpModel->invisibleRootItem());
+            const auto rms = bcbp.repeatedMandatorySection(i);
+            StandardItemModelHelper::fillFromGadget(rms, legItem);
+            const auto rcs = bcbp.repeatedConditionalSection(i);
+            StandardItemModelHelper::fillFromGadget(rcs, legItem);
+            StandardItemModelHelper::addEntry(i18n("Airline use section"), bcbp.airlineUseSection(i), legItem);
+            StandardItemModelHelper::addEntry(i18n("Date of flight"), rms.dateOfFlight(issueDate.isValid() ? issueDate : node.contextDateTime().date()).toString(Qt::ISODate), legItem);
+        }
+
+        if (bcbp.hasSecuritySection()) {
+            auto secItem = StandardItemModelHelper::addEntry(i18n("Security"), {}, m_iataBcbpModel->invisibleRootItem());
+            const auto sec = bcbp.securitySection();
+            StandardItemModelHelper::fillFromGadget(sec, secItem);
+        }
+
+        ui->iataBcbpView->expandAll();
+        ui->inputTabWidget->setTabEnabled(IataBcbpTab, true);
     }
 }

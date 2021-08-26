@@ -10,6 +10,7 @@ set(workbench_srcs
     dommodel.cpp
     extractoreditorwidget.cpp
     settingsdialog.cpp
+    standarditemmodelhelper.cpp
     uic9183ticketlayoutmodel.cpp
     uic9183widget.cpp
     ui.qrc

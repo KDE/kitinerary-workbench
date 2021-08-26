@@ -50,7 +50,8 @@ private:
         TextTab = 3,
         ImageTab = 4,
         DomTab = 5,
-        Uic9183Tab = 6
+        Uic9183Tab = 6,
+        IataBcbpTab = 7,
     };
 
     enum OutputTab {
@@ -83,6 +84,7 @@ private:
     QStandardItemModel *m_imageModel;
     DOMModel *m_domModel;
     AttributeModel *m_attrModel;
+    QStandardItemModel *m_iataBcbpModel;
 
     KItinerary::ExtractorEngine m_engine;
     QByteArray m_data;

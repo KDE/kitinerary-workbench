@@ -7,6 +7,7 @@
 #include "uic9183widget.h"
 #include "ui_uic9183widget.h"
 #include "uic9183ticketlayoutmodel.h"
+#include "standarditemmodelhelper.h"
 
 #include <KItinerary/Uic9183Block>
 #include <KItinerary/Uic9183Parser>
@@ -104,12 +105,13 @@ Uic9183Widget::~Uic9183Widget() = default;
 
 void Uic9183Widget::clear()
 {
-    m_uic9183BlockModel->removeRows(0, m_uic9183BlockModel->rowCount());
-    m_vendor0080BLModel->removeRows(0, m_vendor0080BLModel->rowCount());
+    StandardItemModelHelper::clearContent(m_uic9183BlockModel);
+    StandardItemModelHelper::clearContent(m_vendor0080BLModel);
 }
 
 void Uic9183Widget::setContent(const KItinerary::Uic9183Parser &p)
 {
+    clear();
     m_ticketLayoutModel->setLayout(p.ticketLayout());
     auto idx = ui->ticketLayoutTemplate->findText(p.ticketLayout().type());
     ui->ticketLayoutTemplate->setCurrentIndex(std::max(idx, 0));
