@@ -493,7 +493,7 @@ void MainWindow::setCurrentDocumentNode(const KItinerary::ExtractorDocumentNode 
         StandardItemModelHelper::fillFromGadget(ums, m_iataBcbpModel->invisibleRootItem());
         const auto ucs = bcbp.uniqueConditionalSection();
         StandardItemModelHelper::fillFromGadget(ucs, m_iataBcbpModel->invisibleRootItem());
-        const auto issueDate = ucs.dateOfIssue(node.contextDateTime().date());
+        const auto issueDate = ucs.dateOfIssue(node.contextDateTime());
         StandardItemModelHelper::addEntry(i18n("Date of issue"), issueDate.toString(Qt::ISODate), m_iataBcbpModel->invisibleRootItem());
         for (auto i = 0; i < ums.numberOfLegs(); ++i) {
             auto legItem = StandardItemModelHelper::addEntry(i18n("Leg %1", i + 1), {}, m_iataBcbpModel->invisibleRootItem());
@@ -502,7 +502,7 @@ void MainWindow::setCurrentDocumentNode(const KItinerary::ExtractorDocumentNode 
             const auto rcs = bcbp.repeatedConditionalSection(i);
             StandardItemModelHelper::fillFromGadget(rcs, legItem);
             StandardItemModelHelper::addEntry(i18n("Airline use section"), bcbp.airlineUseSection(i), legItem);
-            StandardItemModelHelper::addEntry(i18n("Date of flight"), rms.dateOfFlight(issueDate.isValid() ? issueDate : node.contextDateTime().date()).toString(Qt::ISODate), legItem);
+            StandardItemModelHelper::addEntry(i18n("Date of flight"), rms.dateOfFlight(issueDate.isValid() ? QDateTime(issueDate, {}) : node.contextDateTime()).toString(Qt::ISODate), legItem);
         }
 
         if (bcbp.hasSecuritySection()) {
