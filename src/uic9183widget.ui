@@ -116,13 +116,37 @@
          <number>0</number>
         </property>
         <item>
-         <widget class="QTreeView" name="vendor0080BLView">
-          <property name="rootIsDecorated">
-           <bool>false</bool>
+         <widget class="QTabWidget" name="vendor0080BLTab">
+          <property name="currentIndex">
+           <number>0</number>
           </property>
-          <attribute name="headerStretchLastSection">
-           <bool>false</bool>
-          </attribute>
+          <widget class="QWidget" name="vendor0080BLSBlockPage">
+           <attribute name="title">
+            <string>S Blocks</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_6">
+            <item>
+             <widget class="QTreeView" name="vendor0080BLView">
+              <property name="rootIsDecorated">
+               <bool>false</bool>
+              </property>
+              <attribute name="headerStretchLastSection">
+               <bool>false</bool>
+              </attribute>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="tab_2">
+           <attribute name="title">
+            <string>Order Blocks</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_7">
+            <item>
+             <widget class="QTreeView" name="vendor0080BLOrderView"/>
+            </item>
+           </layout>
+          </widget>
          </widget>
         </item>
        </layout>

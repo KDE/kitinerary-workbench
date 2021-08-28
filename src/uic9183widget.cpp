@@ -30,6 +30,7 @@ Uic9183Widget::Uic9183Widget(QWidget *parent)
     , m_uic9183BlockModel(new QStandardItemModel(this))
     , m_ticketLayoutModel(new Uic9183TicketLayoutModel(this))
     , m_vendor0080BLModel(new QStandardItemModel(this))
+    , m_vendor0080BLOrderModel(new QStandardItemModel(this))
     , m_genericBlockModel(new QStandardItemModel(this))
 {
     ui->setupUi(this);
@@ -88,6 +89,9 @@ Uic9183Widget::Uic9183Widget(QWidget *parent)
     m_vendor0080BLModel->setHorizontalHeaderLabels({i18n("Name"), i18n("Size"), i18n("Content")});
     ui->vendor0080BLView->setModel(m_vendor0080BLModel);
     ui->vendor0080BLView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    m_vendor0080BLOrderModel->setHorizontalHeaderLabels({i18n("Field"), i18n("Value")});
+    ui->vendor0080BLOrderView->setModel(m_vendor0080BLOrderModel);
+    ui->vendor0080BLOrderView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
     m_genericBlockModel->setHorizontalHeaderLabels({i18n("Field"), i18n("Value")});
     ui->genericBlockView->setModel(m_genericBlockModel);
@@ -100,6 +104,7 @@ void Uic9183Widget::clear()
 {
     StandardItemModelHelper::clearContent(m_uic9183BlockModel);
     StandardItemModelHelper::clearContent(m_vendor0080BLModel);
+    StandardItemModelHelper::clearContent(m_vendor0080BLOrderModel);
     StandardItemModelHelper::clearContent(m_genericBlockModel);
 }
 
@@ -132,6 +137,11 @@ void Uic9183Widget::setContent(const KItinerary::Uic9183Parser &p)
             m_vendor0080BLModel->appendRow({nameItem, sizeItem, contentItem});
             sblock = sblock.nextBlock();
         }
+        for (int i = 0; i < vendor0080BL.orderBlockCount(); ++i) {
+            auto item = StandardItemModelHelper::addEntry(i18n("Order %1", i + 1), {}, m_vendor0080BLOrderModel->invisibleRootItem());
+            StandardItemModelHelper::fillFromGadget(vendor0080BL.orderBlock(i), item);
+        }
+        ui->vendor0080BLOrderView->expandAll();
     }
 
     m_uic9183 = p;
@@ -156,7 +166,7 @@ void Uic9183Widget::blockSelectionChanged()
     const auto blockName = sel.at(0).data(Qt::DisplayRole).toString();
     if (blockName == QLatin1String("U_TLAY")) {
         ui->detailsStack->setCurrentWidget(ui->layoutPage);
-    } else if (blockName == QLatin1String("0080BL")) {
+    } else if (blockName == QLatin1String(Vendor0080BLBlock::RecordId)) {
         ui->detailsStack->setCurrentWidget(ui->vendor0080BLPage);
     } else {
         const auto block = m_uic9183.block(blockName);
