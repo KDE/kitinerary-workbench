@@ -23,6 +23,9 @@
 #include <KItinerary/MergeUtil>
 #include <KItinerary/PdfDocument>
 #include <KItinerary/Reservation>
+#include <KItinerary/SSBv1Ticket>
+#include <KItinerary/SSBv2Ticket>
+#include <KItinerary/SSBv3Ticket>
 #include <KItinerary/Uic9183Parser>
 
 #include <KPkPass/Pass>
@@ -61,6 +64,7 @@
 #include <QToolBar>
 
 #include <cctype>
+#include <cstring>
 
 Q_DECLARE_METATYPE(KItinerary::Internal::OwnedPtr<KItinerary::HtmlDocument>)
 Q_DECLARE_METATYPE(KItinerary::Internal::OwnedPtr<KItinerary::PdfDocument>)
@@ -519,7 +523,30 @@ void MainWindow::setCurrentDocumentNode(const KItinerary::ExtractorDocumentNode 
     }
     else if (node.mimeType() == QLatin1String("internal/era-ssb")) {
         StandardItemModelHelper::clearContent(m_eraSsbModel);
-        StandardItemModelHelper::fillFromGadget(node.content(), m_eraSsbModel->invisibleRootItem());
+        if (node.isA<SSBv1Ticket>()) {
+            const auto ssb = node.content<SSBv1Ticket>();
+            StandardItemModelHelper::fillFromGadget(ssb, m_eraSsbModel->invisibleRootItem());
+            StandardItemModelHelper::addEntry(i18n("First day of validity"), ssb.firstDayOfValidity(node.contextDateTime()).toString(Qt::ISODate), m_eraSsbModel->invisibleRootItem());
+            StandardItemModelHelper::addEntry(i18n("Departure time"), ssb.departureTime(node.contextDateTime()).toString(Qt::ISODate), m_eraSsbModel->invisibleRootItem());
+        } else if (node.isA<SSBv3Ticket>()) {
+            const auto ssb = node.content<SSBv3Ticket>();
+            const auto typePrefix = QByteArray("type" + QByteArray::number(ssb.ticketTypeCode()));
+            for (auto i = 0; i < SSBv3Ticket::staticMetaObject.propertyCount(); ++i) {
+                const auto prop = SSBv3Ticket::staticMetaObject.property(i);
+                if (!prop.isStored() || (std::strncmp(prop.name(), "type", 4) == 0 && std::strncmp(prop.name(), typePrefix.constData(), 5) != 0)) {
+                    continue;
+                }
+                const auto value = prop.readOnGadget(&ssb);
+                StandardItemModelHelper::addEntry(prop.name(), value.toString(), m_eraSsbModel->invisibleRootItem());
+            }
+            StandardItemModelHelper::addEntry(i18n("Issuing day"), ssb.issueDate(node.contextDateTime()).toString(Qt::ISODate), m_eraSsbModel->invisibleRootItem());
+            if (ssb.ticketTypeCode() == SSBv3Ticket::IRT_RES_BOA) {
+                StandardItemModelHelper::addEntry(i18n("Departure day"), ssb.type1DepartureDay(node.contextDateTime()).toString(Qt::ISODate), m_eraSsbModel->invisibleRootItem());
+            }
+        } else {
+            StandardItemModelHelper::fillFromGadget(node.content(), m_eraSsbModel->invisibleRootItem());
+        }
+
         ui->eraSsbView->expandAll();
         ui->inputTabWidget->setTabEnabled(EraSsbTab, true);
     }
