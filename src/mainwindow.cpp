@@ -106,6 +106,7 @@ MainWindow::MainWindow(QWidget* parent)
     , m_domModel(new DOMModel(this))
     , m_attrModel(new AttributeModel(this))
     , m_iataBcbpModel(new QStandardItemModel(this))
+    , m_eraSsbModel(new QStandardItemModel(this))
 {
     ui->setupUi(this);
     ui->contextDate->setDateTime(QDateTime(QDate::currentDate(), QTime()));
@@ -181,6 +182,10 @@ MainWindow::MainWindow(QWidget* parent)
     m_iataBcbpModel->setHorizontalHeaderLabels({i18n("Field"), i18n("Value")});
     ui->iataBcbpView->setModel(m_iataBcbpModel);
     ui->iataBcbpView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+
+    m_eraSsbModel->setHorizontalHeaderLabels({i18n("Field"), i18n("Value")});
+    ui->eraSsbView->setModel(m_eraSsbModel);
+    ui->eraSsbView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
     m_outputDoc = editor->createDocument(nullptr);
     m_outputDoc->setMode(QStringLiteral("JSON"));
@@ -419,11 +424,9 @@ void MainWindow::imageContextMenu(QPoint pos)
 
 void MainWindow::setCurrentDocumentNode(const KItinerary::ExtractorDocumentNode &node)
 {
-    ui->inputTabWidget->setTabEnabled(TextTab, false);
-    ui->inputTabWidget->setTabEnabled(ImageTab, false);
-    ui->inputTabWidget->setTabEnabled(DomTab, false);
-    ui->inputTabWidget->setTabEnabled(Uic9183Tab, false);
-    ui->inputTabWidget->setTabEnabled(IataBcbpTab, false);
+    for (auto i : { TextTab, ImageTab, DomTab, Uic9183Tab, IataBcbpTab, EraSsbTab }) {
+        ui->inputTabWidget->setTabEnabled(i, false);
+    }
 
     StandardItemModelHelper::clearContent(m_imageModel);
     m_domModel->setDocument(nullptr);
@@ -513,5 +516,11 @@ void MainWindow::setCurrentDocumentNode(const KItinerary::ExtractorDocumentNode 
 
         ui->iataBcbpView->expandAll();
         ui->inputTabWidget->setTabEnabled(IataBcbpTab, true);
+    }
+    else if (node.mimeType() == QLatin1String("internal/era-ssb")) {
+        StandardItemModelHelper::clearContent(m_eraSsbModel);
+        StandardItemModelHelper::fillFromGadget(node.content(), m_eraSsbModel->invisibleRootItem());
+        ui->eraSsbView->expandAll();
+        ui->inputTabWidget->setTabEnabled(EraSsbTab, true);
     }
 }

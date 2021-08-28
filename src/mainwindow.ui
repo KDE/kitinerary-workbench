@@ -202,13 +202,23 @@
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="tab">
+       <widget class="QWidget" name="iataBcbpTab">
         <attribute name="title">
          <string>IATA BCBP</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_10">
          <item>
           <widget class="QTreeView" name="iataBcbpView"/>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="eraSsbTab">
+        <attribute name="title">
+         <string>ERA SSB</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_11">
+         <item>
+          <widget class="QTreeView" name="eraSsbView"/>
          </item>
         </layout>
        </widget>

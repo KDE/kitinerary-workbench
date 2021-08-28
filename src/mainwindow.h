@@ -52,6 +52,7 @@ private:
         DomTab = 5,
         Uic9183Tab = 6,
         IataBcbpTab = 7,
+        EraSsbTab = 8,
     };
 
     enum OutputTab {
@@ -85,6 +86,7 @@ private:
     DOMModel *m_domModel;
     AttributeModel *m_attrModel;
     QStandardItemModel *m_iataBcbpModel;
+    QStandardItemModel *m_eraSsbModel;
 
     KItinerary::ExtractorEngine m_engine;
     QByteArray m_data;
