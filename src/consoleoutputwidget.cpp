@@ -64,7 +64,7 @@ ConsoleOutputModel::ConsoleOutputModel(QObject *parent)
 
 ConsoleOutputModel::~ConsoleOutputModel()
 {
-    qInstallMessageHandler(0);
+    qInstallMessageHandler(nullptr);
     sConsoleOutput = nullptr;
 }
 
@@ -189,7 +189,7 @@ ConsoleOutputWidget::ConsoleOutputWidget(QWidget *parent)
         }
         const auto file = idx.data(ConsoleOutputModel::SourceFileRole).toString();
         const auto line = idx.data(ConsoleOutputModel::SourceLineRole).toInt();
-        emit navigateToSource(file, line);
+        Q_EMIT navigateToSource(file, line);
     });
 }
 

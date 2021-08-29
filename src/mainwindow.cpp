@@ -305,7 +305,7 @@ void MainWindow::sourceChanged()
     setCurrentDocumentNode(m_engine.rootDocumentNode());
 
     m_outputDoc->setReadWrite(true);
-    m_outputDoc->setText(QJsonDocument(data).toJson());
+    m_outputDoc->setText(QString::fromUtf8(QJsonDocument(data).toJson()));
     m_outputDoc->setReadWrite(false);
 
     ExtractorPostprocessor postproc;
@@ -315,7 +315,7 @@ void MainWindow::sourceChanged()
     auto result = postproc.result();
 
     m_postprocDoc->setReadWrite(true);
-    m_postprocDoc->setText(QJsonDocument(JsonLdDocument::toJson(result)).toJson());
+    m_postprocDoc->setText(QString::fromUtf8(QJsonDocument(JsonLdDocument::toJson(result)).toJson()));
     m_postprocDoc->setReadWrite(false);
 
     ExtractorValidator validator;
@@ -324,7 +324,7 @@ void MainWindow::sourceChanged()
         return !validator.isValidElement(elem);
     }), result.end());
     m_validatedDoc->setReadWrite(true);
-    m_validatedDoc->setText(QJsonDocument(JsonLdDocument::toJson(result)).toJson());
+    m_validatedDoc->setText(QString::fromUtf8(QJsonDocument(JsonLdDocument::toJson(result)).toJson()));
     m_validatedDoc->setReadWrite(false);
 
     const auto batches = batchReservations(result);
@@ -487,7 +487,7 @@ void MainWindow::setCurrentDocumentNode(const KItinerary::ExtractorDocumentNode 
         ui->inputTabWidget->setTabEnabled(TextTab, true);
     }
     else if (node.mimeType() == QLatin1String("application/ld+json")) {
-        m_preprocDoc->setText(QJsonDocument(node.content().value<QJsonArray>()).toJson());
+        m_preprocDoc->setText(QString::fromUtf8(QJsonDocument(node.content().value<QJsonArray>()).toJson()));
         ui->inputTabWidget->setTabEnabled(TextTab, true);
     }
     else if (node.mimeType() == QLatin1String("internal/iata-bcbp")) {
@@ -537,7 +537,7 @@ void MainWindow::setCurrentDocumentNode(const KItinerary::ExtractorDocumentNode 
                     continue;
                 }
                 const auto value = prop.readOnGadget(&ssb);
-                StandardItemModelHelper::addEntry(prop.name(), value.toString(), m_eraSsbModel->invisibleRootItem());
+                StandardItemModelHelper::addEntry(QString::fromUtf8(prop.name()), value.toString(), m_eraSsbModel->invisibleRootItem());
             }
             StandardItemModelHelper::addEntry(i18n("Issuing day"), ssb.issueDate(node.contextDateTime()).toString(Qt::ISODate), m_eraSsbModel->invisibleRootItem());
             if (ssb.ticketTypeCode() == SSBv3Ticket::IRT_RES_BOA) {

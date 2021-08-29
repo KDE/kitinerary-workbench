@@ -33,7 +33,7 @@ public:
     void navigateToSource(const QString &fileName, int line);
     void reloadExtractors();
 
-signals:
+Q_SIGNALS:
     void extractorChanged();
 
 private:

@@ -41,6 +41,6 @@ void StandardItemModelHelper::fillFromGadget(const QMetaObject *mo, const void *
             continue;
         }
         const auto value = prop.readOnGadget(gadget);
-        addEntry(prop.name(), value.toString(), parent);
+        addEntry(QString::fromUtf8(prop.name()), value.toString(), parent);
     }
 }

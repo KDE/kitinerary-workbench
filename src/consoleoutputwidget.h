@@ -25,7 +25,7 @@ public:
 
     void clear();
 
-signals:
+Q_SIGNALS:
     void navigateToSource(const QString &file, int line);
 
 private:

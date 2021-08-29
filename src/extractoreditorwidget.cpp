@@ -103,7 +103,7 @@ void ExtractorFilterModel::setReadOnly(bool ro)
 {
     m_readOnly = ro;
     if (!m_filters.empty()) {
-        emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
+        Q_EMIT dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
     }
 }
 
@@ -173,7 +173,7 @@ bool ExtractorFilterModel::setData(const QModelIndex &index, const QVariant &val
             break;
     }
 
-    emit dataChanged(index, index);
+    Q_EMIT dataChanged(index, index);
     return true;
 }
 
@@ -247,7 +247,7 @@ ExtractorEditorWidget::ExtractorEditorWidget(QWidget *parent)
 
     connect(m_scriptDoc, &KTextEditor::Document::modifiedChanged, this, [this]() {
         if (!m_scriptDoc->isModified()) { // approximation for "document has been saved"
-            emit extractorChanged();
+            Q_EMIT extractorChanged();
         }
     });
 
@@ -302,7 +302,7 @@ void ExtractorEditorWidget::navigateToSource(const QString &fileName, int line)
 {
     // TODO find the extractor this file belongs to and select it?
     if (m_scriptDoc->url().toString() != fileName) {
-        m_scriptDoc->openUrl(fileName);
+        m_scriptDoc->openUrl(QUrl(fileName));
     }
     m_scriptView->setCursorPosition(KTextEditor::Cursor(line - 1, 0));
 }
