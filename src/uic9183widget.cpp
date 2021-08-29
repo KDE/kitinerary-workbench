@@ -29,6 +29,7 @@ Uic9183Widget::Uic9183Widget(QWidget *parent)
     , ui(new Ui::Uic9183Widget)
     , m_uic9183BlockModel(new QStandardItemModel(this))
     , m_ticketLayoutModel(new Uic9183TicketLayoutModel(this))
+    , m_layoutFieldsModel(new QStandardItemModel(this))
     , m_vendor0080BLModel(new QStandardItemModel(this))
     , m_vendor0080BLOrderModel(new QStandardItemModel(this))
     , m_genericBlockModel(new QStandardItemModel(this))
@@ -86,6 +87,10 @@ Uic9183Widget::Uic9183Widget(QWidget *parent)
         }
     });
 
+    m_layoutFieldsModel->setHorizontalHeaderLabels({i18n("Key"), i18n("Value")});
+    ui->layoutRawView->setModel(m_layoutFieldsModel);
+    ui->layoutRawView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+
     m_vendor0080BLModel->setHorizontalHeaderLabels({i18n("Name"), i18n("Size"), i18n("Content")});
     ui->vendor0080BLView->setModel(m_vendor0080BLModel);
     ui->vendor0080BLView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
@@ -103,6 +108,7 @@ Uic9183Widget::~Uic9183Widget() = default;
 void Uic9183Widget::clear()
 {
     StandardItemModelHelper::clearContent(m_uic9183BlockModel);
+    StandardItemModelHelper::clearContent(m_layoutFieldsModel);
     StandardItemModelHelper::clearContent(m_vendor0080BLModel);
     StandardItemModelHelper::clearContent(m_vendor0080BLOrderModel);
     StandardItemModelHelper::clearContent(m_genericBlockModel);
@@ -114,6 +120,12 @@ void Uic9183Widget::setContent(const KItinerary::Uic9183Parser &p)
     m_ticketLayoutModel->setLayout(p.ticketLayout());
     auto idx = ui->ticketLayoutTemplate->findText(p.ticketLayout().type());
     ui->ticketLayoutTemplate->setCurrentIndex(std::max(idx, 0));
+    int i = 0;
+    for (auto field = p.ticketLayout().firstField(); !field.isNull(); field = field.next()) {
+        auto item = StandardItemModelHelper::addEntry(i18n("Field %1", ++i), {}, m_layoutFieldsModel->invisibleRootItem());
+        StandardItemModelHelper::fillFromGadget(field, item);
+    }
+    ui->layoutRawView->expandAll();
 
     auto block = p.firstBlock();
     while (!block.isNull()) {

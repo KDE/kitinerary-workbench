@@ -40,6 +40,7 @@ private:
     KItinerary::Uic9183Parser m_uic9183;
     QStandardItemModel *m_uic9183BlockModel;
     Uic9183TicketLayoutModel *m_ticketLayoutModel;
+    QStandardItemModel *m_layoutFieldsModel;
     QStandardItemModel *m_vendor0080BLModel;
     QStandardItemModel *m_vendor0080BLOrderModel;
     QStandardItemModel *m_genericBlockModel;
