@@ -44,3 +44,8 @@ void StandardItemModelHelper::fillFromGadget(const QMetaObject *mo, const void *
         addEntry(QString::fromUtf8(prop.name()), value.toString(), parent);
     }
 }
+
+QString StandardItemModelHelper::dataToHex(const uint8_t *data, int size, int offset)
+{
+    return QString::fromUtf8(QByteArray((const char*)data + offset, size - offset).toHex());
+}

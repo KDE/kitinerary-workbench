@@ -7,6 +7,8 @@
 #ifndef STANDARDITEMMODELHELPER_H
 #define STANDARDITEMMODELHELPER_H
 
+#include <cstdint>
+
 class QMetaObject;
 class QStandardItem;
 class QStandardItemModel;
@@ -28,6 +30,13 @@ inline void fillFromGadget(const T &value, QStandardItem *parent)
 {
     return fillFromGadget(&T::staticMetaObject, &value, parent);
 }
+template <typename T>
+inline void fillFromGadget(const T *value, QStandardItem *parent)
+{
+    return fillFromGadget(&T::staticMetaObject, value, parent);
+}
+
+QString dataToHex(const uint8_t *data, int size, int offset = 0);
 
 }
 

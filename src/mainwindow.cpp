@@ -13,6 +13,7 @@
 #include "standarditemmodelhelper.h"
 
 #include <KItinerary/BarcodeDecoder>
+#include <KItinerary/BERElement>
 #include <KItinerary/CalendarHandler>
 #include <KItinerary/ExtractorPostprocessor>
 #include <KItinerary/ExtractorRepository>
@@ -27,6 +28,8 @@
 #include <KItinerary/SSBv2Ticket>
 #include <KItinerary/SSBv3Ticket>
 #include <KItinerary/Uic9183Parser>
+#include <KItinerary/VdvTicket>
+#include <KItinerary/VdvTicketContent>
 
 #include <KPkPass/Pass>
 
@@ -111,6 +114,7 @@ MainWindow::MainWindow(QWidget* parent)
     , m_attrModel(new AttributeModel(this))
     , m_iataBcbpModel(new QStandardItemModel(this))
     , m_eraSsbModel(new QStandardItemModel(this))
+    , m_vdvModel(new QStandardItemModel(this))
 {
     ui->setupUi(this);
     ui->contextDate->setDateTime(QDateTime(QDate::currentDate(), QTime()));
@@ -190,6 +194,10 @@ MainWindow::MainWindow(QWidget* parent)
     m_eraSsbModel->setHorizontalHeaderLabels({i18n("Field"), i18n("Value")});
     ui->eraSsbView->setModel(m_eraSsbModel);
     ui->eraSsbView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+
+    m_vdvModel->setHorizontalHeaderLabels({i18n("Field"), i18n("Value")});
+    ui->vdvView->setModel(m_vdvModel);
+    ui->vdvView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
     m_outputDoc = editor->createDocument(nullptr);
     m_outputDoc->setMode(QStringLiteral("JSON"));
@@ -428,7 +436,7 @@ void MainWindow::imageContextMenu(QPoint pos)
 
 void MainWindow::setCurrentDocumentNode(const KItinerary::ExtractorDocumentNode &node)
 {
-    for (auto i : { TextTab, ImageTab, DomTab, Uic9183Tab, IataBcbpTab, EraSsbTab }) {
+    for (auto i : { TextTab, ImageTab, DomTab, Uic9183Tab, IataBcbpTab, EraSsbTab, VdvTab }) {
         ui->inputTabWidget->setTabEnabled(i, false);
     }
 
@@ -549,5 +557,69 @@ void MainWindow::setCurrentDocumentNode(const KItinerary::ExtractorDocumentNode 
 
         ui->eraSsbView->expandAll();
         ui->inputTabWidget->setTabEnabled(EraSsbTab, true);
+    }
+    else if (node.mimeType() == QLatin1String("internal/vdv")) {
+        StandardItemModelHelper::clearContent(m_vdvModel);
+        const auto vdv = node.content<VdvTicket>();
+        auto item = StandardItemModelHelper::addEntry(i18n("Header"), {}, m_vdvModel->invisibleRootItem());
+        StandardItemModelHelper::fillFromGadget(vdv.header(), item);
+
+        item = StandardItemModelHelper::addEntry(i18n("Product data"), {}, m_vdvModel->invisibleRootItem());
+        for (auto block = vdv.productData().first(); block.isValid(); block = block.next()) {
+            auto blockItem = StandardItemModelHelper::addEntry(i18n("Block 0x%1 (%2 bytes)", QString::number(block.type(), 16), block.size()), {}, item);
+            switch (block.type()) {
+                case VdvTicketBasicData::Tag:
+                    StandardItemModelHelper::fillFromGadget(block.contentAt<VdvTicketBasicData>(), blockItem);
+                    break;
+            case VdvTicketTravelerData::Tag:
+            {
+                const auto traveler = block.contentAt<VdvTicketTravelerData>();
+                StandardItemModelHelper::fillFromGadget(traveler, blockItem);
+                StandardItemModelHelper::addEntry(i18n("Name"), QString::fromUtf8(traveler->name(), traveler->nameSize(block.contentSize())), blockItem);
+                break;
+            }
+            case VdvTicketValidityAreaData::Tag:
+            {
+                const auto area = block.contentAt<VdvTicketValidityAreaData>();
+
+                switch (area->type) {
+                    case VdvTicketValidityAreaDataType31::Type:
+                    {
+                        const auto area31 = static_cast<const VdvTicketValidityAreaDataType31*>(area);
+                        StandardItemModelHelper::fillFromGadget(area31, blockItem);
+                        StandardItemModelHelper::addEntry(i18n("Payload"), StandardItemModelHelper::dataToHex(block.contentData(), block.contentSize(), sizeof(VdvTicketValidityAreaDataType31)), blockItem);
+                        break;
+                    }
+                    default:
+                        StandardItemModelHelper::fillFromGadget(area, blockItem);
+                        StandardItemModelHelper::addEntry(i18n("Payload"), StandardItemModelHelper::dataToHex(block.contentData(), block.contentSize(), sizeof(VdvTicketValidityAreaData)), blockItem);
+                        break;
+                }
+                break;
+            }
+            default:
+                StandardItemModelHelper::addEntry(i18n("Data"), StandardItemModelHelper::dataToHex(block.contentData(), block.contentSize()), blockItem);
+            }
+        }
+
+        item = StandardItemModelHelper::addEntry(i18n("Transaction data"), {}, m_vdvModel->invisibleRootItem());
+        StandardItemModelHelper::fillFromGadget(vdv.commonTransactionData(), item);
+        item = StandardItemModelHelper::addEntry(i18n("Product-specific transaction data (%1 bytes)", vdv.productSpecificTransactionData().contentSize()), {}, m_vdvModel->invisibleRootItem());
+        for (auto block = vdv.productSpecificTransactionData().first(); block.isValid(); block = block.next()) {
+            auto blockItem = StandardItemModelHelper::addEntry(i18n("Tag 0x%1 (%2 bytes)", QString::number(block.type(), 16), block.size()), {}, item);
+            switch (block.type()) {
+                default:
+                    StandardItemModelHelper::addEntry(i18n("Data"), StandardItemModelHelper::dataToHex(block.contentData(), block.contentSize()), blockItem);
+            }
+        }
+
+        item = StandardItemModelHelper::addEntry(i18n("Issue data"), {}, m_vdvModel->invisibleRootItem());
+        StandardItemModelHelper::fillFromGadget(vdv.issueData(), item);
+        item = StandardItemModelHelper::addEntry(i18n("Trailer"), {}, m_vdvModel->invisibleRootItem());
+        StandardItemModelHelper::addEntry(i18n("identifier"), QString::fromUtf8(vdv.trailer()->identifier, 3), item);
+        StandardItemModelHelper::fillFromGadget(vdv.trailer(), item);
+
+        ui->vdvView->expandAll();
+        ui->inputTabWidget->setTabEnabled(VdvTab, true);
     }
 }

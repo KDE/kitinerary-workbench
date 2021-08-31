@@ -222,6 +222,16 @@
          </item>
         </layout>
        </widget>
+       <widget class="QWidget" name="vdvTab">
+        <attribute name="title">
+         <string>VDV</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_12">
+         <item>
+          <widget class="QTreeView" name="vdvView"/>
+         </item>
+        </layout>
+       </widget>
       </widget>
       <widget class="QTabWidget" name="outputTabWidget">
        <property name="currentIndex">
