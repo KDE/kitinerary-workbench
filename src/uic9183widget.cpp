@@ -12,6 +12,7 @@
 #include <KItinerary/Uic9183Block>
 #include <KItinerary/Uic9183Header>
 #include <KItinerary/Vendor0080Block>
+#include <KItinerary/Vendor0080VUBlockData>
 
 #include <KLocalizedString>
 
@@ -180,6 +181,19 @@ void Uic9183Widget::blockSelectionChanged()
         ui->detailsStack->setCurrentWidget(ui->layoutPage);
     } else if (blockName == QLatin1String(Vendor0080BLBlock::RecordId)) {
         ui->detailsStack->setCurrentWidget(ui->vendor0080BLPage);
+    } else if (blockName == QLatin1String(Vendor0080VUBlock::RecordId)) {
+        const auto block = m_uic9183.findBlock<Vendor0080VUBlock>();
+        StandardItemModelHelper::clearContent(m_genericBlockModel);
+        StandardItemModelHelper::fillFromGadget(block.commonData(), m_genericBlockModel->invisibleRootItem());
+        for (int i = 0; i < (int)block.commonData()->numberOfTickets; ++i) {
+            const auto ticket = block.ticketData(i);
+            auto item = StandardItemModelHelper::addEntry(i18n("Ticket %1", i + 1), {}, m_genericBlockModel->invisibleRootItem());
+            StandardItemModelHelper::fillFromGadget(ticket, item);
+            StandardItemModelHelper::fillFromGadget(ticket->validityArea, item);
+            StandardItemModelHelper::addEntry(i18n("Payload"), StandardItemModelHelper::dataToHex((const uint8_t*)&ticket->validityArea, ticket->validityAreaDataSize, sizeof(VdvTicketValidityAreaData)), item);
+        }
+        ui->genericBlockView->expandAll();
+        ui->detailsStack->setCurrentWidget(ui->genericPage);
     } else {
         const auto block = m_uic9183.block(blockName);
         StandardItemModelHelper::clearContent(m_genericBlockModel);
