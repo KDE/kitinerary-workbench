@@ -163,7 +163,7 @@ void ConsoleOutputModel::handleMessage(QtMsgType type, const QMessageLogContext&
         }
         const auto idx2 = msg.indexOf(QLatin1Char(':'), idx1 + 2);
         if (idx2 > idx1) {
-            m.line = msg.midRef(idx1 + 2, idx2 - idx1 - 2).toInt();
+            m.line = QStringView(msg).mid(idx1 + 2, idx2 - idx1 - 2).toInt();
             m.msg = msg.mid(idx2 + 1);
         } else {
             m.msg = msg;
