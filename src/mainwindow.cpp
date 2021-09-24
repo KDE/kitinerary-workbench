@@ -360,8 +360,13 @@ void MainWindow::urlChanged()
             return;
         }
         m_data = job->data();
-        const auto isText = std::none_of(m_data.begin(), m_data.end(), [](char c) { return std::iscntrl(c) && !std::isspace(c); });
-        if (isText) {
+        const auto isText = std::none_of(m_data.begin(), m_data.end(), [](unsigned char c) { return std::iscntrl(c) && !std::isspace(c); });
+        const auto textExt =
+            url.fileName().endsWith(QLatin1String(".eml")) ||
+            url.fileName().endsWith(QLatin1String(".html")) ||
+            url.fileName().endsWith(QLatin1String(".mbox")) ||
+            url.fileName().endsWith(QLatin1String(".txt"));
+        if (isText || textExt) {
             if (url.scheme() == QLatin1String("https") || url.scheme() == QLatin1String("http")) {
                 m_sourceDoc->setText(QString::fromUtf8(m_data));
             } else {
