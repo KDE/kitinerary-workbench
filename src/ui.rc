@@ -21,5 +21,8 @@
             <Action name="input_from_clipboard"/>
             <Action name="input_clear"/>
         </Menu>
+        <Menu name="settings">
+            <Action name="settings_separate_process"/>
+        </Menu>
     </MenuBar>
 </kpartgui>

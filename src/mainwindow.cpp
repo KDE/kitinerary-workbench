@@ -141,6 +141,9 @@ MainWindow::MainWindow(QWidget* parent)
     ui->documentTreeView->setModel(m_extractorDocModel);
     ui->documentTreeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     connect(ui->documentTreeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this](const QItemSelection &selection) {
+        if (selection.empty()) {
+            return;
+        }
         auto idx = selection.at(0).topLeft();
         idx = idx.sibling(idx.row(), 0);
         setCurrentDocumentNode(idx.data(Qt::UserRole).value<KItinerary::ExtractorDocumentNode>());
@@ -255,6 +258,11 @@ MainWindow::MainWindow(QWidget* parent)
         m_sourceView->show();
         sourceChanged();
     });
+    connect(ui->actionSeparateProcess, &QAction::toggled, this, [this](bool checked) {
+        clearEngine();
+        m_engine.setUseSeparateProcess(checked);
+        sourceChanged();
+    });
     connect(ui->actionSettingsConfigure, &QAction::triggered, this, [this]() {
         SettingsDialog dlg(this);
         if (dlg.exec() == QDialog::Accepted) {
@@ -267,6 +275,7 @@ MainWindow::MainWindow(QWidget* parent)
     actionCollection()->addAction(QStringLiteral("input_clear"), ui->actionInputClear);
     actionCollection()->addAction(QStringLiteral("file_quit"), KStandardAction::quit(QApplication::instance(), &QApplication::closeAllWindows, this));
     actionCollection()->addAction(QStringLiteral("options_configure"), ui->actionSettingsConfigure);
+    actionCollection()->addAction(QStringLiteral("settings_separate_process"), ui->actionSeparateProcess);
     ui->extractorWidget->registerActions(actionCollection());
 
     setupGUI(Default, QStringLiteral("ui.rc"));
@@ -283,6 +292,8 @@ MainWindow::~MainWindow()
         history.push_back(ui->senderBox->itemText(i));
     settings.setValue(QLatin1String("History"), history);
     settings.endGroup();
+
+    clearEngine();
 }
 
 void MainWindow::openFile(const QString &file)
@@ -290,9 +301,19 @@ void MainWindow::openFile(const QString &file)
     ui->fileRequester->setText(file);
 }
 
+void MainWindow::clearEngine()
+{
+    // ensure we hold no references to document nodes anymore
+    ui->documentTreeView->clearSelection();
+    m_currentNode = {};
+    StandardItemModelHelper::clearContent(m_extractorDocModel);
+    m_engine.clear();
+}
+
 void MainWindow::sourceChanged()
 {
-    m_engine.clear();
+    clearEngine();
+
     StandardItemModelHelper::clearContent(m_imageModel);
     ui->uic9183Widget->clear();
     ui->consoleWidget->clear();

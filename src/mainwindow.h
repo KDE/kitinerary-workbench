@@ -65,7 +65,7 @@ private:
         ConsoleTab = 5
     };
 
-    void typeChanged();
+    void clearEngine();
     void sourceChanged();
     void urlChanged();
     void loadFromClipboard();
