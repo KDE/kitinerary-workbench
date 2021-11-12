@@ -17,6 +17,7 @@
 #include <KItinerary/CalendarHandler>
 #include <KItinerary/ExtractorPostprocessor>
 #include <KItinerary/ExtractorRepository>
+#include <KItinerary/ExtractorResult>
 #include <KItinerary/ExtractorValidator>
 #include <KItinerary/HtmlDocument>
 #include <KItinerary/IataBcbp>
@@ -198,6 +199,12 @@ MainWindow::MainWindow(QWidget* parent)
     m_vdvModel->setHorizontalHeaderLabels({i18n("Field"), i18n("Value")});
     ui->vdvView->setModel(m_vdvModel);
     ui->vdvView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+
+    m_nodeResultDoc = editor->createDocument(nullptr);
+    m_nodeResultDoc->setMode(QStringLiteral("JSON"));
+    view = m_nodeResultDoc->createView(nullptr);
+    layout = new QHBoxLayout(ui->nodeResultTab);
+    layout->addWidget(view);
 
     m_outputDoc = editor->createDocument(nullptr);
     m_outputDoc->setMode(QStringLiteral("JSON"));
@@ -450,6 +457,7 @@ void MainWindow::setCurrentDocumentNode(const KItinerary::ExtractorDocumentNode 
 
     using namespace KItinerary;
     m_currentNode = node;
+    m_nodeResultDoc->setText(QString::fromUtf8(QJsonDocument(node.result().jsonLdResult()).toJson()));
 
     if (node.mimeType() == QLatin1String("application/pdf")) {
         const auto pdf = node.content<PdfDocument*>();

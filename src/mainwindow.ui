@@ -235,8 +235,13 @@
       </widget>
       <widget class="QTabWidget" name="outputTabWidget">
        <property name="currentIndex">
-        <number>2</number>
+        <number>3</number>
        </property>
+       <widget class="QWidget" name="nodeResultTab">
+        <attribute name="title">
+         <string>Node</string>
+        </attribute>
+       </widget>
        <widget class="QWidget" name="outputTab">
         <attribute name="title">
          <string>Extractor</string>
