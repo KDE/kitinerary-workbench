@@ -493,9 +493,16 @@ void MainWindow::setCurrentDocumentNode(const KItinerary::ExtractorDocumentNode 
             const auto page = pdf->page(i);
             for (int j = 0; j < page.imageCount(); ++j) {
                 auto imgItem = new QStandardItem;
-                const auto img = page.image(j);
-                imgItem->setData(img.image(), Qt::DecorationRole);
-                imgItem->setToolTip(i18n("Size: %1 x %2\nSource: %3 x %4", img.width(), img.height(), img.sourceWidth(), img.sourceHeight()));
+                auto pdfImg = page.image(j);
+                auto imgData = pdfImg.image();
+                bool skippedByExtractor = false;
+                if (imgData.isNull()) {
+                    skippedByExtractor = true;
+                    pdfImg.setLoadingHints(PdfImage::NoHint);
+                    imgData = pdfImg.image();
+                }
+                imgItem->setData(imgData, Qt::DecorationRole);
+                imgItem->setToolTip(i18n("Size: %1 x %2\nSource: %3 x %4\nSkipped: %5", pdfImg.width(), pdfImg.height(), pdfImg.sourceWidth(), pdfImg.sourceHeight(), skippedByExtractor));
                 pageItem->appendRow(imgItem);
             }
             m_imageModel->appendRow(pageItem);
