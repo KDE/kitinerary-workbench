@@ -369,6 +369,17 @@
     <string>Perform extraction out of process.</string>
    </property>
   </action>
+  <action name="actionFullPageRasterImages">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Extract &amp;Full Page Raster Images</string>
+   </property>
+   <property name="toolTip">
+    <string>Use of PDF documents containing raster instead of vector content.</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

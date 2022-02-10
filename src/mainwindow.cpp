@@ -263,6 +263,15 @@ MainWindow::MainWindow(QWidget* parent)
         m_engine.setUseSeparateProcess(checked);
         sourceChanged();
     });
+    connect(ui->actionFullPageRasterImages, &QAction::toggled, this, [this](bool checked) {
+        clearEngine();
+        if (checked) {
+            m_engine.setHints(m_engine.hints() | KItinerary::ExtractorEngine::ExtractFullPageRasterImages);
+        } else {
+            m_engine.setHints(m_engine.hints() & ~KItinerary::ExtractorEngine::ExtractFullPageRasterImages);
+        }
+        sourceChanged();
+    });
     connect(ui->actionSettingsConfigure, &QAction::triggered, this, [this]() {
         SettingsDialog dlg(this);
         if (dlg.exec() == QDialog::Accepted) {
@@ -276,6 +285,7 @@ MainWindow::MainWindow(QWidget* parent)
     actionCollection()->addAction(QStringLiteral("file_quit"), KStandardAction::quit(QApplication::instance(), &QApplication::closeAllWindows, this));
     actionCollection()->addAction(QStringLiteral("options_configure"), ui->actionSettingsConfigure);
     actionCollection()->addAction(QStringLiteral("settings_separate_process"), ui->actionSeparateProcess);
+    actionCollection()->addAction(QStringLiteral("settings_full_page_raster_images"), ui->actionFullPageRasterImages);
     ui->extractorWidget->registerActions(actionCollection());
 
     setupGUI(Default, QStringLiteral("ui.rc"));

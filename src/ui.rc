@@ -23,6 +23,7 @@
         </Menu>
         <Menu name="settings">
             <Action name="settings_separate_process"/>
+            <Action name="settings_full_page_raster_images"/>
         </Menu>
     </MenuBar>
 </kpartgui>
