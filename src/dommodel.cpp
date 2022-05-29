@@ -92,7 +92,11 @@ bool DOMFilterModel::filterAcceptsRow(int source_row, const QModelIndex& source_
 {
     for (int i = 0; i < sourceModel()->columnCount(source_parent); ++i) {
         const auto str = sourceModel()->data(sourceModel()->index(source_row, i, source_parent), Qt::DisplayRole).toString();
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         if (filterRegExp().indexIn(str) >= 0) {
+#else
+        if (str.contains(filterRegularExpression())) {
+#endif
             return true;
         }
     }
