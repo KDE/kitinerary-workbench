@@ -20,6 +20,7 @@ add_executable(kitinerary-workbench ${workbench_srcs})
 target_link_libraries(kitinerary-workbench
     KPim::Itinerary
     KPim::PkPass
+    KF5::CalendarCore
     KF5::KIOWidgets
     KF5::TextEditor
 )
