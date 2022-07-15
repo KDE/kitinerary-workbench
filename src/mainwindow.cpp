@@ -587,6 +587,11 @@ void MainWindow::setCurrentDocumentNode(const KItinerary::ExtractorDocumentNode 
             StandardItemModelHelper::fillFromGadget(ssb, m_eraSsbModel->invisibleRootItem());
             StandardItemModelHelper::addEntry(i18n("First day of validity"), ssb.firstDayOfValidity(node.contextDateTime()).toString(Qt::ISODate), m_eraSsbModel->invisibleRootItem());
             StandardItemModelHelper::addEntry(i18n("Departure time"), ssb.departureTime(node.contextDateTime()).toString(Qt::ISODate), m_eraSsbModel->invisibleRootItem());
+        } else if (node.isA<SSBv2Ticket>()) {
+            const auto ssb = node.content<SSBv2Ticket>();
+            StandardItemModelHelper::fillFromGadget(ssb, m_eraSsbModel->invisibleRootItem());
+            StandardItemModelHelper::addEntry(i18n("First day of validity"), ssb.firstDayOfValidity(node.contextDateTime()).toString(Qt::ISODate), m_eraSsbModel->invisibleRootItem());
+            StandardItemModelHelper::addEntry(i18n("Last day of validity"), ssb.lastDayOfValidity(node.contextDateTime()).toString(Qt::ISODate), m_eraSsbModel->invisibleRootItem());
         } else if (node.isA<SSBv3Ticket>()) {
             const auto ssb = node.content<SSBv3Ticket>();
             const auto typePrefix = QByteArray("type" + QByteArray::number(ssb.ticketTypeCode()));
