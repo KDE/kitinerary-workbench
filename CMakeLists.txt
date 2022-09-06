@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.16)
 project(kitinerary-workbench VERSION 0.0.1)
 
 find_package(ECM 5.85 REQUIRED NO_MODULE)
-set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH} ${ECM_KDE_MODULE_DIR} ${CMAKE_SOURCE_DIR}/cmake)
+set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 
 include(KDECompilerSettings NO_POLICY_SCOPE)
 include(ECMAddTests)
