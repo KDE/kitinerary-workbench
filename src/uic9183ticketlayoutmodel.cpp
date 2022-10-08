@@ -99,8 +99,27 @@ static const struct {
 "X                                                  X                   X"
 "X              X              X                    X                   X"
 "XRRRRRRRRRRRX                 X                    X                   X"
-"X           X                 X     X        X     X                   X"
+"X           X                 X     X        X     X                   X" }, {
 
+// RCT2 RPT
+"X             XXXX                   X             X                   X"
+"X             XXXX                   X             X                   X"
+"X   X    X  XXXXXXXXXXXXXXXXXXXXXXXXXX             X                   X"
+"X                                    X             X                   X"
+"X     X     X                                      X     X     XXX     X"
+"X     X     X                                      X     X     XXX     X"
+"X     X     X                                      X     X     XXX     X"
+"X     X     X                                      X     X     XXX     X"
+"X                                                                      X"
+"X                                                                      X"
+"X                                                                      X"
+"X                                                                      X"
+"X                                                  XXXXXXXXXXXXXXXXXXXXX"
+"X                                                  X                   X"
+"X                                                  X                   X"
+"X              X              X                    X                    "
+"XRRRRRRRRRRRX                 X                    X                    "
+"X           X                 X     X        X     X                    "
 }};
 
 Uic9183TicketLayoutModel::Uic9183TicketLayoutModel(QObject *parent)
@@ -119,7 +138,7 @@ void Uic9183TicketLayoutModel::setLayout(const KItinerary::Uic9183TicketLayout &
 
 QStringList Uic9183TicketLayoutModel::supportedTemplates()
 {
-    return {QStringLiteral("RCT2"), QStringLiteral("RCT2 NRT"), QStringLiteral("RCT2 IRT"), QStringLiteral("RCT2 RES")};
+    return {QStringLiteral("RCT2"), QStringLiteral("RCT2 NRT"), QStringLiteral("RCT2 IRT"), QStringLiteral("RCT2 RES"), QStringLiteral("RCT2 RPT")};
 }
 
 void Uic9183TicketLayoutModel::setLayoutTemplate(int tplIndex)
