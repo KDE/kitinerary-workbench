@@ -50,6 +50,7 @@
 #include <KLocalizedString>
 #include <KStandardAction>
 
+#include <QBuffer>
 #include <QClipboard>
 #include <QDebug>
 #include <QFontMetrics>
@@ -336,13 +337,22 @@ void MainWindow::sourceChanged()
         }
         m_data = codec->fromUnicode(m_sourceDoc->text());
     }
+    QString fileName = ui->fileRequester->url().path();
+    if (ui->fileRequester->url().path().endsWith(QLatin1String(".jpg"))) { // TODO generalize to other image formats
+        const auto img = QImage::fromData(m_data);
+        m_data.clear();
+        fileName.clear();
+        QBuffer buffer(&m_data);
+        buffer.open(QIODevice::WriteOnly);
+        img.save(&buffer, "PNG");
+    }
 
     m_contextMsg = std::make_unique<KMime::Message>();
     m_contextMsg->from()->fromUnicodeString(ui->senderBox->currentText(), "utf-8");
     m_contextMsg->date()->setDateTime(ui->contextDate->dateTime());
     m_engine.setContext(QVariant::fromValue<KMime::Content*>(m_contextMsg.get()), u"message/rfc822");
 
-    m_engine.setData(m_data, ui->fileRequester->url().toString());
+    m_engine.setData(m_data, fileName);
     const auto data = m_engine.extract();
     ui->extractorWidget->showExtractor(m_engine.usedCustomExtractor());
 
