@@ -41,7 +41,19 @@ void StandardItemModelHelper::fillFromGadget(const QMetaObject *mo, const void *
             continue;
         }
         const auto value = prop.readOnGadget(gadget);
-        addEntry(QString::fromUtf8(prop.name()), value.toString(), parent);
+        auto item = addEntry(QString::fromUtf8(prop.name()), value.toString(), parent);
+        if (const auto childMo = QMetaType::metaObjectForType(value.userType())) {
+            fillFromGadget(childMo, value.constData(), item);
+        } else if (value.canConvert<QVariantList>() && value.type() != QVariant::String && value.type() != QVariant::ByteArray) {
+            auto iterable = value.value<QSequentialIterable>();
+            int idx = 0;
+            for (const QVariant &v : iterable) {
+                auto arrayItem = addEntry(QString::number(idx++), v.toString(), item);
+                if (const auto childMo = QMetaType::metaObjectForType(v.userType())) {
+                    fillFromGadget(childMo, v.constData(), arrayItem);
+                }
+            }
+        }
     }
 }
 
