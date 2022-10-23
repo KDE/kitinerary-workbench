@@ -177,7 +177,7 @@ void Uic9183Widget::blockSelectionChanged()
         return;
     }
     const auto blockName = sel.at(0).data(Qt::DisplayRole).toString();
-    if (blockName == QLatin1String("U_TLAY")) {
+    if (blockName == QLatin1String(Uic9183TicketLayout::RecordId)) {
         ui->detailsStack->setCurrentWidget(ui->layoutPage);
     } else if (blockName == QLatin1String(Vendor0080BLBlock::RecordId)) {
         ui->detailsStack->setCurrentWidget(ui->vendor0080BLPage);
@@ -204,4 +204,5 @@ void Uic9183Widget::blockSelectionChanged()
             ui->detailsStack->setCurrentWidget(ui->noDetailsPage);
         }
     }
+    ui->genericBlockView->expandAll();
 }
