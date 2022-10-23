@@ -475,7 +475,7 @@ void MainWindow::imageContextMenu(QPoint pos)
             const auto fileName = QFileDialog::getSaveFileName(this, i18n("Save Barcode Content"));
             if (!fileName.isEmpty()) {
                 BarcodeDecoder decoder;
-                const auto b = decoder.decodeBinary(idx.data(Qt::DecorationRole).value<QImage>(), BarcodeDecoder::Any);
+                const auto b = decoder.decodeBinary(idx.data(Qt::DecorationRole).value<QImage>(), BarcodeDecoder::Any | BarcodeDecoder::IgnoreAspectRatio);
                 QFile f(fileName);
                 if (!f.open(QFile::WriteOnly)) {
                     qWarning() << "Failed to open file:" << f.errorString() << fileName;
