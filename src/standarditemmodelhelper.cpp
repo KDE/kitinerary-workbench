@@ -7,6 +7,7 @@
 #include "standarditemmodelhelper.h"
 
 #include <QMetaProperty>
+#include <QSequentialIterable>
 #include <QStandardItem>
 
 void StandardItemModelHelper::clearContent(QStandardItemModel *model)
