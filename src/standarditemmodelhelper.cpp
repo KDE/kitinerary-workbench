@@ -42,7 +42,7 @@ void StandardItemModelHelper::fillFromGadget(const QMetaObject *mo, const void *
             continue;
         }
         const auto value = prop.readOnGadget(gadget);
-        auto item = addEntry(QString::fromUtf8(prop.name()), value.toString(), parent);
+        auto item = addEntry(QString::fromUtf8(prop.name()), value.toString().isEmpty() ? QString::fromUtf8(value.typeName()) : value.toString(), parent);
         if (const auto childMo = QMetaType::metaObjectForType(value.userType())) {
             fillFromGadget(childMo, value.constData(), item);
         } else if (value.canConvert<QVariantList>() && value.type() != QVariant::String && value.type() != QVariant::ByteArray) {
