@@ -13,6 +13,7 @@
 #include <KItinerary/Uic9183Header>
 #include <KItinerary/Vendor0080Block>
 #include <KItinerary/Vendor0080VUBlockData>
+#include <KItinerary/Vendor1154Block>
 
 #include <KLocalizedString>
 
@@ -193,6 +194,13 @@ void Uic9183Widget::blockSelectionChanged()
             StandardItemModelHelper::addEntry(i18n("Payload"), StandardItemModelHelper::dataToHex((const uint8_t*)&ticket->validityArea, ticket->validityAreaDataSize, sizeof(VdvTicketValidityAreaData)), item);
         }
         ui->genericBlockView->expandAll();
+        ui->detailsStack->setCurrentWidget(ui->genericPage);
+    } else if (blockName == QLatin1String(Vendor1154UTBlock::RecordId)) {
+        Vendor1154UTBlock block = m_uic9183.findBlock<Vendor1154UTBlock>();
+        StandardItemModelHelper::clearContent(m_genericBlockModel);
+        for (auto b = block.firstBlock(); !b.isNull(); b = b.nextBlock()) {
+            StandardItemModelHelper::addEntry(QString::fromUtf8(b.id(), 2), b.toString(), m_genericBlockModel->invisibleRootItem());
+        }
         ui->detailsStack->setCurrentWidget(ui->genericPage);
     } else {
         const auto block = m_uic9183.block(blockName);
