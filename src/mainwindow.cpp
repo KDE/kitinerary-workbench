@@ -122,6 +122,8 @@ MainWindow::MainWindow(QWidget* parent)
     ui->contextDate->setDateTime(QDateTime(QDate::currentDate(), QTime()));
     setCentralWidget(ui->mainSplitter);
 
+    m_engine.setHints(KItinerary::ExtractorEngine::ExtractGenericIcalEvents);
+
     connect(ui->senderBox, &QComboBox::currentTextChanged, this, &MainWindow::sourceChanged);
     connect(ui->contextDate, &QDateTimeEdit::dateTimeChanged, this, &MainWindow::sourceChanged);
     connect(ui->fileRequester, &KUrlRequester::textChanged, this, &MainWindow::urlChanged);
