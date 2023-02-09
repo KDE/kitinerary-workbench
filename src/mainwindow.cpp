@@ -626,6 +626,12 @@ void MainWindow::setCurrentDocumentNode(const KItinerary::ExtractorDocumentNode 
         ui->eraSsbView->expandAll();
         ui->inputTabWidget->setTabEnabled(EraSsbTab, true);
     }
+    else if (node.mimeType() == QLatin1String("internal/era-elb")) {
+        StandardItemModelHelper::clearContent(m_eraSsbModel);
+        StandardItemModelHelper::fillFromGadget(node.content(), m_eraSsbModel->invisibleRootItem());
+        ui->eraSsbView->expandAll();
+        ui->inputTabWidget->setTabEnabled(EraSsbTab, true);
+    }
     else if (node.mimeType() == QLatin1String("internal/vdv")) {
         StandardItemModelHelper::clearContent(m_vdvModel);
         const auto vdv = node.content<VdvTicket>();

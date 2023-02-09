@@ -214,7 +214,7 @@
        </widget>
        <widget class="QWidget" name="eraSsbTab">
         <attribute name="title">
-         <string>ERA SSB</string>
+         <string>ERA ELB/SSB</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_11">
          <item>
