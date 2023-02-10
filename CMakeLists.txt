@@ -15,11 +15,20 @@ include(FeatureSummary)
 include(KDEInstallDirs)
 include(KDECMakeSettings)
 
+if (QT_MAJOR_VERSION EQUAL "6")
+    set(KF_MAJOR_VERSION "6")
+else()
+    set(KF_MAJOR_VERSION "5")
+endif()
+
 set(CMAKE_AUTOUIC ON)
 ecm_setup_version(PROJECT VARIABLE_PREFIX KITINERARY_WORKBENCH VERSION_HEADER kitinerary_workbench_version.h)
 
 find_package(Qt${QT_MAJOR_VERSION} REQUIRED COMPONENTS Widgets)
-find_package(KF5 REQUIRED COMPONENTS TextEditor KIO)
+if (QT_MAJOR_VERSION EQUAL "6")
+    find_package(Qt6 REQUIRED COMPONENTS Core5Compat)
+endif()
+find_package(KF${KF_MAJOR_VERSION} REQUIRED COMPONENTS TextEditor KIO)
 find_package(KPimPkPass REQUIRED)
 find_package(KPimItinerary 5.17.41 REQUIRED)
 
