@@ -202,6 +202,7 @@ ExtractorEditorWidget::ExtractorEditorWidget(QWidget *parent)
         QStringLiteral("application/octet-stream"),
         QStringLiteral("application/pdf"),
         QStringLiteral("application/vnd.apple.pkpass"),
+        QStringLiteral("internal/era-elb"),
         QStringLiteral("internal/era-ssb"),
         QStringLiteral("internal/event"),
         QStringLiteral("internal/uic9183"),
