@@ -25,6 +25,7 @@
 #include <KItinerary/MergeUtil>
 #include <KItinerary/PdfDocument>
 #include <KItinerary/Reservation>
+#include <KItinerary/ELBTicket>
 #include <KItinerary/SSBv1Ticket>
 #include <KItinerary/SSBv2Ticket>
 #include <KItinerary/SSBv3Ticket>
@@ -628,7 +629,29 @@ void MainWindow::setCurrentDocumentNode(const KItinerary::ExtractorDocumentNode 
     }
     else if (node.mimeType() == QLatin1String("internal/era-elb")) {
         StandardItemModelHelper::clearContent(m_eraSsbModel);
-        StandardItemModelHelper::fillFromGadget(node.content(), m_eraSsbModel->invisibleRootItem());
+        const auto elb = node.content<ELBTicket>();
+        for (auto i = 0; i < ELBTicket::staticMetaObject.propertyCount(); ++i) {
+            const auto prop = ELBTicket::staticMetaObject.property(i);
+            if (!prop.isStored() || QMetaType(prop.userType()).metaObject()) {
+                continue;
+            }
+            const auto value = prop.readOnGadget(&elb);
+            StandardItemModelHelper::addEntry(QString::fromUtf8(prop.name()), value.toString(), m_eraSsbModel->invisibleRootItem());
+        }
+        StandardItemModelHelper::addEntry(i18n("Emission date"), elb.emissionDate(node.contextDateTime()).toString(Qt::ISODate), m_eraSsbModel->invisibleRootItem());
+        StandardItemModelHelper::addEntry(i18n("Valid from"), elb.validFromDate(node.contextDateTime()).toString(Qt::ISODate), m_eraSsbModel->invisibleRootItem());
+        StandardItemModelHelper::addEntry(i18n("Valid until"), elb.validUntilDate(node.contextDateTime()).toString(Qt::ISODate), m_eraSsbModel->invisibleRootItem());
+
+        auto parent = StandardItemModelHelper::addEntry(i18n("Segment 1"), {}, m_eraSsbModel->invisibleRootItem());
+        StandardItemModelHelper::fillFromGadget(elb.segment1(), parent);
+        StandardItemModelHelper::addEntry(i18n("Departure date"), elb.segment1().departureDate(node.contextDateTime()).toString(Qt::ISODate), parent);
+
+        if (elb.segment2().isValid()) {
+            auto parent = StandardItemModelHelper::addEntry(i18n("Segment 2"), {}, m_eraSsbModel->invisibleRootItem());
+            StandardItemModelHelper::fillFromGadget(elb.segment2(), parent);
+            StandardItemModelHelper::addEntry(i18n("Departure date"), elb.segment2().departureDate(node.contextDateTime()).toString(Qt::ISODate), parent);
+        }
+
         ui->eraSsbView->expandAll();
         ui->inputTabWidget->setTabEnabled(EraSsbTab, true);
     }
