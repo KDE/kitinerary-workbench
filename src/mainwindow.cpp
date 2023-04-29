@@ -617,8 +617,17 @@ void MainWindow::setCurrentDocumentNode(const KItinerary::ExtractorDocumentNode 
                 StandardItemModelHelper::addEntry(QString::fromUtf8(prop.name()), value.toString(), m_eraSsbModel->invisibleRootItem());
             }
             StandardItemModelHelper::addEntry(i18n("Issuing day"), ssb.issueDate(node.contextDateTime()).toString(Qt::ISODate), m_eraSsbModel->invisibleRootItem());
-            if (ssb.ticketTypeCode() == SSBv3Ticket::IRT_RES_BOA) {
-                StandardItemModelHelper::addEntry(i18n("Departure day"), ssb.type1DepartureDay(node.contextDateTime()).toString(Qt::ISODate), m_eraSsbModel->invisibleRootItem());
+            switch (ssb.ticketTypeCode()) {
+                case SSBv3Ticket::IRT_RES_BOA:
+                    StandardItemModelHelper::addEntry(i18n("Departure day"), ssb.type1DepartureDay(node.contextDateTime()).toString(Qt::ISODate), m_eraSsbModel->invisibleRootItem());
+                    break;
+                case SSBv3Ticket::NRT:
+                    StandardItemModelHelper::addEntry(i18n("Valid from"), ssb.type2ValidFrom(node.contextDateTime()).toString(Qt::ISODate), m_eraSsbModel->invisibleRootItem());
+                    StandardItemModelHelper::addEntry(i18n("Valid until"), ssb.type2ValidUntil(node.contextDateTime()).toString(Qt::ISODate), m_eraSsbModel->invisibleRootItem());
+                    break;
+                case SSBv3Ticket::GRT:
+                case SSBv3Ticket::RPT:
+                    break;
             }
         } else {
             StandardItemModelHelper::fillFromGadget(node.content(), m_eraSsbModel->invisibleRootItem());
