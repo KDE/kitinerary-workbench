@@ -18,8 +18,8 @@ set(workbench_srcs
 
 add_executable(kitinerary-workbench ${workbench_srcs})
 target_link_libraries(kitinerary-workbench
-    KPim::Itinerary
-    KPim::PkPass
+    KPim${KF_MAJOR_VERSION}::Itinerary
+    KPim${KF_MAJOR_VERSION}::PkPass
     KF${KF_MAJOR_VERSION}::CalendarCore
     KF${KF_MAJOR_VERSION}::KIOWidgets
     KF${KF_MAJOR_VERSION}::TextEditor

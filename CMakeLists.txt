@@ -29,8 +29,8 @@ if (QT_MAJOR_VERSION EQUAL "6")
     find_package(Qt6 REQUIRED COMPONENTS Core5Compat)
 endif()
 find_package(KF${KF_MAJOR_VERSION} REQUIRED COMPONENTS TextEditor KIO)
-find_package(KPimPkPass REQUIRED)
-find_package(KPimItinerary 5.17.41 REQUIRED)
+find_package(KPim${KF_MAJOR_VERSION}PkPass REQUIRED)
+find_package(KPim${KF_MAJOR_VERSION}Itinerary 5.17.41 REQUIRED)
 
 add_subdirectory(src)
 
