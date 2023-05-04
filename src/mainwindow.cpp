@@ -88,13 +88,9 @@ static QVector<QVector<QVariant>> batchReservations(const QVector<QVariant> &res
             continue;
         }
 
-        if (JsonLd::canConvert<Reservation>(res) && JsonLd::canConvert<Reservation>(batch.at(0))) {
-            const auto trip1 = JsonLd::convert<Reservation>(res).reservationFor();
-            const auto trip2 = JsonLd::convert<Reservation>(batch.at(0)).reservationFor();
-            if (KItinerary::MergeUtil::isSame(trip1, trip2)) {
-                batch.push_back(res);
-                continue;
-            }
+        if (MergeUtil::isSameIncidence(res, batch.at(0))) {
+            batch.push_back(res);
+            continue;
         }
 
         batches.push_back(batch);
