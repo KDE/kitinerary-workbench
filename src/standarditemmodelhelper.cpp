@@ -47,7 +47,15 @@ void StandardItemModelHelper::fillFromGadget(const QMetaObject *mo, const void *
             continue;
         }
         const auto value = prop.readOnGadget(gadget);
-        auto item = addEntry(QString::fromUtf8(prop.name()), isListType(value) ? QString::fromUtf8(value.typeName()) : value.toString(), parent);
+        QString valueString;
+        if (isListType(value)) {
+            valueString = QString::fromUtf8(value.typeName());
+        } else if (prop.isEnumType()) {
+            valueString = QString::fromUtf8(prop.enumerator().valueToKey(value.toInt()));
+        } else {
+            valueString = value.toString();
+        }
+        auto item = addEntry(QString::fromUtf8(prop.name()), valueString, parent);
         if (const auto childMo = QMetaType::metaObjectForType(value.userType())) {
             fillFromGadget(childMo, value.constData(), item);
         } else if (isListType(value)) {
