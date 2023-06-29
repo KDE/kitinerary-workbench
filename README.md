@@ -1,6 +1,7 @@
 # KItinerary Workbench
 
-Interactive test and inspection tool for the reservation data extraction.
+Interactive test and inspection tool for developing extractor scripts for
+the [Itinerary data extraction engine](https://invent.kde.org/pim/kitinerary).
 
 ## Usage
 
@@ -12,7 +13,7 @@ pre-processed input data (such as textual and image data extracted from a PDF). 
 panel allows to inspect the result of the various extractor and post-processing stages.
 
 To test an extractor, specify the input data on the source tab of the input panel, either
-by opening a file (via the file open dialgo, or e.g. by dnd-ing an email attachment on to the
+by opening a file (via the file open dialog, or e.g. by dnd-ing an email attachment on to the
 file input line), or by entering textual source data directly in the text field. If not detected
 automatically, you also need to set the right input data type (plain text, HTML, PDF, Apple Wallet
 passes, IATA boarding pass codes, UIC 918.3 train ticket codes, etc).
