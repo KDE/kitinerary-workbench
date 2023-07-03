@@ -3,6 +3,8 @@
 Interactive test and inspection tool for developing extractor scripts for
 the [Itinerary data extraction engine](https://invent.kde.org/pim/kitinerary).
 
+![KItinerary Workbench script editor](doc/kitinerary-workbench-script-editor.png)
+
 ## Usage
 
 KItinerary Workbench is structured into to main UI parts, the input panel on the left,
@@ -45,3 +47,8 @@ document, and the attributes of an selected element in there.
 The output view does not only show the final result ('Post-processed') but also the output of the
 extractor script directly ('Extractor'), before it has been normalized, validated and
 augmented in the post-processing stage (see https://api.kde.org/kdepim/kitinerary/html/classKItinerary_1_1ExtractorPostprocessor.html).
+
+## Contributing
+
+See the contributions section of the [Itinerary data extraction engine](https://invent.kde.org/pim/kitinerary)
+README about contributing new or improved extractor scripts as well as about donating sample data.
