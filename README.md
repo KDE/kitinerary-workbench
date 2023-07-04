@@ -5,6 +5,15 @@ the [Itinerary data extraction engine](https://invent.kde.org/pim/kitinerary).
 
 ![KItinerary Workbench script editor](doc/kitinerary-workbench-script-editor.png)
 
+## Installing
+
+The easiest way to get KItinerary Workbench is from KDE's nightly Flatpak repository.
+
+```
+flatpak remote-add --if-not-exists kdeapps --from https://distribute.kde.org/kdeapps.flatpakrepo
+flatpak install org.kde.kitinerary-workbench
+```
+
 ## Usage
 
 KItinerary Workbench is structured into to main UI parts, the input panel on the left,
