@@ -29,6 +29,7 @@
 #include <QMessageBox>
 #include <QMetaEnum>
 #include <QSettings>
+#include <QStandardPaths>
 
 using namespace KItinerary;
 
@@ -351,6 +352,8 @@ void ExtractorEditorWidget::create()
     QString startDir;
     if (!repo.additionalSearchPaths().empty()) {
         startDir = repo.additionalSearchPaths().at(0);
+    } else {
+        startDir = QStandardPaths::locate(QStandardPaths::GenericDataLocation, QStringLiteral("kitinerary/extractors"), QStandardPaths::LocateDirectory);
     }
 
     const auto metaFileName = QFileDialog::getSaveFileName(this, i18n("Create New Extractor"), startDir, i18n("JSON (*.json)"), nullptr, QFileDialog::DontConfirmOverwrite);
