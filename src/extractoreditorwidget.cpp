@@ -7,6 +7,8 @@
 #include "extractoreditorwidget.h"
 #include "ui_extractoreditorwidget.h"
 
+#include "metaenumcombobox.h"
+
 #include <KItinerary/ExtractorFilter>
 #include <KItinerary/ExtractorRepository>
 #include <KItinerary/ScriptExtractor>
@@ -23,6 +25,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QFileDialog>
+#include <QItemEditorFactory>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -30,6 +33,7 @@
 #include <QMetaEnum>
 #include <QSettings>
 #include <QStandardPaths>
+#include <QStyledItemDelegate>
 
 using namespace KItinerary;
 
@@ -144,7 +148,7 @@ QVariant ExtractorFilterModel::data(const QModelIndex &index, int role) const
         const auto &filter = m_filters[index.row()];
         switch (index.column()) {
             case 0: return filter.mimeType();
-            case 1: return filter.scope();
+            case 1: return QVariant::fromValue(filter.scope());
             case 2: return filter.fieldName();
             case 3: return filter.pattern();
         }
@@ -269,6 +273,10 @@ ExtractorEditorWidget::ExtractorEditorWidget(QWidget *parent)
     connect(m_filterModel, &ExtractorFilterModel::rowsInserted, this, &ExtractorEditorWidget::validateInput);
     connect(m_filterModel, &ExtractorFilterModel::dataChanged, this, &ExtractorEditorWidget::validateInput);
     connect(ui->filterView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ExtractorEditorWidget::validateInput);
+
+    auto factory = new QItemEditorFactory;
+    factory->registerEditor(qMetaTypeId<ExtractorFilter::Scope>(), new QStandardItemEditorCreator<MetaEnumComboBox>());
+    qobject_cast<QStyledItemDelegate*>(ui->filterView->itemDelegate())->setItemEditorFactory(factory);
 }
 
 ExtractorEditorWidget::~ExtractorEditorWidget() = default;

@@ -11,6 +11,7 @@ set(workbench_srcs
     documentmodel.cpp
     dommodel.cpp
     extractoreditorwidget.cpp
+    metaenumcombobox.cpp
     settingsdialog.cpp
     standarditemmodelhelper.cpp
     uic9183ticketlayoutmodel.cpp
