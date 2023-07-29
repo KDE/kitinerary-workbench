@@ -119,7 +119,7 @@ MainWindow::MainWindow(QWidget* parent)
     ui->contextDate->setDateTime(QDateTime(QDate::currentDate(), QTime()));
     setCentralWidget(ui->mainSplitter);
 
-    m_engine.setHints(KItinerary::ExtractorEngine::ExtractGenericIcalEvents);
+    m_engine.setHints(KItinerary::ExtractorEngine::ExtractGenericIcalEvents | KItinerary::ExtractorEngine::ExtractFullPageRasterImages);
 
     connect(ui->senderBox, &QComboBox::currentTextChanged, this, &MainWindow::sourceChanged);
     connect(ui->contextDate, &QDateTimeEdit::dateTimeChanged, this, &MainWindow::sourceChanged);
