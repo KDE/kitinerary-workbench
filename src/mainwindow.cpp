@@ -365,7 +365,6 @@ void MainWindow::sourceChanged()
 
     ExtractorPostprocessor postproc;
     postproc.setContextDate(ui->contextDate->dateTime());
-    postproc.setValidationEnabled(false);
     postproc.process(JsonLdDocument::fromJson(data));
     auto result = postproc.result();
 
