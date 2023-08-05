@@ -26,6 +26,7 @@ target_link_libraries(kitinerary-workbench
     KF${KF_MAJOR_VERSION}::CalendarCore
     KF${KF_MAJOR_VERSION}::KIOWidgets
     KF${KF_MAJOR_VERSION}::TextEditor
+    KF${KF_MAJOR_VERSION}::I18n
 )
 if (TARGET Qt6::Core5Compat)
     target_link_libraries(kitinerary-workbench Qt6::Core5Compat) # QTextCodec
