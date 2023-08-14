@@ -16,7 +16,7 @@ flatpak install org.kde.kitinerary-workbench
 
 ## Usage
 
-KItinerary Workbench is structured into to main UI parts, the input panel on the left,
+KItinerary Workbench is structured into two main UI parts, the input panel on the left,
 and the output panel on the right.
 
 The input panel allows specifying the input data and its context, as well as inspecting
