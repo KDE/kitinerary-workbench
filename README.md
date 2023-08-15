@@ -41,7 +41,7 @@ this as well, so you can easily test certain variations in the input by editing 
 
 For reloading to work, your extractor script must be placed in the file system rather than be compiled
 in. It's therefore convenient to symlink the extractor sources to $XDG_DATA_DIRS/kitinerary/extractors
-(see https://api.kde.org/kdepim/kitinerary/html/classKItinerary_1_1Extractor.html). Note that
+(see https://api.kde.org/kdepim/kitinerary/html/classKItinerary_1_1ScriptExtractor.html). Note that
 reloading only works for extractor scripts, not for extractor meta data.
 
 For PDF extractors, the input panel provides two additional tabs, one showing the extracted plain text
