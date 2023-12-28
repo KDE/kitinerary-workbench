@@ -21,16 +21,14 @@ set(workbench_srcs
 
 add_executable(kitinerary-workbench ${workbench_srcs})
 target_link_libraries(kitinerary-workbench
-    KPim${KF_MAJOR_VERSION}::Itinerary
-    KPim${KF_MAJOR_VERSION}::PkPass
-    KF${KF_MAJOR_VERSION}::CalendarCore
-    KF${KF_MAJOR_VERSION}::KIOWidgets
-    KF${KF_MAJOR_VERSION}::TextEditor
-    KF${KF_MAJOR_VERSION}::I18n
+    KPim6::Itinerary
+    KPim6::PkPass
+    KF6::CalendarCore
+    KF6::KIOWidgets
+    KF6::TextEditor
+    KF6::I18n
+    Qt6::Core5Compat # for QTextCodec
 )
-if (TARGET Qt6::Core5Compat)
-    target_link_libraries(kitinerary-workbench Qt6::Core5Compat) # QTextCodec
-endif()
 
 install(TARGETS kitinerary-workbench ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})
 install(PROGRAMS org.kde.kitinerary-workbench.desktop DESTINATION ${KDE_INSTALL_APPDIR})
