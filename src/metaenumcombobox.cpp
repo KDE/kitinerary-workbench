@@ -28,7 +28,7 @@ void MetaEnumComboBox::setValue(const QVariant& value)
     clear();
     m_value = value;
 
-    const auto mo = QMetaType::metaObjectForType(value.userType());
+    const auto mo = QMetaType(value.typeId()).metaObject();
     if (!mo)
         return;
 

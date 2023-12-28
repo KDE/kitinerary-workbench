@@ -33,7 +33,7 @@ void StandardItemModelHelper::fillFromGadget(const QVariant &value, QStandardIte
 
 static bool isListType(const QVariant &value)
 {
-    return value.canConvert<QVariantList>() && value.type() != QVariant::String && value.type() != QVariant::ByteArray;
+    return value.canConvert<QVariantList>() && value.typeId() != QMetaType::QString && value.typeId() != QMetaType::QByteArray;
 }
 
 void StandardItemModelHelper::fillFromGadget(const QMetaObject *mo, const void *gadget, QStandardItem *parent)
@@ -56,14 +56,14 @@ void StandardItemModelHelper::fillFromGadget(const QMetaObject *mo, const void *
             valueString = value.toString();
         }
         auto item = addEntry(QString::fromUtf8(prop.name()), valueString, parent);
-        if (const auto childMo = QMetaType::metaObjectForType(value.userType())) {
+        if (const auto childMo = QMetaType(value.typeId()).metaObject()) {
             fillFromGadget(childMo, value.constData(), item);
         } else if (isListType(value)) {
             auto iterable = value.value<QSequentialIterable>();
             int idx = 0;
             for (const QVariant &v : iterable) {
                 auto arrayItem = addEntry(QString::number(idx++), v.toString(), item);
-                if (const auto childMo = QMetaType::metaObjectForType(v.userType())) {
+                if (const auto childMo = QMetaType(v.typeId()).metaObject()) {
                     fillFromGadget(childMo, v.constData(), arrayItem);
                 }
             }
