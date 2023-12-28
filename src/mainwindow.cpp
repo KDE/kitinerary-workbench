@@ -66,7 +66,7 @@
 #include <QMimeData>
 #include <QSettings>
 #include <QStandardItemModel>
-#include <QTextCodec>
+#include <QStringEncoder>
 #include <QToolBar>
 
 #include <cctype>
@@ -330,11 +330,11 @@ void MainWindow::sourceChanged()
     using namespace KItinerary;
 
     if (m_sourceView->isVisible()) {
-        auto codec = QTextCodec::codecForName(m_sourceDoc->encoding().toUtf8());
-        if (!codec) {
-            codec = QTextCodec::codecForLocale();
+        QStringEncoder codec(m_sourceDoc->encoding().toUtf8().constData());
+        if (!codec.isValid()) {
+            codec = QStringEncoder(QStringEncoder::System);
         }
-        m_data = codec->fromUnicode(m_sourceDoc->text());
+        m_data = codec.encode(m_sourceDoc->text());
     }
     QString fileName = ui->fileRequester->url().path();
     if (ui->fileRequester->url().path().endsWith(QLatin1String(".jpg"))) { // TODO generalize to other image formats
