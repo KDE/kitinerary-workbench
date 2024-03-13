@@ -10,8 +10,7 @@ the [Itinerary data extraction engine](https://invent.kde.org/pim/kitinerary).
 The easiest way to get KItinerary Workbench is from KDE's nightly Flatpak repository.
 
 ```
-flatpak remote-add --if-not-exists kdeapps --from https://distribute.kde.org/kdeapps.flatpakrepo
-flatpak install org.kde.kitinerary-workbench
+flatpak install https://cdn.kde.org/flatpak/kitinerary-workbench-nightly/org.kde.kitinerary-workbench.flatpakref
 ```
 
 ## Usage
