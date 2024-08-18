@@ -338,7 +338,7 @@ void MainWindow::sourceChanged()
     }
 
     m_contextMsg = std::make_unique<KMime::Message>();
-    m_contextMsg->from()->fromUnicodeString(ui->senderBox->currentText(), "utf-8");
+    m_contextMsg->from()->fromUnicodeString(ui->senderBox->currentText());
     m_contextMsg->date()->setDateTime(ui->contextDate->dateTime());
     m_engine.setContext(QVariant::fromValue<KMime::Content*>(m_contextMsg.get()), u"message/rfc822");
 
