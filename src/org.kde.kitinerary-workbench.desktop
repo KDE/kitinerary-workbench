@@ -6,5 +6,5 @@ Icon=map-globe
 Type=Application
 Comment=Development tool for KItinerary reservation data extractors.
 Terminal=false
-MimeType=application/vnd.apple.pkpass;application/ld+json;application/pdf;text/html;text/plain;message/rfc822;text/calendar;image/png;image/jpeg;
+MimeType=application/vnd.apple.pkpass;application/ld+json;application/pdf;text/html;text/plain;message/rfc822;text/calendar;image/png;image/jpeg;image/gif;
 Categories=Qt;KDE;
