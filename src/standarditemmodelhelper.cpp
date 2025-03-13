@@ -10,6 +10,10 @@
 #include <QSequentialIterable>
 #include <QStandardItem>
 
+#include <cctype>
+
+using namespace Qt::Literals;
+
 void StandardItemModelHelper::clearContent(QStandardItemModel *model)
 {
     model->removeRows(0, model->rowCount());
@@ -36,6 +40,24 @@ static bool isListType(const QVariant &value)
     return value.canConvert<QVariantList>() && value.typeId() != QMetaType::QString && value.typeId() != QMetaType::QByteArray;
 }
 
+static void setEnabledRecursive(QStandardItem *item, bool enabled)
+{
+    item->setEnabled(enabled);
+    if (item->parent()) {
+        for (auto i = 1; i < item->parent()->columnCount(); ++i) {
+            item->parent()->child(item->row(), i)->setEnabled(enabled);
+        }
+    } else {
+        for (auto i = 1; i < item->model()->columnCount(); ++i) {
+            item->model()->item(item->row(), i)->setEnabled(enabled);
+        }
+    }
+
+    for (auto i = 0; i < item->rowCount(); ++i) {
+        setEnabledRecursive(item->child(i, 0), enabled);
+    }
+}
+
 void StandardItemModelHelper::fillFromGadget(const QMetaObject *mo, const void *gadget, QStandardItem *parent)
 {
     if (!gadget || !mo) {
@@ -52,20 +74,50 @@ void StandardItemModelHelper::fillFromGadget(const QMetaObject *mo, const void *
             valueString = QString::fromUtf8(value.typeName());
         } else if (prop.isEnumType()) {
             valueString = QString::fromUtf8(prop.enumerator().valueToKey(value.toInt()));
+        } else if (prop.typeId() == QMetaType::QByteArray) {
+            const auto b = value.toByteArray();
+            if (std::ranges::any_of(b, [](unsigned char c) { return std::iscntrl(c); })) {
+                valueString = "(hex) "_L1 + QString::fromLatin1(value.toByteArray().toHex());
+            } else {
+                valueString = QString::fromUtf8(b);
+            }
+        } else if (!QMetaType::canConvert(QMetaType(value.typeId()), QMetaType(QMetaType::QString))) {
+            valueString = QString::fromUtf8(value.typeName());
         } else {
             valueString = value.toString();
         }
         auto item = addEntry(QString::fromUtf8(prop.name()), valueString, parent);
+
         if (const auto childMo = QMetaType(value.typeId()).metaObject()) {
             fillFromGadget(childMo, value.constData(), item);
         } else if (isListType(value)) {
             auto iterable = value.value<QSequentialIterable>();
             int idx = 0;
             for (const QVariant &v : iterable) {
-                auto arrayItem = addEntry(QString::number(idx++), v.toString(), item);
+                QString valueString;
+                if (!QMetaType::canConvert(QMetaType(v.typeId()), QMetaType(QMetaType::QString))) {
+                    valueString = QString::fromUtf8(v.typeName());
+                } else {
+                    valueString = v.toString();
+                }
+                auto arrayItem = addEntry(QString::number(idx++), valueString, item);
                 if (const auto childMo = QMetaType(v.typeId()).metaObject()) {
                     fillFromGadget(childMo, v.constData(), arrayItem);
                 }
+            }
+        }
+
+        // ASN.1 optional properties
+        if (i + 1 < mo->propertyCount()) {
+            const auto optProp = mo->property(i + 1);
+            const auto nameLen = std::strlen(prop.name());
+            if (optProp.typeId() == QMetaType::Bool && std::strlen(optProp.name()) - 5 == nameLen
+                && std::strncmp(prop.name(), optProp.name(), nameLen) == 0 && std::strcmp(optProp.name() + nameLen, "IsSet") == 0)
+            {
+                if (!optProp.readOnGadget(gadget).toBool()) {
+                    setEnabledRecursive(item, false);
+                }
+                ++i;
             }
         }
     }
