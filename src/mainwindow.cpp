@@ -713,5 +713,11 @@ void MainWindow::setCurrentDocumentNode(const KItinerary::ExtractorDocumentNode 
 
         ui->vdvView->expandAll();
         ui->inputTabWidget->setTabEnabled(VdvTab, true);
+    } else if (node.mimeType() == QLatin1String("internal/uic-dosipas")) {
+        StandardItemModelHelper::clearContent(m_eraSsbModel);
+        const auto dosipasContainer = node.content();
+        StandardItemModelHelper::fillFromGadget(QMetaType(dosipasContainer.typeId()).metaObject(), dosipasContainer.data(), m_eraSsbModel->invisibleRootItem());
+        ui->eraSsbView->expandAll();
+        ui->inputTabWidget->setTabEnabled(EraSsbTab, true);
     }
 }
