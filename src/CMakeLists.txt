@@ -27,6 +27,7 @@ target_link_libraries(kitinerary-workbench
     KF6::KIOWidgets
     KF6::TextEditor
     KF6::I18n
+    KF6::ColorScheme
 )
 
 install(TARGETS kitinerary-workbench ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})
