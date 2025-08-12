@@ -7,4 +7,4 @@ Type=Application
 Comment=Development tool for KItinerary reservation data extractors.
 Terminal=false
 MimeType=application/vnd.apple.pkpass;application/ld+json;application/pdf;text/html;text/plain;message/rfc822;text/calendar;image/png;image/jpeg;image/gif;application/vnd.apple.pkpasses;
-Categories=Qt;KDE;
+Categories=Qt;KDE;Development;
