@@ -24,6 +24,7 @@
 #include <QGuiApplication>
 #include <QStandardItemModel>
 
+using namespace Qt::Literals;
 using namespace KItinerary;
 
 Uic9183Widget::Uic9183Widget(QWidget *parent)
@@ -195,8 +196,8 @@ void Uic9183Widget::blockSelectionChanged()
         }
         ui->genericBlockView->expandAll();
         ui->detailsStack->setCurrentWidget(ui->genericPage);
-    } else if (blockName == QLatin1String(Vendor1154UTBlock::RecordId)) {
-        Vendor1154UTBlock block = m_uic9183.findBlock<Vendor1154UTBlock>();
+    } else if (blockName == QLatin1String(Vendor1154UTBlock::RecordId) || blockName == "3697OT"_L1) {
+        Vendor1154UTBlock block = Vendor1154UTBlock(m_uic9183.findBlock(blockName.toLatin1().constData()));
         StandardItemModelHelper::clearContent(m_genericBlockModel);
         for (auto b = block.firstBlock(); !b.isNull(); b = b.nextBlock()) {
             StandardItemModelHelper::addEntry(QString::fromUtf8(b.id(), 2), b.toString(), m_genericBlockModel->invisibleRootItem());
