@@ -25,4 +25,4 @@ find_package(KPim6Itinerary 5.24.42 REQUIRED)
 
 add_subdirectory(src)
 
-feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)
+feature_summary(WHAT ALL FATAL_ON_MISSING_REQUIRED_PACKAGES)
