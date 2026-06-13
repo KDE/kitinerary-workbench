@@ -19,10 +19,10 @@ set(CMAKE_AUTOUIC ON)
 ecm_setup_version(PROJECT VARIABLE_PREFIX KITINERARY_WORKBENCH VERSION_HEADER kitinerary_workbench_version.h)
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
-find_package(KF6 REQUIRED COMPONENTS TextEditor KIO ColorScheme)
+find_package(KF6 REQUIRED COMPONENTS TextEditor KIO ColorScheme I18n)
 find_package(KPim6PkPass REQUIRED)
 find_package(KPim6Itinerary 5.24.42 REQUIRED)
 
 add_subdirectory(src)
 
-feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)
+feature_summary(WHAT ALL FATAL_ON_MISSING_REQUIRED_PACKAGES)
