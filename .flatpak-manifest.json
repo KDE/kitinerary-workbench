@@ -138,28 +138,6 @@
             ]
         },
         {
-            "name": "kmime",
-            "config-opts": [
-                "-DBUILD_TESTING=OFF",
-                "-DCMAKE_BUILD_TYPE=RelWithDebInfo"
-            ],
-            "buildsystem": "cmake-ninja",
-            "builddir": true,
-            "sources": [
-                {
-                    "type": "git",
-                    "url": "https://invent.kde.org/pim/kmime",
-                    "branch": "master"
-                }
-            ],
-            "cleanup": [
-                "/include",
-                "/lib/cmake",
-                "/mkspecs",
-                "/share/qlogging-categories6"
-            ]
-        },
-        {
             "name": "zxing",
             "config-opts": [
                 "-DBUILD_DEPENDENCIES=LOCAL",
